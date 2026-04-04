@@ -28,7 +28,7 @@ getDatosInciales(){
       this.sucursal = data;
       this._datosInicialesService.chageSucursal(this.sucursal[0]) 
     } , error: error => {CustomConsole.log('error retornado',error)
-      Swal.fire('_datosInicialesService - error', JSON.stringify(error) , 'error') 
+      Swal.fire('_datosInicialesService - error', this._datosInicialesService.getErrorMessage(error) , 'error') 
     }
   } ); 
 }

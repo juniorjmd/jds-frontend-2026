@@ -46,8 +46,8 @@ constructor(private http: HttpClient ,  private configService:ConfigService){
                 };
         CustomConsole.log('servicios datos iniciales inicializado ' ,this.configService.url.login , datos, this.configService.url.httpOptionsSinAutorizacion);
         return this.http
-          .post<ApiResponse<AuthLoginData>>(this.configService.url.login , datos, this.configService.url.httpOptionsSinAutorizacion)
-          .pipe(map((response) => response.data));
+          .post<ApiResponse<AuthLoginData>>(this.configService.url.login , datos, this.configService.url.httpOptionsSinAutorizacion as any)
+          .pipe(map((response: any) => response.data as AuthLoginData));
     } 
 
 

@@ -3,7 +3,7 @@ import { vwsucursal } from 'src/app/models/app.db.interfaces';
 import { actions } from 'src/app/models/app.db.actions';
 import { httpOptions, url } from 'src/app/models/app.db.url';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, map, Observable } from 'rxjs';
 import { cajaModel } from '../models/ventas/cajas.model';
 import { vistas } from '../models/app.db.view';
 import { cntGrupoRequest, DocumentoRequest, empleadoRequest, empleadoVentasRequest, parametroRequest, ProductosVendidosRequest, usuarioRequest, usuarioVentasRequest } from '../interfaces/producto-request';
@@ -13,6 +13,7 @@ import { TABLA } from '../models/app.db.tables';
 import { ParametrosModel } from '../models/parametros/parametros.model';
 import { CustomConsole } from '../models/CustomConsole';
 import { ConfigService } from './config.service';
+import { DatosInicialesBranchResponse } from '../interfaces/datos-iniciales-response.interface';
 
 
 
@@ -118,12 +119,21 @@ constructor(private http: HttpClient , private configService: ConfigService){
           }
       
     }
-    getDatosIniSucursal():Observable<any>{ 
+    getDatosIniSucursal():Observable<vwsucursal[]>{ 
         let datos = {"action": actions.datosInicialesSucursal};
         console.log('ingreso aqui - getDatosIniSucursal')
         CustomConsole.log('servicios datos iniciales inicializado ' ,this.configService.url.datosIniciales , datos, this.configService.url.httpOptionsSinAutorizacion);
-        return this.http.post<any>(this.configService.url.datosIniciales , datos, this.configService.url.httpOptionsSinAutorizacion) ;
+        return this.http
+          .post<DatosInicialesBranchResponse>(this.configService.url.datosIniciales , datos, this.configService.url.httpOptionsSinAutorizacion as any)
+          .pipe(map((response: any) => response.data.branches as vwsucursal[]));
       
+    }
+
+    getErrorMessage(error: any): string {
+        return error?.error?.error?.message
+          ?? error?.error?.error
+          ?? error?.message
+          ?? 'Error inesperado';
     }
      
 }

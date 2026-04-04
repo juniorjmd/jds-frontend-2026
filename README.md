@@ -138,6 +138,23 @@ Se alineó `Admin` entre backend y frontend para cubrir recursos, permisos, crea
 - los servicios se convierten en la capa de adaptación del módulo
 - los componentes ya no leen `e.error.error` en los flujos principales revisados
 
+## Modulo DatosIniciales: trabajo reciente
+
+Se alineó `DatosIniciales` para la lectura de sucursal principal desde el contrato estándar del backend nuevo.
+
+### Cambios aplicados
+
+- se agregaron tipos del módulo:
+  - `src/app/interfaces/datos-iniciales-response.interface.ts`
+- se actualizó `src/app/services/DatosIniciales.services.ts` para:
+  - desempaquetar `data.branches`
+  - centralizar errores con `getErrorMessage()`
+- se adaptaron consumidores directos del login:
+  - `src/app/modules/login/pages/login/login.component.ts`
+  - `src/app/modules/login/pages/forgotPassWord/forgotPassWord.component.ts`
+- se agregó prueba:
+  - `src/app/services/DatosIniciales.services.spec.ts`
+
 ## Documentación por feature
 
 Cada cambio importante debe quedar documentado en `pr-features`.
@@ -153,6 +170,9 @@ Ejemplo actual:
 - `pr-features/03-admin-response-alignment/01-SPECS.md`
 - `pr-features/03-admin-response-alignment/02-IMPLEMENTATION.md`
 - `pr-features/03-admin-response-alignment/03-ACCEPTANCE_CRITERIA.md`
+- `pr-features/04-datosiniciales-response-alignment/01-SPECS.md`
+- `pr-features/04-datosiniciales-response-alignment/02-IMPLEMENTATION.md`
+- `pr-features/04-datosiniciales-response-alignment/03-ACCEPTANCE_CRITERIA.md`
 
 ## Desarrollo local
 
@@ -199,6 +219,12 @@ Pruebas puntuales del módulo `Admin`:
 ```bash
 ng test jds_carwash --watch=false --browsers ChromeHeadless --include src/app/services/usuario.services.spec.ts
 ng test jds_carwash --watch=false --browsers ChromeHeadless --include src/app/services/cntContables.service.spec.ts
+```
+
+Prueba puntual del módulo `DatosIniciales`:
+
+```bash
+ng test jds_carwash --watch=false --browsers ChromeHeadless --include src/app/services/DatosIniciales.services.spec.ts
 ```
 
 Nota:
