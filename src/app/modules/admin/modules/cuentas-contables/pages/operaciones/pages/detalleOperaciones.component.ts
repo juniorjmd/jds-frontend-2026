@@ -35,7 +35,7 @@ export class DetalleOperacionesComponent implements OnInit {
       await printM.printSoporteMovimiento(false,value.data[0].obj); 
     },
     error:
-  e=> Swal.fire(e.error.error)
+  e=> Swal.fire(this.cntService.getErrorMessage(e))
    
   })
    
@@ -50,11 +50,11 @@ export class DetalleOperacionesComponent implements OnInit {
           {next:(result:cntTransaccionesRequest)=>{
            this.transacciones= result.data;
            //CustomConsole.log(this.transacciones)
-          },error:(e)=>Swal.fire(e.error.error)}
+          },error:(e)=>Swal.fire(this.cntService.getErrorMessage(e))}
         )
       }
 
-    },error : (e:any)=>Swal.fire(e.error.error)}) 
+    },error : (e:any)=>Swal.fire(this.cntService.getErrorMessage(e))}) 
     
 
 

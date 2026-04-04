@@ -77,7 +77,7 @@ export class ejecutarDeMuchaAUnaComponent   {
          //CustomConsole.log('cajaas' , this.establecimientos);
          
        }
-     }, error: e=>Swal.fire('error',e.error.error,'error')})
+    }, error: e=>Swal.fire('error',this.cntService.getErrorMessage(e),'error')})
      /*
       DESDE_CAJA
       ASIGNA_SALDO
@@ -92,7 +92,7 @@ export class ejecutarDeMuchaAUnaComponent   {
            this.dataProceso!.cuentas =  value.data;
            //CustomConsole.log('cuentas' , value.data);
            
-     },error:e=> Swal.fire(e.error.error) })
+     },error:e=> Swal.fire(this.cntService.getErrorMessage(e)) })
  
    }
    }
@@ -109,7 +109,7 @@ export class ejecutarDeMuchaAUnaComponent   {
        this.cntService.ejecutarTrasladosCuentas(this.dataProceso!).subscribe(
         {next:(val:ejecucionTrasladosRequest)=>{
          this.printer_soporte_final(val.objeto);
-       },error:e=>Swal.fire('error' , e.error.error)
+       },error:e=>Swal.fire('error' , this.cntService.getErrorMessage(e))
        })
    }
  

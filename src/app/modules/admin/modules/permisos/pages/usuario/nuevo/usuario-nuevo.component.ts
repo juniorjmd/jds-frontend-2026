@@ -141,7 +141,7 @@ export class UsuarioNuevoComponent implements OnInit {
      this.cerrarFormularioTrue()
      },
     error: e=>{
-      Swal.fire('error' , e.error.error,'error'); this.loading.hide();
+      Swal.fire('error' , this.userService.getErrorMessage(e),'error'); this.loading.hide();
     } }
     )
   }

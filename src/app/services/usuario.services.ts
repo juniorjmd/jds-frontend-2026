@@ -7,11 +7,12 @@ import { TABLA } from '../models/app.db.tables';
 import { httpOptions, url } from '../models/app.db.url';
 import { vistas } from '../models/app.db.view';
 import { UsuarioModel } from '../models/usuario.model';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, map, Observable } from 'rxjs';
 import { Recurso } from '../interfaces/recurso';
 import { perfil, perfilRequest, recursoRequest } from '../interfaces/producto-request';
 import { CustomConsole } from '../models/CustomConsole';
 import { ConfigService } from './config.service';
+import { AdminProfileResourcesResponse, AdminResourcesResponse, AdminUserResponse } from '../interfaces/admin-response.interface';
 
 @Injectable({
     providedIn: 'root'
@@ -46,20 +47,41 @@ constructor(private http: HttpClient , private configService:ConfigService,
         let datos = {"action": actions.getAllRecursosArr   
                     };
         CustomConsole.log('servicios de usuarios activo - getArrayRecursos' ,this.configService.url.actionAdmin , datos, httpOptions());
-        return this.http.post<recursoRequest>(this.configService.url.actionAdmin , datos, httpOptions()) ;
+        return this.http.post<AdminResourcesResponse>(this.configService.url.actionAdmin , datos, httpOptions()).pipe(
+          map((response) => ({
+            data: response.data.resources,
+            query: '',
+            numdata: response.data.count,
+            error: 'ok',
+          }))
+        );
     } 
     
      
       getArrayRecursosByPerfil(_idPerfil:number):Observable<recursoRequest>{
         let datos = {"action": actions.getAllRecursosArrByPerfil , _idPerfil };
         CustomConsole.log('servicios de usuarios activo - getArrayRecursosByPerfil' ,this.configService.url.actionAdmin , datos, httpOptions());
-        return this.http.post<recursoRequest>(this.configService.url.actionAdmin , datos, httpOptions()) ;
+        return this.http.post<AdminResourcesResponse>(this.configService.url.actionAdmin , datos, httpOptions()).pipe(
+          map((response) => ({
+            data: response.data.resources,
+            query: '',
+            numdata: response.data.count,
+            error: 'ok',
+          }))
+        );
     } 
     
     setArrayRecursos(_perfil:number , _recursos:Recurso):Observable<recursoRequest>{
         let datos = {"action": actions.setAllRecursosArr  , _perfil ,  _recursos           };
         CustomConsole.log('servicios de usuarios activo - setArrayRecursos' ,this.configService.url.actionAdmin , datos, httpOptions());
-        return this.http.post<recursoRequest>(this.configService.url.actionAdmin , datos, httpOptions()) ;
+        return this.http.post<AdminProfileResourcesResponse>(this.configService.url.actionAdmin , datos, httpOptions()).pipe(
+          map((response) => ({
+            data: [],
+            query: response.data.message,
+            numdata: response.data.updatedCount,
+            error: 'ok',
+          }))
+        );
     } 
     getPerfiles():Observable<perfilRequest>{
         let datos = {"action": actions.actionSelect ,
@@ -114,7 +136,15 @@ constructor(private http: HttpClient , private configService:ConfigService,
                     };
 
         CustomConsole.log('servicios de usuarios activo - getUsuarios' ,this.configService.url.action , datos, httpOptions());
-        return this.http.post(this.configService.url.actionAdmin , datos, httpOptions()) ;
+        return this.http.post<AdminUserResponse>(this.configService.url.actionAdmin , datos, httpOptions()).pipe(
+          map((response) => ({
+            error: 'ok',
+            data: [response.data.usuario],
+            numdata: 1,
+            query: response.data.message,
+            usuarioID: response.data.usuarioID,
+          }))
+        );
     }
     guardarUsuarioPerfil(usuario : UsuarioModel ,  perfil:number){
       
@@ -144,6 +174,13 @@ constructor(private http: HttpClient , private configService:ConfigService,
 
         CustomConsole.log('servicios de usuarios activo - getUsuarios' ,this.configService.url.action , datos, httpOptions());
         return this.http.post(this.configService.url.action , datos, httpOptions()) ;
+    }
+
+    getErrorMessage(error: any): string {
+        return error?.error?.error?.message
+          ?? error?.error?.error
+          ?? error?.message
+          ?? 'Error inesperado';
     }
 
 }

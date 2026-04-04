@@ -31,7 +31,7 @@ export class ListarOperacionesComponent implements OnInit {
       
     this.cntService.getCntOperacionesManuales().subscribe({next:(value:cntOperacionesRequest )=>{
       this.operaciones =  value.data; 
-    },error : (e:any)=>Swal.fire(e.error.error)}) 
+    },error : (e:any)=>Swal.fire(this.cntService.getErrorMessage(e))}) 
     
 
 

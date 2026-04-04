@@ -37,21 +37,21 @@ export class OperacionesComponent implements OnInit {
     this.cntService.currentCntClase.subscribe({next:(value:CntClasesModel[] | null)=>{
       this.clases = value??[] ;
       //CustomConsole.log('Clases = >',this.clases) 
-    },error : (e:any)=>Swal.fire(e.error.error)})
+    },error : (e:any)=>Swal.fire(this.cntService.getErrorMessage(e))})
     
     this.cntService.currentCntGrupo.subscribe({next:(value:CntGruposModel[] | null)=>{
       this.Mgrupos = value??[] ;
       //CustomConsole.log('Grupos = >',this.Mgrupos) 
-    },error : (e:any)=>Swal.fire(e.error.error)})
+    },error : (e:any)=>Swal.fire(this.cntService.getErrorMessage(e))})
  
     this.cntService.currentCntcuentaM.subscribe({next:(value:CntCuentaMModel[] | null)=>{
       this.McuentasMayores = value??[] ;
       //CustomConsole.log('Cuentas = >',this.McuentasMayores) 
-    },error : (e:any)=>Swal.fire(e.error.error)})
+    },error : (e:any)=>Swal.fire(this.cntService.getErrorMessage(e))})
     this.cntService.currentsubcuenta.subscribe({next:(value:vwCntSubCuentaModel[] | null)=>{
       this.Mcuentas = value??[] ;
       //CustomConsole.log('subCuentas = >',this.Mcuentas) 
-    },error : (e:any)=>Swal.fire(e.error.error)})
+    },error : (e:any)=>Swal.fire(this.cntService.getErrorMessage(e))})
     
 
 

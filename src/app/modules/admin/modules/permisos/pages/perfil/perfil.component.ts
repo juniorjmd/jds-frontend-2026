@@ -37,7 +37,7 @@ this.usuarioService.getArrayRecursos().subscribe({next:(value:recursoRequest)=>{
    this.usuarioService.updateRecursos([...this.recursosAux]) ;
    //CustomConsole.log('recursos' , this.recursos , Array.isArray(this.recursos));
     
-}, error:e=>Swal.fire(JSON.stringify(e))
+}, error:e=>Swal.fire(this.usuarioService.getErrorMessage(e))
 }
 )
   }
@@ -71,7 +71,7 @@ getPerfiles(){
     this.Perfil = {...i};
     this.usuarioService.getArrayRecursosByPerfil(i.id!).subscribe({next:(val:recursoRequest)=>{
       if(val.error == 'ok') this.usuarioService.updateRecursos([...val.data]) ;
-    } , error: e=> Swal.fire(JSON.stringify(e))
+    } , error: e=> Swal.fire(this.usuarioService.getErrorMessage(e))
   }
       
     )

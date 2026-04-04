@@ -30,16 +30,16 @@ export class ListarOperacionesAutomaticasComponent implements OnInit {
       
     this.cntService.getCntOperacionesAuto().subscribe({next:(value:cntOperacionesRequest )=>{
       this.operaciones =  value.data; 
-    },error : (e:any)=>Swal.fire(e.error.error)}) 
+    },error : (e:any)=>Swal.fire(this.cntService.getErrorMessage(e))}) 
     
   this.cntService.getDocumentosOperacionesAuto().subscribe({next:(value:cntDocOperacionesRequest )=>{
     this.docOperaciones =  value.data; 
-  },error : (e:any)=>Swal.fire(e.error.error)}) 
+  },error : (e:any)=>Swal.fire(this.cntService.getErrorMessage(e))}) 
 
 
   this.cntService.getTipDocOperacionesAuto().subscribe({next:(value:cntTipDocOperacionesRequest )=>{
     this.tipDocOperaciones =  value.data; 
-  },error : (e:any)=>Swal.fire(e.error.error)}) 
+  },error : (e:any)=>Swal.fire(this.cntService.getErrorMessage(e))}) 
 
 
 
@@ -52,7 +52,7 @@ export class ListarOperacionesAutomaticasComponent implements OnInit {
      this.operaciones =  value.data; 
     //CustomConsole.log('getDocumentosOperacionesAuto' , value);
     
-  },error : (e:any)=>Swal.fire(e.error.error)}) ; 
+  },error : (e:any)=>Swal.fire(this.cntService.getErrorMessage(e))}) ; 
   }
 
   buscarPorTipoDocumento( ){
@@ -61,7 +61,7 @@ export class ListarOperacionesAutomaticasComponent implements OnInit {
     this.operaciones =  value.data; 
    //CustomConsole.log('getDocumentosOperacionesAuto' , value);
    
- },error : (e:any)=>Swal.fire(e.error.error)}) ; 
+ },error : (e:any)=>Swal.fire(this.cntService.getErrorMessage(e))}) ; 
 
   }
  

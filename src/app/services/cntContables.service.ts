@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core'; 
 
 import { httpOptions, url } from '../models/app.db.url';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, map, Observable } from 'rxjs';
 import {  cntClaseRequest, cntCuentaMayorRequest, cntDocOperacionesRequest, cntGrupoRequest, cntMovCuentasRequest, cntOperacionesRequest,  cntSubCuentaRequest, cntSubCuentaVwRequest, cntTipDocOperacionesRequest, cntTransaccionesRequest, cntTrasladosRequest, ejecucionTrasladosRequest, soporteMovimientoCntRequest, trasladosCntRequest } from '../interfaces/producto-request';
 import { actions } from '../models/app.db.actions';
 import { vistas } from '../models/app.db.view';
@@ -16,6 +16,7 @@ import { TransaccionesModel } from '../models/transacciones/transacciones.module
 import { TrasladosCuentasModel } from '../models/trasladosCuentas.';
 import { CustomConsole } from '../models/CustomConsole';
 import { ConfigService } from './config.service';
+import { AdminOperationResponse } from '../interfaces/admin-response.interface';
 
 @Injectable({
   providedIn: 'root'
@@ -56,7 +57,14 @@ constructor(private http: HttpClient, private configService :ConfigService, ) {
       _operacion
    };
    CustomConsole.log('setNewOperacion' ,this.configService.url.actionAdmin , datos, httpOptions());
-   return this.http.post(this.configService.url.actionAdmin , datos, httpOptions()) ;
+   return this.http.post<AdminOperationResponse>(this.configService.url.actionAdmin , datos, httpOptions()).pipe(
+    map((response) => ({
+      error: 'ok',
+      message: response.data.message,
+      operationId: response.data.operationId,
+      operation: response.data.operation,
+    }))
+   );
   }
 
   deleteItemListadoOprPre(dato:any){ 
@@ -166,7 +174,13 @@ setCntTransaccionesTmp(data:TransaccionesModel):Observable<any>{
  
 CustomConsole.log('setCntTransaccionesTmp',this.configService.url.actionAdmin , datos);
 
- return this.http.post<any>(this.configService.url.actionAdmin , datos, httpOptions()) ;
+ return this.http.post<AdminOperationResponse>(this.configService.url.actionAdmin , datos, httpOptions()).pipe(
+  map((response) => ({
+    error: 'ok',
+    message: response.data.message,
+    objeto: response.data.objeto,
+  }))
+ ) ;
  }
  
 
@@ -194,7 +208,12 @@ CustomConsole.log('setCntTransaccionesTmp',this.configService.url.actionAdmin , 
       "_arraydatos" : idTraslado
      }; 
      CustomConsole.log('ejecutarTrasladosCuentas' , this.configService.url.actionAdmin , datos, httpOptions())
-     return this.http.post<ejecucionTrasladosRequest>(this.configService.url.actionAdmin , datos, httpOptions()) ;
+     return this.http.post<AdminOperationResponse>(this.configService.url.actionAdmin , datos, httpOptions()).pipe(
+      map((response) => ({
+        error: 'ok',
+        objeto: response.data.objeto as any,
+      }))
+     );
   }
   bucarSoporteMovimiento(idTraslado:number):Observable<soporteMovimientoCntRequest>{
     let where = [{"columna" : "cod_comprobante" , "tipocomp" : '=' , "dato" :  idTraslado } ]
@@ -433,5 +452,12 @@ getEmpleadosAcumulados( id:number|string , fechas:fechaBusqueda){
     "_where" : [{columna : 'cod_comprobante' , tipocomp : '=' , dato : idOperacion }]     }; 
     CustomConsole.log("getCntTransacciones" , this.configService.url.action , datos, httpOptions())
      return this.http.post<cntTransaccionesRequest>(this.configService.url.action , datos, httpOptions()) ;
+  }
+
+  getErrorMessage(error: any): string {
+    return error?.error?.error?.message
+      ?? error?.error?.error
+      ?? error?.message
+      ?? 'Error inesperado';
   }
 }

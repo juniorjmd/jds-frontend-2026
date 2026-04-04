@@ -109,6 +109,35 @@ Se inició la alineación del módulo `Carwash` para las acciones de caja:
 - el módulo consume el envelope estándar del backend nuevo
 - la adaptación del contrato queda aislada en `Cajas.services`
 
+## Modulo Admin: trabajo reciente
+
+Se alineó `Admin` entre backend y frontend para cubrir recursos, permisos, creación de usuario y operaciones contables.
+
+### Cambios aplicados
+
+- se agregaron tipos del módulo:
+  - `src/app/interfaces/admin-response.interface.ts`
+- se actualizó `src/app/services/usuario.services.ts` para:
+  - desempaquetar `GET_ALL_RECURSOS`, `GET_ALL_RECURSOS_BY_PERFIL`, `SET_PERFIL_RECURSO` y `CREAR_USUARIO`
+  - centralizar errores con `getErrorMessage()`
+- se actualizó `src/app/services/cntContables.service.ts` para:
+  - desempaquetar `CREAR_OPERACION_MANUAL`, `CREAR_OPERACIONES_PREESTABLECIDAS` y `EJECUTAR_OPERACIONES_PREESTABLECIDAS`
+  - centralizar errores con `getErrorMessage()`
+- se adaptaron consumidores directos del módulo:
+  - permisos
+  - creación de usuario
+  - operaciones contables
+  - modales de traslados contables
+- se agregaron pruebas:
+  - `src/app/services/usuario.services.spec.ts`
+  - `src/app/services/cntContables.service.spec.ts`
+
+### Resultado esperado
+
+- `Admin` deja de depender del contrato HTTP legacy
+- los servicios se convierten en la capa de adaptación del módulo
+- los componentes ya no leen `e.error.error` en los flujos principales revisados
+
 ## Documentación por feature
 
 Cada cambio importante debe quedar documentado en `pr-features`.
@@ -121,6 +150,9 @@ Ejemplo actual:
 - `pr-features/02-carwash-response-alignment/01-SPECS.md`
 - `pr-features/02-carwash-response-alignment/02-IMPLEMENTATION.md`
 - `pr-features/02-carwash-response-alignment/03-ACCEPTANCE_CRITERIA.md`
+- `pr-features/03-admin-response-alignment/01-SPECS.md`
+- `pr-features/03-admin-response-alignment/02-IMPLEMENTATION.md`
+- `pr-features/03-admin-response-alignment/03-ACCEPTANCE_CRITERIA.md`
 
 ## Desarrollo local
 
@@ -160,6 +192,13 @@ Prueba puntual del módulo `Carwash`:
 
 ```bash
 ng test jds_carwash --watch=false --browsers ChromeHeadless --include src/app/services/Cajas.services.spec.ts
+```
+
+Pruebas puntuales del módulo `Admin`:
+
+```bash
+ng test jds_carwash --watch=false --browsers ChromeHeadless --include src/app/services/usuario.services.spec.ts
+ng test jds_carwash --watch=false --browsers ChromeHeadless --include src/app/services/cntContables.service.spec.ts
 ```
 
 Nota:

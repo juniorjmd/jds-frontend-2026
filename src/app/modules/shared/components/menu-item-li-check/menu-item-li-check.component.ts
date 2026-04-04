@@ -79,7 +79,7 @@ export class MenuItemLiCheckComponent implements OnInit {
           CustomConsole.log(val);
           
         },
-        error:e=>Swal.fire(JSON.stringify(e))
+        error:e=>Swal.fire(this.usuarioService.getErrorMessage(e))
       }
      )}
   }

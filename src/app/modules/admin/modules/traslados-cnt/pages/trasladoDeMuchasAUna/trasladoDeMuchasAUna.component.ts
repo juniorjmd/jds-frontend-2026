@@ -42,7 +42,7 @@ constructor(){
 eliminar(item:CntOperacionPrestablecidas){
   this.cntService.deleteItemListadoOprPre(item.id).subscribe({next:(value)=>{ 
    this.ngAfterViewInit(); 
-  },error:e=>Swal.fire(e.error.error)})
+  },error:e=>Swal.fire(this.cntService.getErrorMessage(e))})
 }
 editar(item:CntOperacionPrestablecidas){
   this.newAbrirDialog.open(newTrasladoDeMuchasAUnaComponent, { data:  item })
@@ -72,7 +72,7 @@ ejecutarPerforma(item:CntOperacionPrestablecidas){
       this.datos = value.data;
       CustomConsole.log('Datos recibidos',this.datos);
       
-    },error:e=>Swal.fire(e.error.error)})
+    },error:e=>Swal.fire(this.cntService.getErrorMessage(e))})
   }
 openModal() {  
 this.newAbrirDialog.open(newTrasladoDeMuchasAUnaComponent, { data:  null })
