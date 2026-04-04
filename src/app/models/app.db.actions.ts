@@ -21,12 +21,6 @@
  const actionAbrirCaja = 'ABRIR_CAJA_ACTIVA';
  const actionCerarCaja = 'CERRAR_CAJA_ACTIVA';
  
- const actionConfirmar = '54cf0ad78873b07d7756976e37b6ed1e659a573f';
- const actionUsuario = '781e41a4c6237dbaecab19579643041de310c041';
- const insert_orden_pregunta = '99c505a66a9d8a984059baf1b99bb9e6456ae4bb';
- const generarPDF = '23929870008e23007350be74a708ab3a806dce13';
- const resultadoSimulacro = '8e9ae038c37d3b59fc1eed456c77aefb5eadffea';
- const cambioContrasena = '52444d9072f7ec12a26cb2879ebb4ab0bf5aa553';
  const datosInicialesSucursal = 'GET_SUCURSAL_PRINCIPAL_DATA'
  const validarLlave = '16770d92a6a82ee846f7ff23b4c8ad05b69fba03';
  const getUsuarioLogeado = '16770d92a6a82ee8464f678f5f223b4c8ad05b69fba03';
@@ -78,7 +72,6 @@
   'get_all_products_by_brand' : 'BUSCAR_TODOS_LOS_PRODUCTOS_POR_MARCA',
   'get_all_products_by_category' : 'BUSCAR_TODOS_LOS_PRODUCTOS_POR_CATEGORIA',
   'get_all_products' : 'BUSCAR_TODOS_LOS_PRODUCTOS',
-  'get_product' : 'BUSCAR_TODOS_LOS_PRODUCTOS',
   'action_get_documentos_usuario':'GET_DOCUMENTOS_USUARIO_ACTUAL',
   'action_get_documentos_caja':'GET_DOCUMENTOS_USUARIO_ACTUAL_CAJA_ACTIVA',
   'action_insertar_pagos':INSERTAR_PAGO_EMPLEADO,
@@ -154,12 +147,6 @@
     'actionSetPass' :'HIJODELAGRANCHINGADA',
     'actionSelCajaXuser' :actionSelectCajasPorUsuario, 
     'actionCambioCajaDocumento' :actionCambioCajaDocumento, 
-    'actionConfirmar' :actionConfirmar ,
-    'actionUsuario' :actionUsuario ,
-    'insert_orden_pregunta' :insert_orden_pregunta ,
-    'generarPDF' :generarPDF ,
-    'resultadoSimulacro' :resultadoSimulacro ,
-    'cambioContrasena' :cambioContrasena     ,
     'buscarProducto' :actionBuscarProducto    ,
     'buscarExistenciaProducto' :'BUSCAR_EXISTENCIA_PRODUCTO'    ,
     'buscarProductoCodBarras' :'BUSCAR_PRODUCTO_COD_BARRAS'    ,

@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { firstValueFrom, map, Observable } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
+import { syncAppDbRuntime } from '../models/app.db.url';
 
 @Injectable({
   providedIn: 'root'
@@ -39,6 +40,7 @@ export class ConfigService {
 
         this.printer = config.printer;
         this.enviroment = config.enviroment;
+        syncAppDbRuntime(config);
 
         console.log('Configuración cargada:', this.url, this.enviroment);
       })

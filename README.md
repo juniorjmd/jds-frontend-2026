@@ -175,6 +175,7 @@ Se alineó `Inventario` para que `ProductoService` consuma el contrato estándar
 - el frontend deja de depender del payload HTTP legacy de `inventario`
 - la compatibilidad transitoria con `error/numdata/data` queda encapsulada en `ProductoService`
 - el backend puede mantener una sola forma de respuesta estándar
+- en entorno Apache local las llamadas autenticadas del módulo también envían `X-Session-Token` además de `Authorization`
 
 ## Documentación por feature
 

@@ -24,6 +24,7 @@
             ],
             "tsConfig": "tsconfig.app.json",
             "assets": [
+              "src/.htaccess",
               "src/favicon.ico",
               "src/assets"
             ],
@@ -45,6 +46,8 @@
           },
           "configurations": {
             "production": {
+              "baseHref": "/jds_carwash/",
+              "deployUrl": "/jds_carwash/",
               "budgets": [
                 {
                   "type": "initial",
@@ -97,6 +100,7 @@
             ],
             "tsConfig": "tsconfig.spec.json",
             "assets": [
+              "src/.htaccess",
               "src/favicon.ico",
               "src/assets"
             ],

@@ -1,6 +1,3 @@
- const DATOS_SUCURSAL = 'vw_estudiante';
- 
-
  export const TABLA = {
   actividad_det_tmp :'inv_descuentos_actividad_detalle_tmp',
   actividad_det_producto_excluido:'inv_descuentos_actividad_detalle_excluidos',
@@ -17,7 +14,7 @@
    vehiculos_servicios_costos:'inv_mst_servicios_costos',
    TiposServicios : 'inv_mst_tipos_servicios',// vehiculos_servicios_tipos
    vehiculos_servicios :'inv_mst_servicios',
-    SUCURSAL : DATOS_SUCURSAL ,
+    SUCURSAL : 'vw_estudiante',
     ciudades : "mst_per_clientes_ciudades" ,
     departamento: "mst_per_clientes_deptos" ,
     pais : "mst_per_clientes_paises",
