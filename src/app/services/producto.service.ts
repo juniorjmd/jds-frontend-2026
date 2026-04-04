@@ -12,7 +12,7 @@ import { AuxIngresoInventarioModule } from '../models/aux-ingreso-inventario/aux
 import { DocumentosModel } from '../models/ventas/documento.model';
 import { ProductoModel } from '../models/producto/producto.module';
 import { UsuarioModel } from '../models/usuario.model';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, map, Observable } from 'rxjs';
 import { categoriaRequest, categoriaVendidosRequest, DescuentoRequest, DocumentoCierreRequest, DocumentoRequest, InventarioAplicadoDetalleRequest, InventarioAplicadoRequest, marcaRequest, presentacionPrdRequest, ProductoExitenciaRequest, ProductoExitenciasRequest, ProductoRequest } from '../interfaces/producto-request';
 import { PrdPreciosModule } from '../models/prd-precios/prd-precios.module';
 import { CategoriasModel } from '../models/categorias.model';
@@ -20,6 +20,7 @@ import { MarcasModel } from '../models/marcas/marcas.module';
 import { DescuentoModule } from '../models/descuento/descuento.model';
 import { CustomConsole } from '../models/CustomConsole';
 import { ConfigService } from './config.service';
+import { InventarioCategoriesResponse, InventarioExistenceResponse, InventarioPrechartResponse, InventarioProductMutationResponse, InventarioProductResponse, InventarioProductsResponse, InventarioReturnResponse, InventarioWarehousesResponse } from '../interfaces/inventario-response.interface';
 
 
 @Injectable({
@@ -41,6 +42,90 @@ currentMarcas = this.marcasSource.asObservable();
   // private _configService = inject(configService); 
 constructor(  private configService:ConfigService ){ 
     CustomConsole.log('servicios productos inicializado');  
+}
+
+private toLegacyProductsPayload(response: InventarioProductsResponse): ProductoRequest {
+  return {
+    data: response.data.products,
+    producto: response.data.products[0] as ProductoModel,
+    query: response.data.query,
+    numdata: response.data.count,
+    error: 'ok'
+  };
+}
+
+private toLegacyProductPayload(response: InventarioProductResponse): ProductoRequest {
+  return {
+    data: response.data.products,
+    producto: response.data.product,
+    query: response.data.query,
+    numdata: response.data.count,
+    error: 'ok'
+  };
+}
+
+private toLegacyExistencePayload(response: InventarioExistenceResponse): ProductoExitenciaRequest {
+  return {
+    data: response.data.productExistence,
+    query: response.data.query,
+    numdata: response.data.count,
+    error: 'ok'
+  };
+}
+
+private toLegacyPrechartPayload(response: InventarioPrechartResponse): any {
+  return {
+    error: 'ok',
+    ingreso_id: response.data.ingressId,
+    bodega_ingreso: response.data.warehouseId,
+    numdata: response.data.count,
+    datos: response.data.items,
+    estado: response.data.status,
+    fecha_guardado: response.data.performedAt,
+    usuario: response.data.user,
+    message: response.data.message
+  };
+}
+
+private toLegacyCancelPrechartPayload(response: InventarioPrechartResponse): any {
+  return {
+    error: 'ok',
+    ingreso_id: response.data.ingressId,
+    bodega_ingreso: response.data.warehouseId,
+    numdata: response.data.count,
+    datos: response.data.items,
+    estado: response.data.status,
+    fecha_cancelacion: response.data.performedAt,
+    usuario: response.data.user,
+    message: response.data.message
+  };
+}
+
+private toLegacyProductMutationPayload(response: InventarioProductMutationResponse): any {
+  return {
+    error: 'ok',
+    producto: response.data.product,
+    numdata: response.data.count,
+    message: response.data.message
+  };
+}
+
+private toLegacyReturnPayload(response: InventarioReturnResponse): any {
+  return {
+    error: 'ok',
+    producto: response.data.product,
+    estado: response.data.status,
+    message: response.data.message
+  };
+}
+
+getErrorMessage(error: any): string {
+  const rawApiError = error?.error?.error;
+  const apiMessage = typeof rawApiError === 'string' ? rawApiError : rawApiError?.message;
+  const fallbackMessage = error?.error?.message;
+  const textMessage = error?.message;
+
+  return apiMessage || fallbackMessage || textMessage || 'Error inesperado';
 }
 
 
@@ -193,23 +278,29 @@ getTiposDeDocumentos(){
   return this.http.post(this.baseUrl, datos, httpOptions()) ;
 }  
 getbodegas(){
-  let datos = {"action": actions.actionSelect ,
-    "_columnas": ['obj'],
-    "_obj": ['obj'],
-    "_tabla" : vistas.prd_bodegas_inventario
-              };
+  let datos = {"action": 'GET_BODEGAS'};
   CustomConsole.log('servicios de usuarios activo - getbodegas' ,this.baseUrl, datos, httpOptions());
-  return this.http.post(this.baseUrl, datos, httpOptions()) ;
+  return this.http
+    .post<InventarioWarehousesResponse>(this.urlInventario, datos, httpOptions())
+    .pipe(map((response) => ({
+      error: 'ok',
+      data: response.data.warehouses.map((warehouse) => ({ obj: warehouse })),
+      numdata: response.data.count,
+      query: 'inventory_warehouses'
+    })));
 } 
 
 getCategorias():Observable<categoriaRequest>{
-  let datos = {"action": actions.actionSelect ,
-               "_tabla" : vistas.categorias,
-              "_columnas": ['obj'],
-              "_obj": ['obj'],
-              };
+  let datos = {"action": actions.get_categorias};
   CustomConsole.log('servicios de usuarios activo - getCategorias' ,this.baseUrl, datos, httpOptions());
-  return this.http.post<categoriaRequest>(this.baseUrl, datos, httpOptions()) ;
+  return this.http
+    .post<InventarioCategoriesResponse>(this.urlInventario, datos, httpOptions())
+    .pipe(map((response) => ({
+      data: response.data.categories,
+      query: 'inventory_categories',
+      numdata: response.data.count,
+      error: 'ok'
+    })));
 } 
 getCategoriasVendidas():Observable<categoriaVendidosRequest>{
   let datos = {"action": actions.actionSelect ,
@@ -336,7 +427,9 @@ eliminaritemIngresoInventario(idDato:string | number | undefined){
 borrarPrecarguePorBodega(bodega:number){
   let datos = {"action": actions.action_cancelar_inventario , "_bodega_ingreso" : bodega };
   CustomConsole.log('servicios getProductosExistencia' ,this.urlInventario, datos, httpOptions());
-  return this.http.post(this.urlInventario, datos, httpOptions()) ;
+  return this.http
+    .post<InventarioPrechartResponse>(this.urlInventario, datos, httpOptions())
+    .pipe(map((response) => this.toLegacyCancelPrechartPayload(response)));
 } 
 
 
@@ -360,7 +453,9 @@ guardarNuevoProducto(producto :ProductoModel  ){
   "_producto_enviado" : producto  
 };
   CustomConsole.log('servicios guardarPrdCompra' ,this.urlInventario, datos, httpOptions());
-  return this.http.post(this.urlInventario, datos, httpOptions()) ;
+  return this.http
+    .post<InventarioProductMutationResponse>(this.urlInventario, datos, httpOptions())
+    .pipe(map((response) => this.toLegacyProductMutationPayload(response)));
 }
 
 updateProducto(producto :ProductoModel  ){
@@ -369,7 +464,9 @@ updateProducto(producto :ProductoModel  ){
   "_producto_enviado" : producto  
 };
   CustomConsole.log('servicios guardarPrdCompra' ,this.urlInventario, datos, httpOptions());
-  return this.http.post(this.urlInventario, datos, httpOptions()) ;
+  return this.http
+    .post<InventarioProductMutationResponse>(this.urlInventario, datos, httpOptions())
+    .pipe(map((response) => this.toLegacyProductMutationPayload(response)));
 }
 
 updateDocumento(documento :DocumentosModel  ){
@@ -399,7 +496,9 @@ guardarNuevoProductoPrecargue( precargue :AuxIngresoInventarioModule ){
   "_ingreso" : precargue  
 };
   CustomConsole.log('servicios guardarNuevoProductoPrecargue' ,this.urlInventario, datos, httpOptions());
-  return this.http.post(this.urlInventario, datos, httpOptions()) ;
+  return this.http
+    .post<InventarioPrechartResponse>(this.urlInventario, datos, httpOptions())
+    .pipe(map((response) => this.toLegacyPrechartPayload(response)));
 }
 
 devolverPrdCompra(producto : DocumentoListado  ){
@@ -408,7 +507,9 @@ devolverPrdCompra(producto : DocumentoListado  ){
   "_producto_enviado" : producto  
 };
   CustomConsole.log('servicios getProductosCodBarrasVCnt' ,this.urlInventario, datos, httpOptions());
-  return this.http.post(this.urlInventario, datos, httpOptions()) ;
+  return this.http
+    .post<InventarioReturnResponse>(this.urlInventario, datos, httpOptions())
+    .pipe(map((response) => this.toLegacyReturnPayload(response)));
 }
 
 
@@ -424,7 +525,9 @@ getProductosGeneral(limit?:any): Observable<ProductoRequest|any>  {
   }
   
   CustomConsole.log('servicios getProductosPorMarca' ,this.urlInventario, datos, httpOptions());
-  return this.http.post<ProductoRequest|any>(this.urlInventario, datos, httpOptions()) ;
+  return this.http
+    .post<InventarioProductsResponse>(this.urlInventario, datos, httpOptions())
+    .pipe(map((response) => this.toLegacyProductsPayload(response)));
 } 
 
 getProductosPorCategoria(codCategoria:any){ 
@@ -432,7 +535,9 @@ getProductosPorCategoria(codCategoria:any){
       "_limit" : [0,100]   
               };
   CustomConsole.log('servicios getProductosPorCategoria' ,this.urlInventario, datos, httpOptions());
-  return this.http.post(this.urlInventario, datos, httpOptions()) ;
+  return this.http
+    .post<InventarioProductsResponse>(this.urlInventario, datos, httpOptions())
+    .pipe(map((response) => this.toLegacyProductsPayload(response)));
 } 
 
 getProductosPorNombre(texto:string , limit?:any  ){
@@ -440,7 +545,9 @@ getProductosPorNombre(texto:string , limit?:any  ){
     "_limit" : limit
   }; 
   CustomConsole.log('servicios getProductosPorMarca' ,this.urlInventario, datos, httpOptions());
-  return this.http.post(this.urlInventario, datos, httpOptions()) ;
+  return this.http
+    .post<InventarioProductsResponse>(this.urlInventario, datos, httpOptions())
+    .pipe(map((response) => this.toLegacyProductsPayload(response)));
 } 
 
 getProductosPorMarca(codMarca : any){ 
@@ -448,7 +555,9 @@ getProductosPorMarca(codMarca : any){
       "_limit" : [0,100] 
               };
   CustomConsole.log('servicios getProductosPorMarca' ,this.urlInventario, datos, httpOptions());
-  return this.http.post(this.urlInventario, datos, httpOptions()) ;
+  return this.http
+    .post<InventarioProductsResponse>(this.urlInventario, datos, httpOptions())
+    .pipe(map((response) => this.toLegacyProductsPayload(response)));
 } 
 
 getProductoById(idprd:any):Observable<ProductoRequest|any>{ 
@@ -458,7 +567,9 @@ getProductoById(idprd:any):Observable<ProductoRequest|any>{
    };
 
   CustomConsole.log('servicios getProductosCodBarrasVCnt' ,this.urlInventario, datos, httpOptions());
-  return this.http.post<Observable<ProductoRequest|any>>(this.urlInventario, datos, httpOptions()) ;
+  return this.http
+    .post<InventarioProductResponse>(this.urlInventario, datos, httpOptions())
+    .pipe(map((response) => this.toLegacyProductPayload(response)));
 }
 
 
@@ -470,7 +581,9 @@ getProductoExtistenciaDocById(idprd:any , orden:number):Observable<ProductoExite
    };
 
   CustomConsole.log('servicios getProductosCodBarrasVCnt' ,this.urlInventario, datos, httpOptions());
-  return this.http.post<Observable<ProductoExitenciaRequest|any>>(this.urlInventario, datos, httpOptions()) ;
+  return this.http
+    .post<InventarioExistenceResponse>(this.urlInventario, datos, httpOptions())
+    .pipe(map((response) => this.toLegacyExistencePayload(response)));
 }
  
 getProductoByIdOrCodBarra(idprd:any):Observable<ProductoRequest|any>{ 
@@ -480,7 +593,9 @@ getProductoByIdOrCodBarra(idprd:any):Observable<ProductoRequest|any>{
    };
 
   CustomConsole.log('servicios getProductosCodBarrasVCnt' ,this.urlInventario, datos, httpOptions());
-  return this.http.post<Observable<ProductoRequest|any>>(this.urlInventario, datos, httpOptions()) ;
+  return this.http
+    .post<InventarioProductResponse>(this.urlInventario, datos, httpOptions())
+    .pipe(map((response) => this.toLegacyProductPayload(response)));
 }
 // #endregion
  

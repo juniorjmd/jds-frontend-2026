@@ -155,6 +155,27 @@ Se alineó `DatosIniciales` para la lectura de sucursal principal desde el contr
 - se agregó prueba:
   - `src/app/services/DatosIniciales.services.spec.ts`
 
+## Modulo Inventario: trabajo reciente
+
+Se alineó `Inventario` para que `ProductoService` consuma el contrato estándar del backend nuevo.
+
+### Cambios aplicados
+
+- se agregaron tipos del módulo:
+  - `src/app/interfaces/inventario-response.interface.ts`
+- se actualizó `src/app/services/producto.service.ts` para:
+  - desempaquetar `ok/data/error`
+  - centralizar errores con `getErrorMessage()`
+  - adaptar productos, producto individual, existencias, precargue, categorias y bodegas
+- se agregó prueba:
+  - `src/app/services/producto.service.spec.ts`
+
+### Resultado esperado
+
+- el frontend deja de depender del payload HTTP legacy de `inventario`
+- la compatibilidad transitoria con `error/numdata/data` queda encapsulada en `ProductoService`
+- el backend puede mantener una sola forma de respuesta estándar
+
 ## Documentación por feature
 
 Cada cambio importante debe quedar documentado en `pr-features`.
@@ -173,6 +194,9 @@ Ejemplo actual:
 - `pr-features/04-datosiniciales-response-alignment/01-SPECS.md`
 - `pr-features/04-datosiniciales-response-alignment/02-IMPLEMENTATION.md`
 - `pr-features/04-datosiniciales-response-alignment/03-ACCEPTANCE_CRITERIA.md`
+- `pr-features/05-inventario-response-alignment/01-SPECS.md`
+- `pr-features/05-inventario-response-alignment/02-IMPLEMENTATION.md`
+- `pr-features/05-inventario-response-alignment/03-ACCEPTANCE_CRITERIA.md`
 
 ## Desarrollo local
 
@@ -225,6 +249,12 @@ Prueba puntual del módulo `DatosIniciales`:
 
 ```bash
 ng test jds_carwash --watch=false --browsers ChromeHeadless --include src/app/services/DatosIniciales.services.spec.ts
+```
+
+Prueba puntual del módulo `Inventario`:
+
+```bash
+ng test jds_carwash --watch=false --browsers ChromeHeadless --include src/app/services/producto.service.spec.ts
 ```
 
 Nota:
