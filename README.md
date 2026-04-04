@@ -79,6 +79,36 @@ Se inició la alineación del módulo `Auth` entre backend y frontend.
 - los componentes consumen datos normalizados
 - el frontend deja de acoplarse al contrato legacy crudo en este módulo
 
+## Modulo Carwash: trabajo reciente
+
+Se inició la alineación del módulo `Carwash` para las acciones de caja:
+
+- `ABRIR_CAJA_ACTIVA`
+- `CERRAR_CAJA_ACTIVA`
+- `CERRAR_CAJA_PARCIAL`
+- `OBTENER_RESUMEN_CAJA`
+
+### Cambios aplicados
+
+- se agregaron tipos del módulo:
+  - `src/app/interfaces/carwash-response.interface.ts`
+- se actualizó `src/app/services/Cajas.services.ts` para:
+  - desempaquetar `response.data`
+  - tipar `message`, `box` y `summary`
+  - centralizar lectura de errores con `getErrorMessage()`
+- se adaptaron consumidores directos de caja:
+  - `src/app/modules/pos/pages/abrir-caja/abrir-caja.component.ts`
+  - `src/app/modules/pos/pages/cerrar-caja/cerrar-caja.component.ts`
+  - `src/app/modules/pos/modals/definir-base-caja/definir-base-caja.component.ts`
+- se agregó prueba inicial de servicio:
+  - `src/app/services/Cajas.services.spec.ts`
+
+### Resultado esperado
+
+- la UI de caja deja de depender de `error === 'ok'`, `numdata` y `datos[0].msg`
+- el módulo consume el envelope estándar del backend nuevo
+- la adaptación del contrato queda aislada en `Cajas.services`
+
 ## Documentación por feature
 
 Cada cambio importante debe quedar documentado en `pr-features`.
@@ -88,6 +118,9 @@ Ejemplo actual:
 - `pr-features/01-auth-response-alignment/01-SPECS.md`
 - `pr-features/01-auth-response-alignment/02-IMPLEMENTATION.md`
 - `pr-features/01-auth-response-alignment/03-ACCEPTANCE_CRITERIA.md`
+- `pr-features/02-carwash-response-alignment/01-SPECS.md`
+- `pr-features/02-carwash-response-alignment/02-IMPLEMENTATION.md`
+- `pr-features/02-carwash-response-alignment/03-ACCEPTANCE_CRITERIA.md`
 
 ## Desarrollo local
 
@@ -121,6 +154,12 @@ Prueba puntual del módulo `Auth`:
 
 ```bash
 ng test jds_carwash --watch=false --browsers ChromeHeadless --include src/app/services/login.services.spec.ts
+```
+
+Prueba puntual del módulo `Carwash`:
+
+```bash
+ng test jds_carwash --watch=false --browsers ChromeHeadless --include src/app/services/Cajas.services.spec.ts
 ```
 
 Nota:

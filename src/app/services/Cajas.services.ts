@@ -14,10 +14,16 @@ import { Establecimientos } from '../interfaces/establecimientos.interface';
 import { Contador } from '../interfaces/contador';
 import { MediosDePagoModel } from '../models/ventas/medios-de-pago.model';
 import { DocpagosModel } from '../models/ventas/pagos.model';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, map, Observable } from 'rxjs';
 import { cajaRequest, DocumentoCierreRequest, establecimientosRequest } from '../interfaces/producto-request';
 import { DocumentosModel } from '../models/ventas/documento.model';
 import { ConfigService } from './config.service';
+import { ApiResponse } from '../interfaces/api-response.interface';
+import {
+    CarwashBoxSummaryData,
+    CarwashCloseBoxData,
+    CarwashOpenBoxData,
+} from '../interfaces/carwash-response.interface';
 
 
 @Injectable({
@@ -47,7 +53,9 @@ constructor(private http: HttpClient ,private configService :ConfigService,
                      "_parametro" : {"idCaja" : caja.id } , 
                      "_valorIngresar" : valorIngresar
                     };
-        return this.http.post(this.configService.url.action , datos, httpOptions()) ;
+        return this.http
+          .post<ApiResponse<CarwashOpenBoxData>>(this.configService.url.action , datos, httpOptions())
+          .pipe(map((response) => response.data));
     }
 
     
@@ -55,13 +63,17 @@ constructor(private http: HttpClient ,private configService :ConfigService,
         let datos = {"action": actions.actionResumenCaja ,
                      "_parametro" : {"idCaja" : caja.id }  
                     };
-        return this.http.post(this.configService.url.action , datos, httpOptions()) ;
+        return this.http
+          .post<ApiResponse<CarwashBoxSummaryData>>(this.configService.url.action , datos, httpOptions())
+          .pipe(map((response) => response.data));
     }
     cerrarCaja(caja : cajaModel){
         let datos = {"action": actions.actionCerarCaja ,
                      "_parametro" : {"idCaja" : caja.id } 
                     };
-        return this.http.post(this.configService.url.actionVentas , datos, httpOptions()) ;
+        return this.http
+          .post<ApiResponse<CarwashCloseBoxData>>(this.configService.url.actionVentas , datos, httpOptions())
+          .pipe(map((response) => response.data));
     }
 
     getCuentasContablesEstablecimientoUsuario():Observable<cajaRequest>{
@@ -76,7 +88,20 @@ return this.http.post<cajaRequest>(this.configService.url.action , datos, httpOp
         let datos = {"action": actions.actionCerarCajaParcial ,
                      "_parametro" : {"idCaja" : caja.id } 
                     };
-        return this.http.post(this.configService.url.actionVentas , datos, httpOptions()) ;
+        return this.http
+          .post<ApiResponse<CarwashCloseBoxData>>(this.configService.url.actionVentas , datos, httpOptions())
+          .pipe(map((response) => response.data));
+    }
+
+    getErrorMessage(error: any): string {
+        const rawApiError = error?.error?.error;
+        const apiMessage = typeof rawApiError === 'string'
+          ? rawApiError
+          : rawApiError?.message;
+        const fallbackMessage = error?.error?.message;
+        const textMessage = error?.message;
+
+        return apiMessage || fallbackMessage || textMessage || 'Error inesperado';
     }
     
     getTiposDocumentosConContadores(){

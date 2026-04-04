@@ -14,6 +14,7 @@ import { PrinterManager } from 'src/app/models/printerManager';
 import { DatosInicialesService } from 'src/app/services/DatosIniciales.services';
 import Swal from 'sweetalert2';
 import { CustomConsole } from 'src/app/models/CustomConsole';
+import { CarwashCloseBoxData, CarwashBoxSummaryData, CarwashSummaryData } from 'src/app/interfaces/carwash-response.interface';
 @Component({
   selector: 'app-abrir-caja',
   templateUrl: './abrir-caja.component.html',
@@ -41,6 +42,10 @@ export class AbrirCajaComponent implements OnInit {
 
   ngOnInit(): void {
   }
+  private toResumenModel(summary: CarwashSummaryData): cajasResumenModel {
+    return Object.assign(new cajasResumenModel(), summary);
+  }
+
   abrirResumen(cajaResumen : cajasResumenModel){
     
     /*["/home", "pos"]*/ 
@@ -55,83 +60,50 @@ export class AbrirCajaComponent implements OnInit {
     })
   }
   cerrar_parcial(caja :cajaModel){
-    let cajaResumen:cajasResumenModel ;    
     this.loading.show()
     this.serviceCaja.cerrarCajaParcial(caja)
-       .subscribe(
-        (respuesta:any)=>{
+       .subscribe({
+        next: (respuesta: CarwashCloseBoxData)=>{
           CustomConsole.log(respuesta)
-         
-        if (respuesta.error === 'ok'){ 
-           
-      if (respuesta.numdata > 0 ){ 
-        respuesta.data!.forEach((dato:any   )=>{
-          cajaResumen =  dato  ;
-
-          CustomConsole.log(cajaResumen, dato , dato); 
-        }) 
-        this.abrirResumen(cajaResumen );
-        
-        this.loading.hide();
-      } 
-
-        }else{
-          Swal.fire(respuesta.error);
+          this.abrirResumen(this.toResumenModel(respuesta.summary));
           this.loading.hide();
+        },
+        error: (error: any) => {
+          this.loading.hide();
+          Swal.fire(this.serviceCaja.getErrorMessage(error));
         }
-       
-        }
-        );}
+       });
+    }
   cerrar(caja :cajaModel ){
-    let cajaResumen:cajasResumenModel ;    
     this.loading.show()
     this.serviceCaja.cerrarCaja(caja)
-       .subscribe(
-        (respuesta:any)=>{
+       .subscribe({
+        next: (respuesta: CarwashCloseBoxData)=>{
           CustomConsole.log(respuesta)
-         
-        if (respuesta.error === 'ok'){ 
-           
-      if (respuesta.numdata > 0 ){ 
-        respuesta.data!.forEach((dato:any   )=>{
-          cajaResumen =  dato  ;
-
-          CustomConsole.log(cajaResumen, dato , dato); 
-        }) 
-        this.abrirResumen(cajaResumen );
-        
-        this.loading.hide();
-      } 
-
-        }else{
-          Swal.fire(respuesta.error);
+          this.abrirResumen(this.toResumenModel(respuesta.summary));
           this.loading.hide();
+        },
+        error: (error: any) => {
+          this.loading.hide();
+          Swal.fire(this.serviceCaja.getErrorMessage(error));
         }
-       
-        }
-        );
+       });
   }
 
    getResumenCaja(caja:cajaModel){
-    let cajaResumen:cajasResumenModel = new cajasResumenModel() ; 
     this.loading.show()
     this.serviceCaja.resumenCaja(caja)
-       .subscribe(
-        (datos:any)=>{
+       .subscribe({
+        next: (datos: CarwashBoxSummaryData)=>{
            CustomConsole.log(datos);  
-      if (datos.numdata > 0 ){ 
-        datos.data!.forEach((dato:any   )=>{
-          cajaResumen = dato.json ; 
-        }) 
-        this.abrirResumen(cajaResumen );
-      } 
-  
-          this.loading.hide()
-        } ,
-        error => {this.loading.hide();
-          Swal.fire( error.error.error);
+          this.abrirResumen(this.toResumenModel(datos.summary));
+          this.loading.hide();
+        },
+        error: (error: any) => {
+          this.loading.hide();
+          Swal.fire(this.serviceCaja.getErrorMessage(error));
         }
-        );
+       });
    }
   getCajas(){
     this.flagCajasDisponibles = true;
@@ -188,18 +160,13 @@ export class AbrirCajaComponent implements OnInit {
     this.cajaService.abrirCaja(caja, 0).subscribe( {next:
       (respuesta:any)=>{
         CustomConsole.log(respuesta)
-       
-      if (respuesta.error === 'ok'){
-       Swal.fire( respuesta.datos[0].msg ); 
-       this.continuar();
-      }else{
-        Swal.fire(respuesta.error);
-      }
-      this.loading.hide();
-     
+        Swal.fire(respuesta.message).then(() => {
+          this.continuar();
+        });
+        this.loading.hide();
       },
       error:(error : any) => {this.loading.hide();
-        Swal.fire( error.error.error);
+        Swal.fire(this.serviceCaja.getErrorMessage(error));
       }}
       );
   } 
