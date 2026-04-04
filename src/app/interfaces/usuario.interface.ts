@@ -5,6 +5,7 @@ export interface Usuario{
     img:string ,
     id_perfil:number,
     nombre_perfil:string,
+    change_pass?: number,
     key_registro:string,
     permisos : RecursoDetalle[]
 }

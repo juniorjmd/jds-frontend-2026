@@ -39,25 +39,20 @@ changePassword( form: NgForm){
     Swal.fire('error' , 'Debe ingresar un usuario valido!' , 'error')
     return;}  
     this._loginService.setRenovacionContrasena(this.usuario.Login).subscribe({next:
-       (datos:any)=>{ 
-        console.log(datos)
-        if(datos.error !== 'ok'){ 
-          Swal.fire('error en la operacion : msg => '+ datos.error)
-        }else{ 
-          Swal.fire({
-            title: 'Cambio de contraseña completado',
-            text: 'El sistema ha generado una nueva contraseña para el usuario suministrado. Esta información ha sido enviada al correo registrado.',
-            icon: 'success'
-          }).then(() => {
-            this._Router.navigate(['']); // Redirige cuando se cierra el modal
-          });
-          
-        }
+       (_datos)=>{ 
+        console.log(_datos)
+        Swal.fire({
+          title: 'Cambio de contraseña completado',
+          text: 'El sistema ha generado una nueva contraseña para el usuario suministrado. Esta información ha sido enviada al correo registrado.',
+          icon: 'success'
+        }).then(() => {
+          this._Router.navigate(['']); // Redirige cuando se cierra el modal
+        });
       
     } ,
     error:(error) => {
       CustomConsole.log(error) 
-      Swal.fire('error', JSON.stringify(error) , 'error') 
+      Swal.fire('error', this._loginService.getErrorMessage(error) , 'error') 
     }}
   ); 
     

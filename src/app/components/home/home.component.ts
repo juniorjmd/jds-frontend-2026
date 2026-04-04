@@ -134,11 +134,11 @@ export class HomeComponent implements OnInit {
      
     this._ServLogin.getUsuarioLogeadoAsync().subscribe({next:(datos)=>{
      
-    this.usuario = datos.data.usuario;   
+    this.usuario = datos.usuario;   
     this.usuarioService.changeUsuario(this.usuario); // Actualiza con el usuario logueado
 
     },error: (error: any) => { 
-      Swal.fire('getUsuarioLogeadoAsync',JSON.stringify(error))
+      Swal.fire('getUsuarioLogeadoAsync', this._ServLogin.getErrorMessage(error))
     this._Router.navigate(['login']);
   }})  
 }

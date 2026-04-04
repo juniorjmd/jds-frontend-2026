@@ -183,9 +183,9 @@ export class EditarComprasComponent implements AfterViewInit, OnInit {
         next:(request) => {
           CustomConsole.log('usuario logeado' , request);
           
-          this.getMenuImage(request.data.usuario)
+          this.getMenuImage(request.usuario)
         } ,
-        error: error=>{Swal.fire('Error getUsuarioLogeado', error);} 
+        error: error=>{Swal.fire('Error getUsuarioLogeado', this._ServLogin.getErrorMessage(error));} 
       }
     )
   }

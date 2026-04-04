@@ -39,13 +39,11 @@ export class MiUsuarioComponent implements OnInit {
       {
         next:(val)=>{
           console.log(val);
-          if(val.error == 'ok'){ 
-            Swal.fire('Contraseña cambiada exitosamente').then(() => {
-              this._Router.navigate(['']); // Redirige cuando se cierra el modal
-            });
-          }else{Swal.fire(val.error)}
+          Swal.fire('Contraseña cambiada exitosamente').then(() => {
+            this._Router.navigate(['']); // Redirige cuando se cierra el modal
+          });
           
-        },error: e=> Swal.fire(JSON.stringify(e))
+        },error: e=> Swal.fire(this._ServLogin.getErrorMessage(e))
         
       }
     ) 
@@ -55,12 +53,12 @@ export class MiUsuarioComponent implements OnInit {
   ngOnInit(): void {
     this._ServLogin.getDatosUsuarioLogeado().subscribe({next:(datos)=>{
      
-      this.usuario = datos.data.usuario;   
+      this.usuario = datos.usuario;   
      // this.usuarioService.changeUsuario(this.usuario); // Actualiza con el usuario logueado
   console.log(this.usuario);
   
       },error: (error: any) => { 
-        Swal.fire(JSON.stringify(error)) 
+        Swal.fire(this._ServLogin.getErrorMessage(error)) 
     }})  
   }
 

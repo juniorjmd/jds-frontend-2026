@@ -1,27 +1,157 @@
-# JdsCarwash
+# JDS Frontend 2026
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 16.1.6.
+Frontend Angular del proyecto JDS Carwash POS e Inventario.
 
-## Development server
+Este repositorio es el destino de los cambios del frontend alineados con el backend nuevo `jds-backend-app-2026`.
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+## Objetivo actual
 
-## Code scaffolding
+El proyecto está en una transición controlada:
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+- el backend nuevo mantiene compatibilidad de entradas legacy
+- las respuestas del backend deben converger a un contrato estándar
+- el frontend debe dejar de depender de payloads legacy crudos
+- la migración se está haciendo por módulo, con documentación y PRs separados por repo
 
-## Build
+## Contrato estándar esperado del backend
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+Hoy el backend nuevo responde exitosamente con un envelope estándar desde `public/index.php`:
 
-## Running unit tests
+```json
+{
+  "ok": true,
+  "data": {},
+  "error": null
+}
+```
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+Y en error:
 
-## Running end-to-end tests
+```json
+{
+  "ok": false,
+  "data": null,
+  "error": {
+    "code": "ERROR_CODE",
+    "message": "Mensaje legible",
+    "meta": null
+  }
+}
+```
 
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
+## Regla de frontend
 
-## Further help
+Los componentes no deben depender directamente de patrones legacy como:
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+- `respuesta.error === 'ok'`
+- `e.error.error`
+- `respuesta.data.usuario` cuando el servicio puede normalizar la salida
+
+La lectura del envelope debe centralizarse en los servicios.
+
+## Modulo Auth: trabajo reciente
+
+Se inició la alineación del módulo `Auth` entre backend y frontend.
+
+### Cambios aplicados
+
+- se agregaron tipos del envelope estándar:
+  - `src/app/interfaces/api-response.interface.ts`
+  - `src/app/interfaces/auth-response.interface.ts`
+- se actualizó `src/app/services/login.services.ts` para:
+  - desempaquetar `response.data`
+  - tipar respuestas del módulo
+  - centralizar lectura de errores con `getErrorMessage()`
+- se adaptaron consumidores principales de `Auth`:
+  - `src/app/modules/login/pages/login/login.component.ts`
+  - `src/app/modules/login/pages/forgotPassWord/forgotPassWord.component.ts`
+  - `src/app/components/home/home.component.ts`
+  - `src/app/components/mi-usuario/mi-usuario.component.ts`
+  - `src/app/modules/pos/pages/ventas/ventas.component.ts`
+  - `src/app/modules/compras/pages/crear/crearCompra.component.ts`
+  - `src/app/modules/compras/pages/editar/editarCompra.component.ts`
+- se agregó prueba inicial de servicio:
+  - `src/app/services/login.services.spec.ts`
+
+### Resultado esperado
+
+- `LoginService` se convierte en la capa de adaptación del módulo `Auth`
+- los componentes consumen datos normalizados
+- el frontend deja de acoplarse al contrato legacy crudo en este módulo
+
+## Documentación por feature
+
+Cada cambio importante debe quedar documentado en `pr-features`.
+
+Ejemplo actual:
+
+- `pr-features/01-auth-response-alignment/01-SPECS.md`
+- `pr-features/01-auth-response-alignment/02-IMPLEMENTATION.md`
+- `pr-features/01-auth-response-alignment/03-ACCEPTANCE_CRITERIA.md`
+
+## Desarrollo local
+
+### Instalar dependencias
+
+```bash
+npm install
+```
+
+### Levantar el proyecto
+
+```bash
+ng serve
+```
+
+### Build
+
+```bash
+ng build
+```
+
+### Tests
+
+Suite completa:
+
+```bash
+ng test
+```
+
+Prueba puntual del módulo `Auth`:
+
+```bash
+ng test jds_carwash --watch=false --browsers ChromeHeadless --include src/app/services/login.services.spec.ts
+```
+
+Nota:
+
+- si falta `node_modules`, Angular/Karma no podrá correr
+- en ese caso ejecutar primero `npm install`
+
+## Relación con backend
+
+Repositorio backend relacionado:
+
+- `jds-backend-app-2026`
+
+La regla de trabajo entre ambos repos es:
+
+- backend y frontend se documentan por separado
+- backend y frontend se envían en PRs separados
+- cada revisión modular debe incluir:
+  - contrato backend
+  - consumidores frontend
+  - archivos afectados
+  - criterios de aceptación
+
+## Estado de la migración
+
+El frontend aún contiene bastante consumo legacy en otros módulos. La limpieza se está haciendo por orden de revisión modular, no por reemplazos masivos.
+
+El siguiente enfoque recomendado es continuar módulo por módulo:
+
+1. cerrar contrato backend
+2. normalizar servicio frontend
+3. adaptar consumidores directos
+4. agregar pruebas
+5. documentar el feature

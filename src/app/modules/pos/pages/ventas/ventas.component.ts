@@ -148,9 +148,9 @@ export class VentasComponent implements AfterViewInit, OnInit {
     this._ServLogin.getUsuarioLogeado().subscribe(
       {
         next:(request) => {
-          this.getMenuImage(request.data.usuario)
+          this.getMenuImage(request.usuario)
         } ,
-        error: error=>{Swal.fire('Error getUsuarioLogeado', JSON.stringify(error) ) ;} 
+        error: error=>{Swal.fire('Error getUsuarioLogeado', this._ServLogin.getErrorMessage(error) ) ;} 
       }
     )
   }

@@ -1,12 +1,19 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import {  RecursoDetalle, Usuario  } from '../interfaces/usuario.interface';
+import { RecursoDetalle, Usuario } from '../interfaces/usuario.interface';
 import { actions } from '../models/app.db.actions';
-import { httpOptions, url } from '../models/app.db.url';
-import { Observable, firstValueFrom } from 'rxjs';
-import { UsuarioResponseInterface } from '../interfaces/UsuarioResponse.Interface';
+import { httpOptions } from '../models/app.db.url';
+import { map, Observable } from 'rxjs';
 import { CustomConsole } from '../models/CustomConsole';
 import { ConfigService } from './config.service';
+import { ApiResponse } from '../interfaces/api-response.interface';
+import {
+  AuthCurrentUserData,
+  AuthLoginData,
+  AuthPasswordResetData,
+  AuthPasswordUpdateData,
+  AuthSessionData,
+} from '../interfaces/auth-response.interface';
 
 
 @Injectable({
@@ -32,13 +39,15 @@ constructor(private http: HttpClient ,  private configService:ConfigService){
     /*
     
     */  
-    getLogin( L_usuario: string , L_contraseña: string) {
-        let datos = {"action": actions.actionlogin ,
+    getLogin( L_usuario: string , L_contraseña: string): Observable<AuthLoginData> {
+        const datos = {"action": actions.actionlogin ,
                     "_password" : L_contraseña,
                     "_usuario" : L_usuario
                 };
         CustomConsole.log('servicios datos iniciales inicializado ' ,this.configService.url.login , datos, this.configService.url.httpOptionsSinAutorizacion);
-        return this.http.post(this.configService.url.login , datos, this.configService.url.httpOptionsSinAutorizacion) ;
+        return this.http
+          .post<ApiResponse<AuthLoginData>>(this.configService.url.login , datos, this.configService.url.httpOptionsSinAutorizacion)
+          .pipe(map((response) => response.data));
     } 
 
 
@@ -48,32 +57,38 @@ constructor(private http: HttpClient ,  private configService:ConfigService){
     private getLlaveRegistro(){
         return this.usuario.key_registro;
     }
-    getUsuarioLogeado( ){
-        let datos = {"action": actions.actionValidarKeylogin ,
+    getUsuarioLogeado(): Observable<AuthSessionData> {
+        const datos = {"action": actions.actionValidarKeylogin ,
                     "_llaveSession" : localStorage.getItem('sis41254#2@')
                 };
         CustomConsole.log('validar llave de session inicializado ' ,this.configService.url.login , datos,         this.configService.url.httpOptionsSinAutorizacion);
-        return this.http.post<UsuarioResponseInterface>(this.configService.url.login , datos, httpOptions()) ;
+        return this.http
+          .post<ApiResponse<AuthSessionData>>(this.configService.url.login , datos, httpOptions())
+          .pipe(map((response) => response.data));
     }
     
 
-    setRenovacionContrasena(_usuario:string):Observable<{error:any}>{
-      let datos = {"action": actions.actionResetearPass ,
+    setRenovacionContrasena(_usuario:string):Observable<AuthPasswordResetData>{
+      const datos = {"action": actions.actionResetearPass ,
                   _usuario
               };
       CustomConsole.log('setRenovacionContrasena inicializado ' ,this.configService.url.login , datos,         this.configService.url.httpOptionsSinAutorizacion);
-      return this.http.post<{error:any}>(this.configService.url.login , datos, httpOptions()) ;
+      return this.http
+        .post<ApiResponse<AuthPasswordResetData>>(this.configService.url.login , datos, httpOptions())
+        .pipe(map((response) => response.data));
   }
 
 
-    getUsuarioLogeadoObs(invoker: string = ''): Observable<any> {
+    getUsuarioLogeadoObs(invoker: string = ''): Observable<AuthSessionData> {
         const datos = {
           "action": actions.actionValidarKeylogin,
           "_llaveSession": localStorage.getItem('sis41254#2@'),
           "_invoker": invoker
         };
         CustomConsole.log('validar llave de session <observable> inicializado', this.configService.url.login, datos, this.configService.url.httpOptionsSinAutorizacion);
-        return this.http.post(this.configService.url.login, datos, httpOptions());
+        return this.http
+          .post<ApiResponse<AuthSessionData>>(this.configService.url.login, datos, httpOptions())
+          .pipe(map((response) => response.data));
       }
 
     // async  getUsuarioLogeadoAsync(invoker :string = '')
@@ -83,31 +98,47 @@ constructor(private http: HttpClient ,  private configService:ConfigService){
     //     CustomConsole.log('validar llave de session inicializado ' ,this.configService.url.login , datos, this.configService.url.httpOptionsSinAutorizacion);
     //     return await   this.http.post(this.configService.url.login , datos, httpOptions()).toPromise() ; 
     // }
-     getUsuarioLogeadoAsync(invoker: string = ''): Observable<any> {
-        let datos = {
+     getUsuarioLogeadoAsync(invoker: string = ''): Observable<AuthSessionData> {
+        const datos = {
           action: actions.actionValidarKeylogin,
           _llaveSession: localStorage.getItem('sis41254#2@'),
           _invoker: invoker
         };
       CustomConsole.log('validar llave de session inicializado', this.configService.url.login, datos, this.configService.url.httpOptionsSinAutorizacion);
-        return  this.http.post(this.configService.url.login, datos, httpOptions()) ;
+        return this.http
+          .post<ApiResponse<AuthSessionData>>(this.configService.url.login, datos, httpOptions())
+          .pipe(map((response) => response.data));
       } 
       
-  SET_PASS_USUARIO( _id_usuario:number, _pass:string): Observable<any> {
-        let datos = {
+  SET_PASS_USUARIO( _id_usuario:number, _pass:string): Observable<AuthPasswordUpdateData> {
+        const datos = {
           action: actions.actionSetPass, _id_usuario, _pass
         };
-       //  CustomConsole.log('validar llave de session inicializado', this.configService.url.login, datos, this.configService.url.httpOptionsSinAutorizacion);
-        return  this.http.post(this.configService.url.login, datos, httpOptions()) ;
+        return this.http
+          .post<ApiResponse<AuthPasswordUpdateData>>(this.configService.url.login, datos, httpOptions())
+          .pipe(map((response) => response.data));
       }
-  getDatosUsuarioLogeado(invoker: string = ''): Observable<any> {
-        let datos = {
+  getDatosUsuarioLogeado(invoker: string = ''): Observable<AuthCurrentUserData> {
+        const datos = {
           action: actions.actionGetUsuarioActual,
           _llaveSession: localStorage.getItem('sis41254#2@'),
           _invoker: invoker
         };
         CustomConsole.log('validar llave de session inicializado', this.configService.url.login, datos, this.configService.url.httpOptionsSinAutorizacion);
-        return  this.http.post(this.configService.url.login, datos, httpOptions()) ;
+        return this.http
+          .post<ApiResponse<AuthCurrentUserData>>(this.configService.url.login, datos, httpOptions())
+          .pipe(map((response) => response.data));
       }
+
+  getErrorMessage(error: any): string {
+      const rawApiError = error?.error?.error;
+      const apiMessage = typeof rawApiError === 'string'
+        ? rawApiError
+        : rawApiError?.message;
+      const fallbackMessage = error?.error?.message;
+      const textMessage = error?.message;
+
+      return apiMessage || fallbackMessage || textMessage || 'Error inesperado';
+  }
     }
  

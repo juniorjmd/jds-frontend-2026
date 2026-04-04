@@ -126,9 +126,9 @@ export class CreateComprasComponent implements AfterViewInit, OnInit {
         next:(request) => {
           CustomConsole.log('usuario logeado' , request);
           
-          this.getMenuImage(request.data.usuario)
+          this.getMenuImage(request.usuario)
         } ,
-        error: error=>{Swal.fire(JSON.stringify(error));} 
+        error: error=>{Swal.fire(this._ServLogin.getErrorMessage(error));} 
       }
     )
   }

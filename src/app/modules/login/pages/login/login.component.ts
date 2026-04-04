@@ -41,17 +41,17 @@ getDatosInciales(){
    if(form.invalid){return;} 
 
     this._loginService.getLogin(this.usuario.Login , this.usuario.pass).subscribe(
-      async (datos:any)=>{ 
-        if(datos.data.usuario.length === 0){ 
+      async (datos)=>{ 
+        if(!datos?.usuario){ 
           Swal.fire('error de usuario')
         }else{
-          CustomConsole.log('respuesta getLogin',datos.data.usuario);  
-          localStorage.setItem('sis41254#2@', datos.data.usuario.key_registro );
-          localStorage.setItem('#2@56YH7H82BF', datos.data.usuario.id ); 
+          CustomConsole.log('respuesta getLogin',datos.usuario);  
+          localStorage.setItem('sis41254#2@', datos.usuario.key_registro );
+          localStorage.setItem('#2@56YH7H82BF', `${datos.usuario.id}`); 
           const digestBuffer = await this._loginService.digestMessage(new Date().toDateString()); 
           localStorage.setItem('#2@JIEQPJKASFÑLKJ', digestBuffer);  
-          localStorage.setItem(digestBuffer, datos.data.usuario.permisos.join()); 
-          if (datos.data.usuario.change_pass ===  0 ){
+          localStorage.setItem(digestBuffer, datos.usuario.permisos.join()); 
+          if (datos.usuario.change_pass ===  0 ){
             this._Router.navigate(['cambiarPass']);
           }else{
             console.log('llego aqui')
@@ -62,7 +62,7 @@ getDatosInciales(){
     } ,
     error => {
       CustomConsole.log(error) 
-      Swal.fire('error', JSON.stringify(error) , 'error') 
+      Swal.fire('error', this._loginService.getErrorMessage(error) , 'error') 
     }
       ); 
     
