@@ -132,4 +132,64 @@ describe('cajasServices', () => {
 
     expect(message).toBe('Caja no disponible');
   });
+
+  it('should unwrap boxes by user from standard api response', () => {
+    let actualResponse: any;
+
+    service.getCajasPorUsuario(8).subscribe((response) => {
+      actualResponse = response;
+    });
+
+    const req = httpMock.expectOne('/action');
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({
+      action: 'mnbvcxzxcxcxasdfewq15616',
+      _usuario: 8
+    });
+
+    req.flush({
+      ok: true,
+      data: {
+        boxes: [
+          { id: 1, nombre: 'Caja Principal', asignada: true }
+        ],
+        count: 1
+      },
+      error: null
+    });
+
+    expect(actualResponse.count).toBe(1);
+    expect(actualResponse.boxes[0].nombre).toBe('Caja Principal');
+    expect(actualResponse.boxes[0].asignada).toBeTrue();
+  });
+
+  it('should unwrap assigned boxes result from standard api response', () => {
+    let actualResponse: any;
+
+    service.setCajasAUsuarios(8, [1, 3]).subscribe((response) => {
+      actualResponse = response;
+    });
+
+    const req = httpMock.expectOne('/action');
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({
+      action: 'qwer12356yhn7ujm8ik',
+      _idUsuario: 8,
+      _cajas: [1, 3]
+    });
+
+    req.flush({
+      ok: true,
+      data: {
+        message: 'Cajas asignadas correctamente',
+        assignedBoxIds: [1, 3],
+        inserted: 2,
+        deleted: 1
+      },
+      error: null
+    });
+
+    expect(actualResponse.message).toBe('Cajas asignadas correctamente');
+    expect(actualResponse.assignedBoxIds).toEqual([1, 3]);
+  });
 });

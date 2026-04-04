@@ -47,16 +47,15 @@ Swal.fire({
     this.VehiculosService.guardarCostoServicio(costo).subscribe(
       (respuesta:any)=>{CustomConsole.log(respuesta)
        
-      if (respuesta.error === 'ok'){
-       Swal.fire('datos ingresados con exito');  
-        //-------------------
-       this.limpiar();
-     //----------------------------------
-        //this.getServiciosVehiculos();
-      }else{ 
-       Swal.fire(respuesta.error, '', 'error');
-      }
+      Swal.fire(respuesta.message ?? 'datos ingresados con exito');  
+      //-------------------
+      this.limpiar();
+    //----------------------------------
+      //this.getServiciosVehiculos();
       this.loading.hide(); 
+      }, error => {
+        this.loading.hide();
+        Swal.fire(this.VehiculosService.getErrorMessage(error), '', 'error');
       }) 
   },
   allowOutsideClick: () => !Swal.isLoading()
@@ -215,16 +214,15 @@ this.newServiciosCostos = new ServiciosCostosModule(this.servicioSelecionado, th
 this.VehiculosService.guardarCostoServicio(this.newServiciosCostos).subscribe(
  (respuesta:any)=>{CustomConsole.log(respuesta)
   
- if (respuesta.error === 'ok'){
-  Swal.fire('datos ingresados con exito');  
-   //-------------------
-  this.limpiar();
+ Swal.fire(respuesta.message ?? 'datos ingresados con exito');  
+  //-------------------
+ this.limpiar();
 //----------------------------------
-   //this.getServiciosVehiculos();
- }else{ 
-  Swal.fire(respuesta.error, '', 'error');
- }
+  //this.getServiciosVehiculos();
  this.loading.hide(); 
+ }, error => {
+  this.loading.hide();
+  Swal.fire(this.VehiculosService.getErrorMessage(error), '', 'error');
  }) 
  }
 

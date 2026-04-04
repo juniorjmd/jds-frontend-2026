@@ -77,8 +77,8 @@ getCajas(){
       (datos:any)=>{
          //CustomConsole.log('getCajasPorUsuario',datos);
          
-    if (datos.numdata > 0 ){ 
-      datos.data!.forEach((dato:caja , index :number)=>{
+    if (datos.count > 0 ){ 
+      datos.boxes!.forEach((dato:caja , index :number)=>{
         this.cajas[index] = new cajaModel( dato );
         this.opciones[index] = this.cajas[index].asignada!;
       }) 
@@ -90,7 +90,7 @@ getCajas(){
         this.loading.hide()
       } ,
       error => {this.loading.hide();
-        alert( error.error.error);
+        alert(this.serviceCaja.getErrorMessage(error));
       }
       );
 }
@@ -113,17 +113,15 @@ guardarRelacion(){
    this.serviceCaja.setCajasAUsuarios(this.usuarioActual.ID,OpcionesEnvio).subscribe(
     (respuesta:any)=>{//CustomConsole.log(respuesta)
      
-    if (respuesta.error === 'ok'){
-      alert('datos ingresados con exito');  
-      this.loading.hide();
-      this.cerrarDialog()
-    }else{
-      alert(respuesta.error);
-      this.loading.hide();
-    }
+    alert(respuesta.message ?? 'datos ingresados con exito');  
+    this.loading.hide();
+    this.cerrarDialog()
     }
 
-   )
+   , error => {
+    this.loading.hide();
+    alert(this.serviceCaja.getErrorMessage(error));
+   })
   }else{
     alert('debe escoger las cajas a asignar!!!')
   }

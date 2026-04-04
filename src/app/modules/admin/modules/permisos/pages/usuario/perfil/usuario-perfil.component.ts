@@ -87,13 +87,12 @@ export class UsuarioPerfilComponent implements OnInit {
     this.userService.guardarUsuarioPerfil(this.usuarioActual , this.perfilUsuario).subscribe(
      (respuesta:any)=>{//CustomConsole.log(respuesta)
       
-     if (respuesta.error === 'ok'){
-       alert('datos ingresados con exito');   
-     }else{
-       alert(respuesta.error);
-     }
+     alert(respuesta.message ?? 'datos ingresados con exito');
      this.loading.hide();
      this.dialogo.close(true);
+     }, error => {
+      this.loading.hide();
+      Swal.fire(this.userService.getErrorMessage(error));
      })
     
   }

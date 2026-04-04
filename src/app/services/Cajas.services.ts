@@ -149,19 +149,19 @@ return this.http.post<cajaRequest>(this.configService.url.action , datos, httpOp
 
     getLocacionesExternas(){
         let datos = {"action": actions.actionBuscarLocacionesExternas  };
-        return this.http.post(this.configService.url.action , datos, httpOptions()) ;
+        return this.http.post<ApiResponse<{ locations: unknown[]; count: number }>>(this.configService.url.action , datos, httpOptions()) ;
     }
     getLocacionesPrincipales(){
         let datos = {"action": actions.actionBuscarLocacionesExternas  ,
         "_principal" : true
                     };
-        return this.http.post(this.configService.url.action , datos, httpOptions()) ;
+        return this.http.post<ApiResponse<{ locations: unknown[]; count: number }>>(this.configService.url.action , datos, httpOptions()) ;
     }
     getLocacionesVirtuales(){
         let datos = {"action": actions.actionBuscarLocacionesExternas  ,
         "_virtual" : true
                     };
-        return this.http.post(this.configService.url.action , datos, httpOptions()) ;
+        return this.http.post<ApiResponse<{ locations: unknown[]; count: number }>>(this.configService.url.action , datos, httpOptions()) ;
     }
 
 
@@ -178,21 +178,21 @@ return this.http.post<cajaRequest>(this.configService.url.action , datos, httpOp
         let datos = {"action": actions.actionBuscarLocacionesExternas  ,
         "_fisicas" : true
                     };
-        return this.http.post(this.configService.url.action , datos, httpOptions()) ;
+        return this.http.post<ApiResponse<{ locations: unknown[]; count: number }>>(this.configService.url.action , datos, httpOptions()) ;
     }
     getLocacionesExistencias(id:number){
         let datos = {"action": actions.actionBuscarLocacionesExternas  ,
         "_principal" : false,"_fisicas" : false,"_existencia" : true,
              "_id_principal" : id
              };
-        return this.http.post(this.configService.url.action , datos, httpOptions()) ;
+        return this.http.post<ApiResponse<{ locations: unknown[]; count: number }>>(this.configService.url.action , datos, httpOptions()) ;
     }
     getLocacionesSecundarias(id:number){
         let datos = {"action": actions.actionBuscarLocacionesExternas  ,
         "_principal" : false,"_fisicas" : false,
              "_id_principal" : id
              };
-        return this.http.post(this.configService.url.action , datos, httpOptions()) ;
+        return this.http.post<ApiResponse<{ locations: unknown[]; count: number }>>(this.configService.url.action , datos, httpOptions()) ;
     }
     getTiposEstablecimientos(){
         let datos = {"action": actions.actionSelect ,
@@ -279,7 +279,15 @@ return this.http.post<cajaRequest>(this.configService.url.action , datos, httpOp
                     // "_tabla" : vistas.cajasActivas       
                      "_tablas" : [vistas.cajasActivas , TABLA.PARAMETROS]             
                     }; 
-        return this.http.post(this.configService.url.action , datos, httpOptions()) ;
+        return this.http
+          .post<ApiResponse<{ records: unknown[][]; count: number }>>(this.configService.url.action , datos, httpOptions())
+          .pipe(
+            map((response) => response.data.records.map((rows) => ({
+              data: rows,
+              numdata: rows.length,
+              error: 'ok',
+            })))
+          );
     } 
     
     getCajasUsuario():Observable<cajaRequest>{
@@ -303,7 +311,9 @@ return this.http.post<cajaRequest>(this.configService.url.action , datos, httpOp
         let datos = {"action": actions.actionSelCajaXuser ,
                      "_usuario" :usuario
                     }; 
-        return this.http.post(this.configService.url.action , datos, httpOptions()) ;
+        return this.http
+          .post<ApiResponse<{ boxes: cajaModel[]; count: number }>>(this.configService.url.action , datos, httpOptions())
+          .pipe(map((response) => response.data));
     } 
 
     setPagoDocumento(idDocumento:number , pagos:DocpagosModel[] ){
@@ -345,7 +355,9 @@ return this.http.post<cajaRequest>(this.configService.url.action , datos, httpOp
         "_idUsuario" : idUsuario, 
          "_cajas" : cajas
        }; 
-        return this.http.post(this.configService.url.action , datos, httpOptions()) ;
+        return this.http
+          .post<ApiResponse<{ message: string; assignedBoxIds: number[]; inserted: number; deleted: number }>>(this.configService.url.action , datos, httpOptions())
+          .pipe(map((response) => response.data));
     }
     setCaja(caja:cajaModel){
         let datos ;

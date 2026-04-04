@@ -13,6 +13,7 @@ import { perfil, perfilRequest, recursoRequest } from '../interfaces/producto-re
 import { CustomConsole } from '../models/CustomConsole';
 import { ConfigService } from './config.service';
 import { AdminProfileResourcesResponse, AdminResourcesResponse, AdminUserResponse } from '../interfaces/admin-response.interface';
+import { ApiResponse } from '../interfaces/api-response.interface';
 
 @Injectable({
     providedIn: 'root'
@@ -156,7 +157,9 @@ constructor(private http: HttpClient , private configService:ConfigService,
        };
 
         CustomConsole.log('servicios de usuarios activo - guardarUsuarioPerfil' ,this.configService.url.action , datos, httpOptions());
-        return this.http.post(this.configService.url.action , datos, httpOptions()) ;
+        return this.http
+          .post<ApiResponse<{ message: string; result: unknown }>>(this.configService.url.action , datos, httpOptions())
+          .pipe(map((response) => response.data));
     }
     updateUsuarios(usuario : Usuarios){ 
         let where:any[] = []  

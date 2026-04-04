@@ -127,4 +127,36 @@ describe('usuarioService', () => {
 
     expect(message).toBe('Perfil invalido');
   });
+
+  it('should unwrap profile assignment from standard api response', () => {
+    let actualResponse: any;
+
+    service.guardarUsuarioPerfil({ ID: 25 } as any, 3).subscribe((response) => {
+      actualResponse = response;
+    });
+
+    const req = httpMock.expectOne('/action');
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({
+      action: 'INSERT_PERFIL_USUARIO',
+      _parametro: {
+        perfil: 3,
+        usuario: 25
+      }
+    });
+
+    req.flush({
+      ok: true,
+      data: {
+        message: 'Perfil asignado correctamente',
+        result: {
+          _result: 100
+        }
+      },
+      error: null
+    });
+
+    expect(actualResponse.message).toBe('Perfil asignado correctamente');
+    expect(actualResponse.result._result).toBe(100);
+  });
 });

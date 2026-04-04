@@ -13,6 +13,8 @@ import { ServiciosCostosModule } from '../models/servicios-costos/servicios-cost
 import { VehiculosIngresoServicioModule } from '../models/vehiculos-ingreso-servicio/vehiculos-ingreso-servicio.module';
 import { CustomConsole } from '../models/CustomConsole';
 import { ConfigService } from './config.service';
+import { ApiResponse } from '../interfaces/api-response.interface';
+import { map } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -82,7 +84,9 @@ constructor(private http: HttpClient, private loading: loading,  private configS
       datos,
       httpOptions()
     );
-    return this.http.post(this.configService.url.action, datos, httpOptions());
+    return this.http
+      .post<ApiResponse<{ message?: string; affected?: number; deleted?: number; insertId?: number }>>(this.configService.url.action, datos, httpOptions())
+      .pipe(map((response) => response.data));
   }
 
   //-------------------------
@@ -406,5 +410,12 @@ constructor(private http: HttpClient, private loading: loading,  private configS
       httpOptions()
     );
     return this.http.post(this.configService.url.action, datos, httpOptions());
+  }
+
+  getErrorMessage(error: any): string {
+    return error?.error?.error?.message
+      ?? error?.error?.error
+      ?? error?.message
+      ?? 'Error inesperado';
   }
 }
