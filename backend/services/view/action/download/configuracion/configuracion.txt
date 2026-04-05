@@ -1,8 +1,0 @@
-umbral 162
-densidad 44
-
-
-marca -> circulo
-tamano marca 14
-
-angular

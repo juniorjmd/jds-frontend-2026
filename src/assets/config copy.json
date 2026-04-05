@@ -1,5 +1,5 @@
 {
-    "baseURL":   "http://localhost/jds_back_2026/api/",
+    "baseURL": "https://carwash.sofdla.com.co/bk.services/services/view/action/",
     "endpoints": {
       "action": "",
       "inventario": "inventario/",
@@ -10,9 +10,10 @@
       "datosIniciales": "datosiniciales/",
       "brand": "brand/",
       "csv_manager": "csv_manager/"
-    },
+    },  
     "printer": {
       "namePrinterGenerico": "impresora_punto_de_venta"
-    },
+    }, 
     "enviroment":   "dev"
   }
+  
