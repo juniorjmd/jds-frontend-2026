@@ -7,10 +7,11 @@ import { DocumentosModel } from 'src/app/models/ventas/documento.model';
 import {ClientesService} from 'src/app/services/Clientes.services'  
 import { ClientesModel } from 'src/app/models/clientes/clientes.module';
 import { MaestroCliente, fndCliente } from 'src/app/interfaces/maestro-cliente';
-import { clienteRequest } from 'src/app/interfaces/producto-request';
 import Swal from 'sweetalert2'; 
 import { BusquedaPersona } from 'src/app/interfaces/busqueda-persona';
 import { CustomConsole } from 'src/app/models/CustomConsole';
+import { ApiResponse } from 'src/app/interfaces/api-response.interface';
+import { GenericMutationPayload, GenericRecordsPayload } from 'src/app/interfaces/generic-response.interface';
 
 @Component({
   selector: 'app-fnd-cliente',
@@ -132,7 +133,7 @@ export class FndClienteComponent implements OnInit {
           this.clientesService.asignarClienteAlDocumento(this.documentoActivo.orden , parseInt(this.NwCliente.id.toString()) ).subscribe(
             {next:(value)=>{
               CustomConsole.log(value)
-              if(value.error == 'ok'){
+              if(value.ok){
                 if (this.asignarEmpleado || this.devolverPersona){
                   this.pasarComoEmpleado();
                    
@@ -141,9 +142,9 @@ export class FndClienteComponent implements OnInit {
                 }
 
 
-              }else{Swal.fire("error" , value.error , "error")}
+              }else{Swal.fire("error" , value.error?.message || 'No fue posible asignar el cliente al documento' , "error")}
               
-            },error:(error)=>Swal.fire("error" , JSON.stringify(error) , "error")
+            },error:(error)=>Swal.fire("error" , this.clientesService.getErrorMessage(error) , "error")
             ,complete:()=>this.loading.hide()})
         }
     }
@@ -167,9 +168,9 @@ export class FndClienteComponent implements OnInit {
     this.clientesService.asignarClienteAlDocumento(this.documentoActivo.orden , parseInt(this.NwCliente.id.toString()) ).subscribe(
       {next:(value)=>{
          CustomConsole.log(value)
-        if(value.error == 'ok'){this.dialogo.close(true)}else{Swal.fire("error" , value.error , "error")}
+        if(value.ok){this.dialogo.close(true)}else{Swal.fire("error" , value.error?.message || 'No fue posible asignar el cliente al documento' , "error")}
         
-      },error:(error)=>Swal.fire("error" , JSON.stringify(error) , "error")
+      },error:(error)=>Swal.fire("error" , this.clientesService.getErrorMessage(error) , "error")
       ,complete:()=>this.loading.hide()})
   }}
 
@@ -191,9 +192,9 @@ export class FndClienteComponent implements OnInit {
       this.loading.show();
             this.clientesService.getClientesByNumAndTipId(
               this.NwCliente.numIdentificacion , this.NwCliente.tipoIdentificacion
-            ).subscribe({next:(value:clienteRequest)=>{
+            ).subscribe({next:(value:ApiResponse<GenericRecordsPayload<ClientesModel>>)=>{
               CustomConsole.log(value)
-              if(value.numdata== 0){
+              if(!value.ok || value.data.count === 0){
                 Swal.fire( {title:'Persona no encontrada',
                    text:'Desea crearla e ingresarla a la venta?',
                    icon:'question', 
@@ -206,7 +207,7 @@ export class FndClienteComponent implements OnInit {
                     this.busqueda =  false
                   }}); 
               }else{
-                this.NwCliente =  value.data[0] 
+                this.NwCliente =  value.data.records[0] 
                 if(this.dataIngreso.invoker == 'cuentasPorCobrarVentas'){
                   this.pasarComoEmpleado();
                 }else{
@@ -216,7 +217,7 @@ export class FndClienteComponent implements OnInit {
                 this.busqueda =  false
               }
               }
-            },error:(error)=>Swal.fire(JSON.stringify(error))
+            },error:(error)=>Swal.fire(this.clientesService.getErrorMessage(error))
           ,complete:()=>this.loading.hide()})
           }
       }
@@ -229,26 +230,26 @@ export class FndClienteComponent implements OnInit {
             
             this.clientesService.getProveedorByNombre(
               this.NwCliente.nombreCompleto  
-            ).subscribe({next:(value:clienteRequest)=>{
+            ).subscribe({next:(value:ApiResponse<GenericRecordsPayload<ClientesModel>>)=>{
               CustomConsole.log(value)
-              if(value.numdata== 0){
+              if(!value.ok || value.data.count === 0){
                 Swal.fire('no se encuentra el proveedor','','info')
               }else{
-                this.NwCliente =  value.data[0] 
-                this.ClientesResult = value.data; 
+                this.NwCliente =  value.data.records[0] 
+                this.ClientesResult = value.data.records; 
                 CustomConsole.log('cliente encontrado' , this.NwCliente)
                 this.getDepartamento() 
                 this.getCiudad()
                 this.busqueda =  false 
-            }},error:(error)=>Swal.fire(error.error.error)
+            }},error:(error)=>Swal.fire(this.clientesService.getErrorMessage(error))
           ,complete:()=>this.loading.hide()})
 
           }else{
                 this.clientesService.getClientesByNombre(
                   this.NwCliente.nombreCompleto  
-                ).subscribe({next:(value:clienteRequest)=>{
+                ).subscribe({next:(value:ApiResponse<GenericRecordsPayload<ClientesModel>>)=>{
                   CustomConsole.log(value)
-                  if(value.numdata== 0){
+                  if(!value.ok || value.data.count === 0){
                     Swal.fire( {title:'Persona no encontrada',
                        text:'Desea crearla e ingresarla a la venta?',
                        icon:'question', 
@@ -263,8 +264,8 @@ export class FndClienteComponent implements OnInit {
                         this.mostrarListado = false;
                       }}); 
                   }else{
-                    this.NwCliente =  value.data[0] 
-                    this.ClientesResult = value.data;
+                    this.NwCliente =  value.data.records[0] 
+                    this.ClientesResult = value.data.records;
                     if(this.dataIngreso.invoker == 'cuentasPorCobrarVentas'){
                       this.pasarComoEmpleado();
                     }else{
@@ -274,7 +275,7 @@ export class FndClienteComponent implements OnInit {
                     this.busqueda =  false
                   }
                   }
-                },error:(error)=>Swal.fire(JSON.stringify(error))
+                },error:(error)=>Swal.fire(this.clientesService.getErrorMessage(error))
               ,complete:()=>this.loading.hide()})
           }
 
@@ -290,9 +291,9 @@ export class FndClienteComponent implements OnInit {
           this.loading.show();
                 this.clientesService.getClientesByNumAndTipId(
                   this.NwCliente.numIdentificacion , this.NwCliente.tipoIdentificacion
-                ).subscribe({next:(value:clienteRequest)=>{
+                ).subscribe({next:(value:ApiResponse<GenericRecordsPayload<ClientesModel>>)=>{
                   CustomConsole.log(value)
-                  if(value.numdata== 0){
+                  if(!value.ok || value.data.count === 0){
 
                    if (this.crear ){
 
@@ -313,7 +314,7 @@ export class FndClienteComponent implements OnInit {
                       this.dialogo.close({response:false , empleado: new ClientesModel()});
                     }
                   }else{
-                    this.NwCliente =  value.data[0]  
+                    this.NwCliente =  value.data.records[0]  
                     if(this.dataIngreso.invoker == 'cuentasXpagar'){
                       this.pasarComoEmpleado();
                       return
@@ -329,7 +330,7 @@ export class FndClienteComponent implements OnInit {
                       }
                     }
                   }
-                },error:(error)=>Swal.fire(JSON.stringify(error))
+                },error:(error)=>Swal.fire(this.clientesService.getErrorMessage(error))
               ,complete:()=>this.loading.hide()})
               }
           }    
@@ -339,31 +340,23 @@ crearCliente(){
  // return 
   this.loading.show() 
 this.clientesService.setClienteOdoo(this.NwCliente ).subscribe({next:
-  (respuesta:any)=>{
-    let cont = 0;
+  (respuesta:ApiResponse<GenericMutationPayload>)=>{
      CustomConsole.log('setClienteOdoo',respuesta); 
-     if (respuesta.error === 'ok'){
+     if (respuesta.ok){
        alert('Datos creados con exito!!')
-       if(respuesta.idGenerado){
-        this.NwCliente.id =  respuesta.idGenerado[0].Id; 
+       if(respuesta.data.insertId){
+        this.NwCliente.id =  respuesta.data.insertId; 
        } 
        this.buscarClienteFinal()
      
      }else{
-       switch(respuesta.error){
-         case 'ok_no_insert' :
-          alert('El cliente ya existe en odoo!!');
-           break;
-           default :
-           alert(respuesta.error);
-           break; 
-       }
+       alert(respuesta.error?.message || 'No fue posible crear el cliente');
       
      }
      this.loading.hide();
 },error:e=>{
   this.loading.hide();
-  Swal.fire(e.error.error);
+  Swal.fire(this.clientesService.getErrorMessage(e));
 }})
 }
      
@@ -372,25 +365,17 @@ crearPersonaYDevolverla(){
   this.loading.show() 
   //this.documentoActivo.orden;
 this.clientesService.setClienteOdoo(this.NwCliente ).subscribe(
-  (respuesta:any)=>{
-    let cont = 0;
+  (respuesta:ApiResponse<GenericMutationPayload>)=>{
      CustomConsole.log('setClienteOdoo',respuesta); 
-     if (respuesta.error === 'ok'){
+     if (respuesta.ok){
        alert('Datos creados con exito!!')
-       if(respuesta.idGenerado){
-        this.NwCliente.id =  respuesta.idGenerado[0].Id; 
+       if(respuesta.data.insertId){
+        this.NwCliente.id =  respuesta.data.insertId; 
        } 
        this.buscarClienteFinal()
      
      }else{
-       switch(respuesta.error){
-         case 'ok_no_insert' :
-          alert('El cliente ya existe en odoo!!');
-           break;
-           default :
-           alert(respuesta.error);
-           break; 
-       }
+       alert(respuesta.error?.message || 'No fue posible crear el cliente');
       
      }
      this.loading.hide();

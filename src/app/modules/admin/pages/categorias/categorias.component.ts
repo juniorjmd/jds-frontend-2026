@@ -5,12 +5,12 @@ import { loading } from 'src/app/models/app.loading';
 import { ProductoService } from 'src/app/services/producto.service';
 import { select } from 'src/app/interfaces/generales.interface';
 import { Categoria } from 'src/app/interfaces/categoria.interface';
-import { categoriaRequest, ProductoRequest } from 'src/app/interfaces/producto-request';
 import { MatDialog } from '@angular/material/dialog';
 import { AdminCategoriasComponent } from '../../modals/admin-categorias/admin-categorias.component';
 import { tap } from 'rxjs';
 import Swal from 'sweetalert2';
 import { CustomConsole } from 'src/app/models/CustomConsole';
+import { InventarioCategoriesResponse } from 'src/app/interfaces/inventario-response.interface';
 
 @Component({
   selector: 'app-categorias',
@@ -50,11 +50,11 @@ private newAbrirDialog =  inject(MatDialog)
   getAllCategorias(){ 
     this.loading.show()
     this.productoService.getCategorias().subscribe({
-       next :(datos:categoriaRequest)=>{
+       next :(datos:InventarioCategoriesResponse)=>{
          CustomConsole.log('getAllCategorias',datos);
          
-    if (datos.numdata > 0 ){  
-        this.categorias = datos.data!.map((x:any)=>x.obj) 
+    if (datos.data.count > 0 ){  
+        this.categorias = datos.data.categories;
         this.productoService.asignarCategorias(this.categorias);
         CustomConsole.log(this.categorias);
     }else{

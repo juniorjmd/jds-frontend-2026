@@ -6,6 +6,8 @@ import { cajasServices } from 'src/app/services/Cajas.services';
 import Swal from 'sweetalert2';
 import { CustomConsole } from 'src/app/models/CustomConsole';
 import { Router } from '@angular/router';
+import { ApiResponse } from 'src/app/interfaces/api-response.interface';
+import { CarwashOpenBoxData } from 'src/app/interfaces/carwash-response.interface';
 
 @Component({
   selector: 'app-definir-base-caja',
@@ -36,9 +38,9 @@ export class DefinirBaseCajaComponent implements OnInit {
     }else{
       this.loading.show()
       this.cajaService.abrirCaja(this.caja, this.valorIngresar).subscribe(
-        (respuesta:any)=>{
+        (respuesta:ApiResponse<CarwashOpenBoxData>)=>{
           CustomConsole.log(respuesta)
-         Swal.fire( respuesta.message ).then(()=>{
+         Swal.fire( respuesta.data.message ).then(()=>{
           this._Router.navigate(["/home","pos","ventas"]);
           location.reload();
          });

@@ -1,13 +1,14 @@
 import { Component, inject, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { DocumentoListado } from 'src/app/interfaces/documento.interface';
-import { CarteraRequest } from 'src/app/interfaces/producto-request';
 import { CarteraModel } from 'src/app/models/cartera/cartera.model';
 import { ClientesModel } from 'src/app/models/clientes/clientes.module';
 import { CustomConsole } from 'src/app/models/CustomConsole';
 import { DocumentosModel } from 'src/app/models/ventas/documento.model';
 import { PersonasModule } from 'src/app/modules/personas/personas.module';
 import { DocumentoService } from 'src/app/services/documento.service';
+import { ApiResponse } from 'src/app/interfaces/api-response.interface';
+import { CarteraRecordsPayload } from 'src/app/services/documento.service';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -26,9 +27,9 @@ export class AbonosCuentasXCobrarComponent implements OnInit {
     this.docAbono.cliente =  ( typeof( this.personaIngreso.id!) == "string"   ) ? parseInt(this.personaIngreso.id) :this.personaIngreso.id!;
     this.docService
     .getCuentasXCobrarByPersonaAbonos(( typeof( this.personaIngreso.id!) == "string"   ) ? parseInt(this.personaIngreso.id) :this.personaIngreso.id! )
-    .subscribe({next:(retorno:CarteraRequest)=>{
-      if(retorno.numdata!> 0){
-        this.lisCartera =  retorno.data;
+    .subscribe({next:(retorno:ApiResponse<CarteraRecordsPayload>)=>{
+      if(retorno.ok && retorno.data.count > 0){
+        this.lisCartera =  retorno.data.records;
         this.docAbono.campo_auxiliar_1 =   this.lisCartera.reduce((acc:number, item) => acc + parseFloat(item.totalActual.toString()), 0);
        
         this.docAbono.campo_auxiliar_4 =   this.lisCartera.reduce((acc:number, item) => acc + parseFloat(item.suma_plazos_vencidos.toString()), 0);

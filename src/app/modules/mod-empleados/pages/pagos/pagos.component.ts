@@ -6,6 +6,8 @@ import { fechaBusqueda, select } from 'src/app/interfaces/generales.interface';
 import Swal from 'sweetalert2'; 
 import { AcumuladosEmpleadoModel } from 'src/app/models/acumulados-empleados/acumulados-empleados.module';
 import { CustomConsole } from 'src/app/models/CustomConsole';
+import { ApiResponse } from 'src/app/interfaces/api-response.interface';
+import { GenericMutationPayload, GenericRecordsPayload } from 'src/app/interfaces/generic-response.interface';
 
 @Component({
   selector: 'app-pagos',
@@ -42,15 +44,15 @@ export class PagosComponent implements OnInit {
     
 this.loading.show(); 
 this.empleadosServices.guardarAnticipoEmpleado(this.empleado, this.valorAnticipo , this.descripcionAticipo.trim()).subscribe(
- (respuesta:any)=>{CustomConsole.log(respuesta)
+ (respuesta:ApiResponse<GenericMutationPayload>)=>{CustomConsole.log(respuesta)
   
- if (respuesta.error === 'ok'){
+ if (respuesta.ok){
   Swal.fire('datos ingresados con exito');  
   this.valorAnticipo =0 ;
   this.descripcionAticipo = '';
   this.getEmpleados();
  }else{ 
-  Swal.fire(respuesta.error, '', 'error');
+  Swal.fire(respuesta.error?.message || 'No fue posible generar el anticipo', '', 'error');
  }
  this.loading.hide(); 
  })
@@ -83,13 +85,13 @@ this.empleadosServices.guardarAnticipoEmpleado(this.empleado, this.valorAnticipo
   generarPago(Empleado:EmpleadoModel, index:number , fechas:fechaBusqueda){
 this.loading.show(); 
 this.empleadosServices.guardarPagoEmpleado(Empleado , fechas).subscribe(
- (respuesta:any)=>{CustomConsole.log(respuesta)
+ (respuesta:ApiResponse<GenericMutationPayload>)=>{CustomConsole.log(respuesta)
   
- if (respuesta.error === 'ok'){
+ if (respuesta.ok){
   Swal.fire('datos ingresados con exito');  
   this.getEmpleados();
  }else{ 
-  Swal.fire(respuesta.error, '', 'error');
+  Swal.fire(respuesta.error?.message || 'No fue posible registrar el pago', '', 'error');
  }
  this.loading.hide(); 
  })
@@ -113,11 +115,11 @@ this.empleadosServices.guardarPagoEmpleado(Empleado , fechas).subscribe(
       {
         next :
       
-       (datos:any)=>{
+       (datos:ApiResponse<GenericRecordsPayload<{ objeto: EmpleadoModel }>>)=>{
           CustomConsole.log('getEmpleados' , datos);
           
-     if (datos.numdata > 0 ){ 
-       datos.data!.forEach((dato:any , index:number )=>{ 
+     if (datos.ok && datos.data.count > 0 ){ 
+       datos.data.records.forEach((dato:any , index:number )=>{ 
         this.empleados.push(dato.objeto);
         empleadosAux = dato.objeto;
         if(empleadosAux.numeroAcumuladosPendientes! > 0 ){
@@ -139,7 +141,7 @@ this.empleadosServices.guardarPagoEmpleado(Empleado , fechas).subscribe(
        } ,
        error : (error:any) => {this.loading.hide();
          CustomConsole.log(error)
-         Swal.fire( error.error.error, '', 'error');
+         Swal.fire(this.empleadosServices.getErrorMessage(error), '', 'error');
        }}
        );
    }  
@@ -163,11 +165,11 @@ liquidarPagos(auxiliar:EmpleadoModel , index :number , fechas:fechaBusqueda){
    this.loading.show()
    this.empleadosServices.getEmpleadosAcumulados(auxiliar.id! ,fechas ).subscribe(
     { next:
-     (datos:any)=>{
+     (datos:ApiResponse<GenericRecordsPayload<{ obj: any; valor: string; porcDescMaximo: number }>>)=>{
         
-   if (datos.numdata > 0 ){ 
+   if (datos.ok && datos.data.count > 0 ){ 
     
-     datos.data!.forEach((dato:any  )=>{  
+     datos.data.records.forEach((dato:any  )=>{  
       totalValorAcumulado += parseFloat(dato.valor);
       if (porcDescMaximo <= 0)  porcDescMaximo = dato.porcDescMaximo ;
 
@@ -187,7 +189,7 @@ liquidarPagos(auxiliar:EmpleadoModel , index :number , fechas:fechaBusqueda){
      } ,
      error: ( error) => {this.loading.hide();
        CustomConsole.log(error)
-       Swal.fire( error.error.error, '', 'error');
+       Swal.fire(this.empleadosServices.getErrorMessage(error), '', 'error');
      }}
      );
 }

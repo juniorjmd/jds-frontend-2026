@@ -9,6 +9,7 @@ import { TrasladosCuentasArrModel, TrasladosCuentasModel } from 'src/app/models/
 import { ModalCntSubCuentasComponent } from 'src/app/modules/admin/modals/cuentasContables/cnt-sub-cuentas.component';
 import { CntContablesService } from 'src/app/services/cntContables.service';
 import Swal from 'sweetalert2';
+import { AdminOperationResponse } from 'src/app/interfaces/admin-response.interface';
 
 @Component({
   selector: 'app-new-traslado-deUnoAmuchos', 
@@ -115,9 +116,9 @@ if (((destino?.length)||0) <= 0){
 if (this.dataProceso == undefined ){
     Swal.fire('Debe ingresar los datos de la transaccion')
     return;}
-this.cntService.setTraslado(this.dataProceso).subscribe({next:(value)=>{
-  if(value.error!='ok') Swal.fire(value.error);
-  if(value.error=='ok') this.dialogo.close(true)
+this.cntService.setTraslado(this.dataProceso).subscribe({next:(value:AdminOperationResponse)=>{
+  if(!value.ok) Swal.fire(value.error?.message ?? 'No fue posible guardar el traslado');
+  if(value.ok) this.dialogo.close(true)
 
 
 },error:e=>Swal.fire(this.cntService.getErrorMessage(e))

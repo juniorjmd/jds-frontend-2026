@@ -13,6 +13,8 @@ import { ConectorPlugin } from 'src/app/models/app.printer.con';
 import { printer, url } from 'src/app/models/app.db.url';
 import { DomiciliosModel } from 'src/app/models/domicilios/domicilios.model';
 import Swal from 'sweetalert2';
+import { ApiResponse } from 'src/app/interfaces/api-response.interface';
+import { GenericRecordsPayload } from 'src/app/interfaces/generic-response.interface';
 @Component({
   selector: 'app-envios',
   templateUrl: './envios.component.html',
@@ -77,13 +79,12 @@ export class EnviosComponent implements OnInit {
   this.loading.show() 
   this.documentoService.cerrarDocumento(idDocumento).subscribe(
     (respuesta:any)=>{
-      let cont = 0;
        //console.log('cerrarDocumento',respuesta); 
-       if (respuesta.error === 'ok'){
+       if (respuesta.ok){
         this.documentoRetorno = respuesta.data.documentoFinal;
         this.printer_factura_final()         
        }else{
-         alert(respuesta.error);
+         alert(respuesta.error?.message || 'No fue posible cerrar el documento');
        }
        this.loading.hide(); 
 
@@ -97,12 +98,12 @@ export class EnviosComponent implements OnInit {
      
     this.loading.show();
     this.serviceDomicilio.getListadosDomicilios().subscribe(
-      (respuesta:any)=>{//console.log(respuesta)
+      (respuesta:ApiResponse<GenericRecordsPayload<DomiciliosModel>>)=>{//console.log(respuesta)
        
-      if (respuesta.error === 'ok'){
-         this.listadoDePedidos = respuesta.data;
+      if (respuesta.ok){
+         this.listadoDePedidos = respuesta.data.records;
       }else{
-        alert(respuesta.error);
+        alert(respuesta.error?.message || 'No fue posible consultar los domicilios');
       }
       
       this.loading.hide();

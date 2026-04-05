@@ -6,14 +6,17 @@ import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, map, Observable } from 'rxjs';
 import { cajaModel } from '../models/ventas/cajas.model';
 import { vistas } from '../models/app.db.view';
-import { cntGrupoRequest, DocumentoRequest, empleadoRequest, empleadoVentasRequest, parametroRequest, ProductosVendidosRequest, usuarioRequest, usuarioVentasRequest } from '../interfaces/producto-request';
-import { EmpleadoModel } from '../models/empleados/empleados.module';
+import { ProductosVendidosRequest } from '../interfaces/producto-request';
+import { EmpleadoModel, VendedorModel } from '../models/empleados/empleados.module';
 import { table } from 'ngx-bootstrap-icons';
 import { TABLA } from '../models/app.db.tables';
 import { ParametrosModel } from '../models/parametros/parametros.model';
 import { CustomConsole } from '../models/CustomConsole';
 import { ConfigService } from './config.service';
 import { DatosInicialesBranchResponse } from '../interfaces/datos-iniciales-response.interface';
+import { ApiResponse } from '../interfaces/api-response.interface';
+import { GenericRecordsPayload } from '../interfaces/generic-response.interface';
+import { UsuarioConVentaModel, UsuarioModel } from '../models/usuario.model';
 
 
 
@@ -53,12 +56,12 @@ constructor(private http: HttpClient , private configService: ConfigService){
     chageContinueVenta(val:boolean){
         this.continue.next(val);
     }
-    getParametroValidarExistencia():Observable<parametroRequest>{
+    getParametroValidarExistencia():Observable<ApiResponse<GenericRecordsPayload<ParametrosModel>>>{
         let datos = {"action": actions.actionSelect , 
             "_tabla" : TABLA.PARAMETROS,
             "_where" : [{columna : 'cod_parametro' , tipocomp : '=' , dato : 'VALIDAR_EXISTENCIA'}]     
            }; 
-           return this.http.post<parametroRequest>(this.configService.url.action , datos, httpOptions()) ;
+           return this.http.post<ApiResponse<GenericRecordsPayload<ParametrosModel>>>(this.configService.url.action , datos, httpOptions()) ;
       }
       
       getProductosVendidos(): Observable<ProductosVendidosRequest> {
@@ -69,35 +72,35 @@ constructor(private http: HttpClient , private configService: ConfigService){
         CustomConsole.log('servicios de usuarios activo - getDocumentoActivo', url.action, datos, httpOptions());
         return this.http.post<ProductosVendidosRequest>(this.configService.url.action, datos, httpOptions());
       }   
-  getVendedores():Observable<empleadoRequest>{
+  getVendedores():Observable<ApiResponse<GenericRecordsPayload<EmpleadoModel>>>{
     let datos = {"action": actions.actionSelect , 
         "_tabla" : vistas.vendedores,
         "_where" : []
        }; 
-       return this.http.post<empleadoRequest>(this.configService.url.action , datos, httpOptions()) ;
+       return this.http.post<ApiResponse<GenericRecordsPayload<EmpleadoModel>>>(this.configService.url.action , datos, httpOptions()) ;
   } 
-   getVendedoresConVentas():Observable<empleadoVentasRequest>{
+   getVendedoresConVentas():Observable<ApiResponse<GenericRecordsPayload<VendedorModel>>>{
     let datos = {"action": actions.actionSelect , 
         "_tabla" : vistas.vendedoresConVentas,
         "_where" : []
        }; 
-       return this.http.post<empleadoVentasRequest>(this.configService.url.action , datos, httpOptions()) ;
+       return this.http.post<ApiResponse<GenericRecordsPayload<VendedorModel>>>(this.configService.url.action , datos, httpOptions()) ;
   }
 
-  getUsuariosConVentas():Observable<usuarioRequest>{
+  getUsuariosConVentas():Observable<ApiResponse<GenericRecordsPayload<UsuarioModel>>>{
     let datos = {"action": actions.actionSelect , 
         "_tabla" : vistas.usuarioConVentas,
         "_where" : []
        }; 
-       return this.http.post<usuarioRequest>(this.configService.url.action , datos, httpOptions()) ;
+       return this.http.post<ApiResponse<GenericRecordsPayload<UsuarioModel>>>(this.configService.url.action , datos, httpOptions()) ;
   }
 
-  getUsuarios():Observable<usuarioVentasRequest>{
+  getUsuarios():Observable<ApiResponse<GenericRecordsPayload<UsuarioConVentaModel>>>{
     let datos = {"action": actions.actionSelect ,
         "_tabla" : vistas.usuario
        };
       CustomConsole.log('servicios de usuarios activo - getUsuarios' ,this.configService.url.action , datos, httpOptions()); 
-       return this.http.post<usuarioVentasRequest>(this.configService.url.action , datos, httpOptions()) ;
+       return this.http.post<ApiResponse<GenericRecordsPayload<UsuarioConVentaModel>>>(this.configService.url.action , datos, httpOptions()) ;
   }
 
     validarCuentasContablesEstablecimiento(caja:cajaModel) {

@@ -9,6 +9,8 @@ import { MatDialog } from '@angular/material/dialog';
 import { FndClienteComponent } from 'src/app/modules/shared/modals/fnd-cliente/fnd-cliente.component';
 import { tap } from 'rxjs';
 import { CustomConsole } from 'src/app/models/CustomConsole';
+import { ApiResponse } from 'src/app/interfaces/api-response.interface';
+import { GenericMutationPayload, GenericRecordsPayload } from 'src/app/interfaces/generic-response.interface';
 
 @Component({
   selector: 'app-creacion-edicion',
@@ -56,15 +58,15 @@ export class CreacionEdicionComponent implements OnInit {
     if( this.nuevoEmpleado.tipo == 0 ){ Swal.fire( 'debe seleccionar el tipo de empleado', '', 'error');  return; }
     this.loading.show(); 
     this.empleadosServices.guardarEmpleado(this.nuevoEmpleado).
-    subscribe({next: (respuesta:any)=>{CustomConsole.log(respuesta)
-      if (respuesta.error === 'ok'){
+    subscribe({next: (respuesta:ApiResponse<GenericMutationPayload>)=>{CustomConsole.log(respuesta)
+      if (respuesta.ok){
          Swal.fire('datos ingresados con exito');  
          this.nuevoEmpleado =    new    EmpleadoModel( ); 
          this.nuevaPersona =    new    ClientesModel( );  
          this.getEmpleados();
-        }else{   Swal.fire(respuesta.error, '', 'error');  }
+        }else{   Swal.fire(respuesta.error?.message || 'No fue posible guardar el empleado', '', 'error');  }
      },
-     error:error=>  {Swal.fire('Error' , error.error.error,'error');this.loading.hide();} , 
+     error:error=>  {Swal.fire('Error' , this.empleadosServices.getErrorMessage(error),'error');this.loading.hide();} , 
      complete: () => this.loading.hide() })
    
    }
@@ -171,11 +173,11 @@ export class CreacionEdicionComponent implements OnInit {
     this.empleados = []; 
      this.loading.show()
      this.empleadosServices.getEmpleados()
-     .subscribe({next: (datos:any)=>{
+     .subscribe({next: (datos:ApiResponse<GenericRecordsPayload<{ objeto: EmpleadoModel }>>)=>{
           CustomConsole.log(datos);
           
-     if (datos.numdata > 0 ){ 
-       datos.data!.forEach((dato:any )=>{ 
+     if (datos.ok && datos.data.count > 0 ){ 
+       datos.data.records.forEach((dato:any )=>{ 
         this.empleados.push(dato.objeto);
        }) 
        CustomConsole.log('empleados',this.empleados);
@@ -187,7 +189,7 @@ export class CreacionEdicionComponent implements OnInit {
        } ,
        error: error => {this.loading.hide();
          CustomConsole.log(error)
-         Swal.fire('Error Busqueda', error.error.error,  'error');
+         Swal.fire('Error Busqueda', this.empleadosServices.getErrorMessage(error),  'error');
        }}
        );
    }  
@@ -196,11 +198,11 @@ export class CreacionEdicionComponent implements OnInit {
     this.tipoEmpleado[0] =   new TiposEmpleadoModule(''); 
     this.loading.show()
     this.empleadosServices.getTiposEmpleados().subscribe(
-      {next:(datos:any)=>{
+      {next:(datos:ApiResponse<GenericRecordsPayload<TiposEmpleadoModule>>)=>{
          CustomConsole.log(datos);
          
-    if (datos.numdata > 0 ){ 
-      this.tipoEmpleado = datos.data ; 
+    if (datos.ok && datos.data.count > 0 ){ 
+      this.tipoEmpleado = datos.data.records ; 
       CustomConsole.log(this.tipoEmpleado);
     }else{
       this.tipoEmpleado = [];
@@ -210,7 +212,7 @@ export class CreacionEdicionComponent implements OnInit {
       } ,
       error: (error : any) => {this.loading.hide();
         CustomConsole.log(error)
-        Swal.fire( error.error.error, '', 'error');
+        Swal.fire(this.empleadosServices.getErrorMessage(error), '', 'error');
       }}
       );
   }  

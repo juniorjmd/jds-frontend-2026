@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core'; 
 
 import { httpOptions, url } from '../models/app.db.url';
-import { BehaviorSubject, map, Observable } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import {  cntClaseRequest, cntCuentaMayorRequest, cntDocOperacionesRequest, cntGrupoRequest, cntMovCuentasRequest, cntOperacionesRequest,  cntSubCuentaRequest, cntSubCuentaVwRequest, cntTipDocOperacionesRequest, cntTransaccionesRequest, cntTrasladosRequest, ejecucionTrasladosRequest, soporteMovimientoCntRequest, trasladosCntRequest } from '../interfaces/producto-request';
 import { actions } from '../models/app.db.actions';
 import { vistas } from '../models/app.db.view';
@@ -12,11 +12,13 @@ import { CntCuentaMModel } from '../models/cnt-cuenta-m/cnt-cuenta-m.module';
 import { vwCntSubCuentaModel } from '../models/cnt-sub-cuenta/cnt-sub-cuenta.module';
 import { CntOperacionesModel } from '../models/cnt-operaciones/cnt-operaciones.module';
 import { TABLA } from '../models/app.db.tables';
-import { TransaccionesModel } from '../models/transacciones/transacciones.module';
+import { TransaccionesModel, vwTransaccionesModel } from '../models/transacciones/transacciones.module';
 import { TrasladosCuentasModel } from '../models/trasladosCuentas.';
 import { CustomConsole } from '../models/CustomConsole';
 import { ConfigService } from './config.service';
 import { AdminOperationResponse } from '../interfaces/admin-response.interface';
+import { ApiResponse } from '../interfaces/api-response.interface';
+import { GenericMutationPayload, GenericRecordsPayload } from '../interfaces/generic-response.interface';
 
 @Injectable({
   providedIn: 'root'
@@ -52,19 +54,12 @@ constructor(private http: HttpClient, private configService :ConfigService, ) {
 
   
 
-  setNewOperacion(_operacion:CntOperacionesModel){ 
+  setNewOperacion(_operacion:CntOperacionesModel):Observable<AdminOperationResponse>{ 
     let datos = {"action": actions.action_generar_nueva_operacion ,
       _operacion
    };
    CustomConsole.log('setNewOperacion' ,this.configService.url.actionAdmin , datos, httpOptions());
-   return this.http.post<AdminOperationResponse>(this.configService.url.actionAdmin , datos, httpOptions()).pipe(
-    map((response) => ({
-      error: 'ok',
-      message: response.data.message,
-      operationId: response.data.operationId,
-      operation: response.data.operation,
-    }))
-   );
+   return this.http.post<AdminOperationResponse>(this.configService.url.actionAdmin , datos, httpOptions());
   }
 
   deleteItemListadoOprPre(dato:any){ 
@@ -74,7 +69,7 @@ constructor(private http: HttpClient, private configService :ConfigService, ) {
     "_where" : where  
    };
    CustomConsole.log('borrar tablas operaPrestablecidas ' ,this.configService.url.action , datos, httpOptions());
-   return this.http.post(this.configService.url.action , datos, httpOptions()) ;
+   return this.http.post<ApiResponse<GenericMutationPayload>>(this.configService.url.action , datos, httpOptions()) ;
   }
   
   deleteListadoOprTmp(){ 
@@ -84,7 +79,7 @@ constructor(private http: HttpClient, private configService :ConfigService, ) {
     "_where" : where  
    };
    CustomConsole.log('borrar tablas temporales por usuario ' ,this.configService.url.action , datos, httpOptions());
-   return this.http.post(this.configService.url.action , datos, httpOptions()) ;
+   return this.http.post<ApiResponse<GenericMutationPayload>>(this.configService.url.action , datos, httpOptions()) ;
   }
 
   deleteItemListadoOprTmp(dato:any){ 
@@ -94,7 +89,7 @@ constructor(private http: HttpClient, private configService :ConfigService, ) {
     "_where" : where  
    };
    CustomConsole.log('borrar tablas temporales por id ' ,this.configService.url.action , datos, httpOptions());
-   return this.http.post(this.configService.url.action , datos, httpOptions()) ;
+   return this.http.post<ApiResponse<GenericMutationPayload>>(this.configService.url.action , datos, httpOptions()) ;
   }
 
   changeOperacion(operacion: CntOperacionesModel) {
@@ -121,19 +116,19 @@ constructor(private http: HttpClient, private configService :ConfigService, ) {
     CustomConsole.log('servicios de cajas activo ' ,this.configService.url.action , datos, httpOptions());
     return this.http.post(this.configService.url.action , datos, httpOptions()) ;
 } 
-getCntTransaccionesTmp():Observable<cntTransaccionesRequest>{
+getCntTransaccionesTmp():Observable<ApiResponse<GenericRecordsPayload<vwTransaccionesModel>>>{
   let datos = {"action": actions.actionSelectPorUsuario , 
     "_tabla" : vistas.vw_transacciones_tmp,
     "_columnaUsuario": 'usuario'
    }; 
    
    CustomConsole.log('getCntTransaccionesTmp',this.configService.url.action , datos, httpOptions()) ;
-   return this.http.post<cntTransaccionesRequest>(this.configService.url.action , datos, httpOptions()) ;
+   return this.http.post<ApiResponse<GenericRecordsPayload<vwTransaccionesModel>>>(this.configService.url.action , datos, httpOptions()) ;
 }
 
 
 
-setCntTransaccionesTmp(data:TransaccionesModel):Observable<any>{
+setCntTransaccionesTmp(data:TransaccionesModel):Observable<ApiResponse<GenericMutationPayload>>{
   
   let datos ;
   let  arraydatos ; 
@@ -163,10 +158,10 @@ setCntTransaccionesTmp(data:TransaccionesModel):Observable<any>{
   } 
   CustomConsole.log('setCntTransaccionesTmp',this.configService.url.action , datos);
   
-   return this.http.post<any>(this.configService.url.action , datos, httpOptions()) ;
+   return this.http.post<ApiResponse<GenericMutationPayload>>(this.configService.url.action , datos, httpOptions()) ;
 }
 
- setTraslado(data:TrasladosCuentasModel):Observable<any>{
+ setTraslado(data:TrasladosCuentasModel):Observable<AdminOperationResponse>{
  let datos = {"action": actions.crearTraslados ,
     "_tabla" : TABLA.transacciones_tmp,
     "_arraydatos" : data
@@ -174,13 +169,7 @@ setCntTransaccionesTmp(data:TransaccionesModel):Observable<any>{
  
 CustomConsole.log('setCntTransaccionesTmp',this.configService.url.actionAdmin , datos);
 
- return this.http.post<AdminOperationResponse>(this.configService.url.actionAdmin , datos, httpOptions()).pipe(
-  map((response) => ({
-    error: 'ok',
-    message: response.data.message,
-    objeto: response.data.objeto,
-  }))
- ) ;
+ return this.http.post<AdminOperationResponse>(this.configService.url.actionAdmin , datos, httpOptions()) ;
  }
  
 
@@ -203,17 +192,12 @@ CustomConsole.log('setCntTransaccionesTmp',this.configService.url.actionAdmin , 
      return this.http.post<cntTrasladosRequest>(this.configService.url.action , datos, httpOptions()) ;
   }
 
-  ejecutarTrasladosCuentas(idTraslado:TrasladosCuentasModel):Observable<ejecucionTrasladosRequest>{
+  ejecutarTrasladosCuentas(idTraslado:TrasladosCuentasModel):Observable<AdminOperationResponse>{
      let datos = {"action": actions.ejecutarTraslados , 
       "_arraydatos" : idTraslado
      }; 
      CustomConsole.log('ejecutarTrasladosCuentas' , this.configService.url.actionAdmin , datos, httpOptions())
-     return this.http.post<AdminOperationResponse>(this.configService.url.actionAdmin , datos, httpOptions()).pipe(
-      map((response) => ({
-        error: 'ok',
-        objeto: response.data.objeto as any,
-      }))
-     );
+     return this.http.post<AdminOperationResponse>(this.configService.url.actionAdmin , datos, httpOptions());
   }
   bucarSoporteMovimiento(idTraslado:number):Observable<soporteMovimientoCntRequest>{
     let where = [{"columna" : "cod_comprobante" , "tipocomp" : '=' , "dato" :  idTraslado } ]
@@ -249,27 +233,27 @@ getEmpleadosAcumulados( id:number|string , fechas:fechaBusqueda){
 
 
 
-  getCntGrupos():Observable<cntGrupoRequest>{
+  getCntGrupos():Observable<ApiResponse<GenericRecordsPayload<CntGruposModel>>>{
     let datos = {"action": actions.actionSelect , 
       "_tabla" : vistas.vw_cnt_grupos,
       "_where" : []
      }; 
-     return this.http.post<cntGrupoRequest>(this.configService.url.action , datos, httpOptions()) ;
+     return this.http.post<ApiResponse<GenericRecordsPayload<CntGruposModel>>>(this.configService.url.action , datos, httpOptions()) ;
   }
-  getCntClases():Observable<cntClaseRequest>{
+  getCntClases():Observable<ApiResponse<GenericRecordsPayload<CntClasesModel>>>{
     let datos = {"action": actions.actionSelect , 
       "_tabla" : vistas.vw_cnt_clase,
       "_where" :[]
      }; 
-     return this.http.post<cntClaseRequest>(this.configService.url.action , datos, httpOptions()) ;
+     return this.http.post<ApiResponse<GenericRecordsPayload<CntClasesModel>>>(this.configService.url.action , datos, httpOptions()) ;
   }
-  getCntCuentasMayores():Observable<cntCuentaMayorRequest>{
+  getCntCuentasMayores():Observable<ApiResponse<GenericRecordsPayload<CntCuentaMModel>>>{
     let datos = {"action": actions.actionSelect , 
       "_tabla" : vistas.vw_cnt_cuenta_mayores
      }; 
 
     CustomConsole.log('getCntCuentasMayores' , this.configService.url.action , datos, httpOptions())
-     return this.http.post<cntCuentaMayorRequest>(this.configService.url.action , datos, httpOptions()) ;
+     return this.http.post<ApiResponse<GenericRecordsPayload<CntCuentaMModel>>>(this.configService.url.action , datos, httpOptions()) ;
   }
   setNewSubCuenta(subCnt:vwCntSubCuentaModel){
     let datos ;
@@ -305,15 +289,15 @@ getEmpleadosAcumulados( id:number|string , fechas:fechaBusqueda){
     
    CustomConsole.log(datos);
    
-    return this.http.post(this.configService.url.action , datos, httpOptions()) ;
+    return this.http.post<ApiResponse<GenericMutationPayload>>(this.configService.url.action , datos, httpOptions()) ;
   }
-  getCntCuentas():Observable<cntSubCuentaRequest>{
+  getCntCuentas():Observable<ApiResponse<GenericRecordsPayload<vwCntSubCuentaModel>>>{
     let datos = {"action": actions.actionSelect , 
       "_tabla" : vistas.vw_cnt_scuentas,
        _limit: 300,  
       "_where" : [{columna : 'digito' , tipocomp : '>' , dato : 0 }]
      }; 
-     return this.http.post<cntSubCuentaRequest>(this.configService.url.action , datos, httpOptions()) ;
+     return this.http.post<ApiResponse<GenericRecordsPayload<vwCntSubCuentaModel>>>(this.configService.url.action , datos, httpOptions()) ;
   }
 
   
@@ -343,53 +327,53 @@ getEmpleadosAcumulados( id:number|string , fechas:fechaBusqueda){
      return this.http.post<cntSubCuentaRequest>(this.configService.url.action , datos, httpOptions()) ;
   }
 
-  getCntCuentasByIdGrupo(id:number):Observable<cntSubCuentaRequest>{
+  getCntCuentasByIdGrupo(id:number):Observable<ApiResponse<GenericRecordsPayload<vwCntSubCuentaModel>>>{
     let datos = {"action": actions.actionSelect , 
       "_tabla" : vistas.vw_cnt_scuentas, 
       "_where" : [{columna : 'cod_grupo' , tipocomp : '=' , dato : id }
                 ,{columna : 'digito' , tipocomp : '>' , dato : 0 }]
      }; 
 
-     return this.http.post<cntSubCuentaRequest>(this.configService.url.action , datos, httpOptions()) ;
+     return this.http.post<ApiResponse<GenericRecordsPayload<vwCntSubCuentaModel>>>(this.configService.url.action , datos, httpOptions()) ;
   }
 
-  getCntCuentasByIdClase(id:number):Observable<cntSubCuentaRequest>{
+  getCntCuentasByIdClase(id:number):Observable<ApiResponse<GenericRecordsPayload<vwCntSubCuentaModel>>>{
     let datos = {"action": actions.actionSelect , 
       "_tabla" : vistas.vw_cnt_scuentas, 
       "_where" : [{columna : 'cod_clase' , tipocomp : '=' , dato : id }
                 ,{columna : 'digito' , tipocomp : '>' , dato : 0 }]
      }; 
 
-     return this.http.post<cntSubCuentaRequest>(this.configService.url.action , datos, httpOptions()) ;
+     return this.http.post<ApiResponse<GenericRecordsPayload<vwCntSubCuentaModel>>>(this.configService.url.action , datos, httpOptions()) ;
   }
 
 
-  getCntCuentasByIdCM(id:number):Observable<cntSubCuentaVwRequest>{
+  getCntCuentasByIdCM(id:number):Observable<ApiResponse<GenericRecordsPayload<vwCntSubCuentaModel>>>{
     let datos = {"action": actions.actionSelect , 
       "_tabla" : vistas.vw_cnt_scuentas, 
       "_where" : [{columna : 'cod_cuenta' , tipocomp : '=' , dato : id }
                 ,{columna : 'digito' , tipocomp : '>' , dato : 0 }]
      }; 
 
-     return this.http.post<cntSubCuentaVwRequest>(this.configService.url.action , datos, httpOptions()) ;
+     return this.http.post<ApiResponse<GenericRecordsPayload<vwCntSubCuentaModel>>>(this.configService.url.action , datos, httpOptions()) ;
   }
-  getCntCuentasById(id:number):Observable<cntSubCuentaVwRequest>{
+  getCntCuentasById(id:number):Observable<ApiResponse<GenericRecordsPayload<vwCntSubCuentaModel>>>{
     let datos = {"action": actions.actionSelect , 
       "_tabla" : vistas.vw_cnt_scuentas, 
       "_where" : [{columna : 'id_scuenta' , tipocomp : '=' , dato : id }
                 ,{columna : 'digito' , tipocomp : '>' , dato : 0 }]
      }; 
 
-     return this.http.post<cntSubCuentaVwRequest>(this.configService.url.action , datos, httpOptions()) ;
+     return this.http.post<ApiResponse<GenericRecordsPayload<vwCntSubCuentaModel>>>(this.configService.url.action , datos, httpOptions()) ;
   }
-  getCntCuentasByName(id:string):Observable<cntSubCuentaRequest>{
+  getCntCuentasByName(id:string):Observable<ApiResponse<GenericRecordsPayload<vwCntSubCuentaModel>>>{
     let datos = {"action": actions.actionSelect , 
       "_tabla" : vistas.vw_cnt_scuentas, 
       "_where" : [{columna : 'nombre_scuenta' , tipocomp : 'like' , dato : id }
                 ,{columna : 'digito' , tipocomp : '>' , dato : 0 }]
      }; 
 
-     return this.http.post<cntSubCuentaRequest>(this.configService.url.action , datos, httpOptions()) ;
+     return this.http.post<ApiResponse<GenericRecordsPayload<vwCntSubCuentaModel>>>(this.configService.url.action , datos, httpOptions()) ;
   }
   getCntOperaciones():Observable<cntOperacionesRequest>{
     let datos = {"action": actions.actionSelect , 

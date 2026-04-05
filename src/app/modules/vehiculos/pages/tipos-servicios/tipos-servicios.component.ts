@@ -6,6 +6,7 @@ import { loading } from 'src/app/models/app.loading';
 import { VehiculosService } from 'src/app/services/vehiculos.service';
 import { select } from 'src/app/interfaces/generales.interface';
 import { CustomConsole } from 'src/app/models/CustomConsole';
+import { VehiculoMutationResponse, VehiculoTiposServiciosResponse } from 'src/app/interfaces/vehiculos-response.interface';
 @Component({
   selector: 'app-tipos-servicios',
   templateUrl: './tipos-servicios.component.html',
@@ -35,9 +36,9 @@ export class TiposServiciosComponent implements OnInit {
       /* Read more about isConfirmed, isDenied below */
       if (result.isConfirmed) {
         this.VehiculosService.eliminarTiposServicios(tipo).subscribe(
-          (respuesta: any) => {
+          (respuesta: VehiculoMutationResponse) => {
             CustomConsole.log(respuesta);
-            if (respuesta.error === 'ok') {
+            if (respuesta.ok) {
               this.getTiposServicios();
               Swal.fire('Elemento eliminado con exito!', '', 'success');
             }
@@ -51,11 +52,11 @@ export class TiposServiciosComponent implements OnInit {
     this.tiposServicio[0] = new TiposServiciosModule('', '' );
     this.loading.show();
     this.VehiculosService.getTiposServicios().subscribe({
-      next: (datos: any) => {
+      next: (datos: VehiculoTiposServiciosResponse) => {
         CustomConsole.log(datos);
-        if (datos.numdata > 0) { 
+        if (datos.data.count > 0) { 
           
-          this.tiposServicio = datos.data!.map((x:any)=> x.obj);
+          this.tiposServicio = datos.data.records;
           
           CustomConsole.log(this.tiposServicio);
         } else {
@@ -84,15 +85,15 @@ export class TiposServiciosComponent implements OnInit {
 
     this.loading.show();
     this.VehiculosService.guardarTiposServicios(this.newTipoServicio).subscribe(
-      (respuesta: any) => {
+      (respuesta: VehiculoMutationResponse) => {
         CustomConsole.log(respuesta);
 
-        if (respuesta.error === 'ok') {
+        if (respuesta.ok) {
           Swal.fire('datos ingresados con exito');
           this.newTipoServicio = new TiposServiciosModule('', '');
           this.getTiposServicios();
         } else {
-          Swal.fire(respuesta.error, '', 'error');
+          Swal.fire(respuesta.error?.message ?? 'error en el servidor', '', 'error');
         }
         this.loading.hide();
       }

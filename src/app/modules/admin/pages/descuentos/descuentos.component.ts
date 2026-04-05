@@ -1,10 +1,11 @@
 import { Component, inject } from '@angular/core';
 import { error } from 'jquery';
-import { DescuentoRequest } from 'src/app/interfaces/producto-request';
 import { CustomConsole } from 'src/app/models/CustomConsole';
 import { DescuentoModule } from 'src/app/models/descuento/descuento.model';
 import { ProductoService } from 'src/app/services/producto.service';
 import Swal from 'sweetalert2';
+import { ApiResponse } from 'src/app/interfaces/api-response.interface';
+import { GenericMutationPayload, GenericRecordsPayload } from 'src/app/interfaces/generic-response.interface';
 
 @Component({
   selector: 'app-descuentos',
@@ -25,13 +26,13 @@ export class DescuentosComponent {
    editar( ){  
         this.productoService.setDescuento(this.newDesc).subscribe({next:(value:any)=>{
           CustomConsole.log(value);
-          if (value.error != undefined && value.error == 'ok'){ 
+          if (value.ok){ 
             this.newDesc =  new DescuentoModule();
             this.getDescuentos();
           } else{
             Swal.fire('error','error en la generacion del descuento','error')
           }
-        },error:error=>Swal.fire(error.error.error)
+        },error:error=>Swal.fire(this.productoService.getErrorMessage(error))
         })
 
    }
@@ -41,9 +42,9 @@ export class DescuentosComponent {
    }
 
    getDescuentos(){
-    this.productoService.getDescuentos().subscribe({next:(value:DescuentoRequest)=>{
-      if(value.numdata > 0){
-        this.descuentos =  value.data;
+    this.productoService.getDescuentos().subscribe({next:(value:ApiResponse<GenericRecordsPayload<DescuentoModule>>)=>{
+      if(value.ok && value.data.count > 0){
+        this.descuentos =  value.data.records;
       }
     }})
    }

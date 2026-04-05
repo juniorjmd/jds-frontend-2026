@@ -1,9 +1,10 @@
 import { Component, OnInit } from '@angular/core';
-import { cntCuentaMayorRequest, cntSubCuentaRequest } from 'src/app/interfaces/producto-request';
 import { CntCuentaMModel } from 'src/app/models/cnt-cuenta-m/cnt-cuenta-m.module';
 import { vwCntSubCuentaModel } from 'src/app/models/cnt-sub-cuenta/cnt-sub-cuenta.module';
 import { CntContablesService } from 'src/app/services/cntContables.service';
 import Swal from 'sweetalert2';
+import { ApiResponse } from 'src/app/interfaces/api-response.interface';
+import { GenericMutationPayload, GenericRecordsPayload } from 'src/app/interfaces/generic-response.interface';
 
 @Component({
   selector: 'app-cnt-sub-cuentas',
@@ -26,9 +27,9 @@ filtrarPorNombre( ) {
     {
       this.Subcuentas =  this.Subcuentas.filter(item => item.nombre_scuenta?.toUpperCase()!.includes(this.newSubcuenta.nombre_scuenta!.toUpperCase()));
       }else{
-        this.cntService.getCntCuentasByName(this.newSubcuenta.nombre_scuenta).subscribe( {next:(value:cntSubCuentaRequest)=>{ 
+        this.cntService.getCntCuentasByName(this.newSubcuenta.nombre_scuenta).subscribe( {next:(value:ApiResponse<GenericRecordsPayload<vwCntSubCuentaModel>>)=>{ 
           //CustomConsole.log('getCntCuentasByName',value)
-          this.Subcuentas = value.data;  
+          this.Subcuentas = value.data.records;  
           //CustomConsole.log('Subcuentas' , this.Subcuentas) 
          },
         error: (e:any)=>Swal.fire(e.error.error)})
@@ -43,10 +44,10 @@ cancelar(){
 }
 filtrarSubCuentas(){
   if(this.newSubcuenta.cod_cuenta != undefined){ 
-  this.cntService.getCntCuentasByIdCM(this.newSubcuenta.cod_cuenta).subscribe( {next:(value:cntSubCuentaRequest)=>{ 
+  this.cntService.getCntCuentasByIdCM(this.newSubcuenta.cod_cuenta).subscribe( {next:(value:ApiResponse<GenericRecordsPayload<vwCntSubCuentaModel>>)=>{ 
     //CustomConsole.log('getCntCuentasByIdCM',value)
-    this.Subcuentas = value.data; 
-    this.auxSubCuentas=value.data;
+    this.Subcuentas = value.data.records; 
+    this.auxSubCuentas=value.data.records;
     //CustomConsole.log('Subcuentas' , this.Subcuentas) 
    },
   error: (e:any)=>Swal.fire(e.error.error)})
@@ -66,9 +67,9 @@ modificarSubcuenta(subcuenta:vwCntSubCuentaModel){
   this.newSubcuenta = {...subcuenta}
 }
 getAllSubcuentas(){
-  this.cntService.getCntCuentas().subscribe( {next:(value:cntSubCuentaRequest)=>{   
-    this.Subcuentas = value.data; 
-    this.auxSubCuentas=value.data;
+  this.cntService.getCntCuentas().subscribe( {next:(value:ApiResponse<GenericRecordsPayload<vwCntSubCuentaModel>>)=>{   
+    this.Subcuentas = value.data.records; 
+    this.auxSubCuentas=value.data.records;
     //CustomConsole.log('Subcuentas' , this.Subcuentas) 
    },
   error: (e:any)=>Swal.fire(e.error.error)})
@@ -80,7 +81,10 @@ enviarNewRegistro() {
   // Aquí puedes manejar la lógica de envío del formulario
   //CustomConsole.log('nueva subcuenta' , this.newSubcuenta);
   
-  this.cntService.setNewSubCuenta(this.newSubcuenta).subscribe( {next:(value:any)=>{   
+  this.cntService.setNewSubCuenta(this.newSubcuenta).subscribe( {next:(value:ApiResponse<GenericMutationPayload>)=>{   
+    if (!value.ok) {
+      return;
+    }
     //CustomConsole.log('Subcuentas' ,value) 
     this.filtrarSubCuentas()
    },

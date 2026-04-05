@@ -5,6 +5,7 @@ import { loading } from 'src/app/models/app.loading';
 import { ProductoService } from 'src/app/services/producto.service'; 
 import { BodegasModule } from 'src/app/models/bodegas/bodegas.module';
 import { CustomConsole } from 'src/app/models/CustomConsole';
+import { InventarioWarehousesResponse } from 'src/app/interfaces/inventario-response.interface';
 
 @Component({
   selector: 'app-bodegas',
@@ -20,10 +21,10 @@ export class BodegasComponent implements OnInit {
   getBodegas(){ 
     this.loading.show()
     this.productoService.getbodegas().subscribe(
-      {next:   (datos:any)=>{
+      {next:   (datos:InventarioWarehousesResponse)=>{
          CustomConsole.log('getBodegas',datos); 
-    if (datos.numdata > 0 ){
-      this.bodegas =  datos.data!.map((x:any)=>x.obj)  ;
+    if (datos.data.count > 0 ){
+      this.bodegas =  datos.data.warehouses;
       CustomConsole.log('bodegas',this.bodegas);
     }else{
       this.bodegas = [];

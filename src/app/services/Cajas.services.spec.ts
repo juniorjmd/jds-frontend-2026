@@ -42,7 +42,7 @@ describe('cajasServices', () => {
     localStorage.removeItem('sis41254#2@');
   });
 
-  it('should unwrap open box data from standard api response', () => {
+  it('should return open box data in the standard api response', () => {
     let actualResponse: any;
 
     service.abrirCaja({ id: 5 } as any, 250000).subscribe((response) => {
@@ -73,8 +73,9 @@ describe('cajasServices', () => {
       error: null
     });
 
-    expect(actualResponse.message).toBe('Caja abierta correctamente');
-    expect(actualResponse.box.caja_id).toBe(5);
+    expect(actualResponse.ok).toBeTrue();
+    expect(actualResponse.data.message).toBe('Caja abierta correctamente');
+    expect(actualResponse.data.box.caja_id).toBe(5);
   });
 
   it('should unwrap box summary from standard api response', () => {
@@ -116,8 +117,9 @@ describe('cajasServices', () => {
       error: null
     });
 
-    expect(actualResponse.summary.caja_id).toBe(3);
-    expect(actualResponse.summary.estado).toBe('ABIERTA');
+    expect(actualResponse.ok).toBeTrue();
+    expect(actualResponse.data.summary.caja_id).toBe(3);
+    expect(actualResponse.data.summary.estado).toBe('ABIERTA');
   });
 
   it('should extract backend error messages from standard error payload', () => {
@@ -158,9 +160,42 @@ describe('cajasServices', () => {
       error: null
     });
 
-    expect(actualResponse.count).toBe(1);
-    expect(actualResponse.boxes[0].nombre).toBe('Caja Principal');
-    expect(actualResponse.boxes[0].asignada).toBeTrue();
+    expect(actualResponse.ok).toBeTrue();
+    expect(actualResponse.data.count).toBe(1);
+    expect(actualResponse.data.boxes[0].nombre).toBe('Caja Principal');
+    expect(actualResponse.data.boxes[0].asignada).toBeTrue();
+  });
+
+  it('should return standard getCajasUsuario payload from backend', () => {
+    let actualResponse: any;
+
+    service.getCajasUsuario().subscribe((response) => {
+      actualResponse = response;
+    });
+
+    const req = httpMock.expectOne('/action');
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({
+      action: 'DATABASE_GENERIC_CONTRUCT_SELECT_BY_USER_LOGGED',
+      _tabla: 'vw_cajas_por_usuario',
+      _columnaUsuario: 'idUsuario',
+      _where: [{ columna: 'estadoGeneral', tipocomp: '=', dato: 1 }]
+    });
+
+    req.flush({
+      ok: true,
+      data: {
+        records: [
+          { id: 2, nombre: 'Caja Vehiculos', nombreEstado: 'Cerrada' }
+        ],
+        count: 1
+      },
+      error: null
+    });
+
+    expect(actualResponse.ok).toBeTrue();
+    expect(actualResponse.data.count).toBe(1);
+    expect(actualResponse.data.records[0].nombre).toBe('Caja Vehiculos');
   });
 
   it('should unwrap assigned boxes result from standard api response', () => {
@@ -189,7 +224,8 @@ describe('cajasServices', () => {
       error: null
     });
 
-    expect(actualResponse.message).toBe('Cajas asignadas correctamente');
-    expect(actualResponse.assignedBoxIds).toEqual([1, 3]);
+    expect(actualResponse.ok).toBeTrue();
+    expect(actualResponse.data.message).toBe('Cajas asignadas correctamente');
+    expect(actualResponse.data.assignedBoxIds).toEqual([1, 3]);
   });
 });

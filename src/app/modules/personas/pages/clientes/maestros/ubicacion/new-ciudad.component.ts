@@ -10,6 +10,8 @@ import { MaestroClienteServices } from 'src/app/services/MaestroCliente.services
 import { loading } from 'src/app/models/app.loading'; 
 import { select } from 'src/app/interfaces/generales.interface';
 import { CustomConsole } from 'src/app/models/CustomConsole';
+import { ApiResponse } from 'src/app/interfaces/api-response.interface';
+import { GenericMutationPayload, GenericRecordsPayload } from 'src/app/interfaces/generic-response.interface';
 
 @Component({
   selector: 'app-new-ciudad',
@@ -57,9 +59,9 @@ export class NewCiudadComponent implements OnInit {
     this.cityN.cod_dane = ( codDep! * 1000) +  this.cityN.cod_ciudad ;
     if(this.cityN.id > 0 ){
         this.maestroServicio.actualizarCiudades(this.cityN).subscribe(
-          (respuesta:any)=>{CustomConsole.log(respuesta)
+          (respuesta: ApiResponse<GenericMutationPayload>)=>{CustomConsole.log(respuesta)
             this.loading.hide();
-            if (respuesta.error === 'ok'){
+            if (respuesta.ok){
               alert('datos ingresados con exito'); 
               this.confirmado();                 
             }             
@@ -67,9 +69,9 @@ export class NewCiudadComponent implements OnInit {
         );
     }else{
       this.maestroServicio.setCiudades(this.cityN).subscribe(
-        (respuesta:any)=>{CustomConsole.log(respuesta)
+        (respuesta: ApiResponse<GenericMutationPayload>)=>{CustomConsole.log(respuesta)
           this.loading.hide();
-        if (respuesta.error === 'ok'){
+        if (respuesta.ok){
           alert('datos ingresados con exito'); 
           this.confirmado(); 
         } 
@@ -92,10 +94,10 @@ export class NewCiudadComponent implements OnInit {
   getPaises(){
     this.loading.show() 
     this.maestroServicio.getPaises().subscribe(
-      (datos:any)=>{ 
-    this.numpaises = datos.numdata;
-    if (datos.numdata > 0 ){
-      this.paises = datos.data;
+      (datos: ApiResponse<GenericRecordsPayload<pais>>)=>{ 
+    this.numpaises = datos.data.count;
+    if (datos.ok && datos.data.count > 0 ){
+      this.paises = datos.data.records;
     }else{
       this.paises = [];
       alert('no existen paises Creador');
@@ -107,7 +109,7 @@ export class NewCiudadComponent implements OnInit {
         this.loading.hide() 
       } ,
       error => {this.loading.hide();
-        alert( error.error.error);});
+        alert(this.maestroServicio.getErrorMessage(error));});
    }
 
  
@@ -115,13 +117,13 @@ export class NewCiudadComponent implements OnInit {
      if(id>0){
     this.loading.show() 
     this.maestroServicio.getDepartamentosPorPais(id).subscribe(
-      (datos:any)=>{ 
-    this.numdep = datos.numdata;
+      (datos: ApiResponse<GenericRecordsPayload<departamento>>)=>{ 
+    this.numdep = datos.data.count;
     CustomConsole.log(datos );
     
-    if (datos.numdata > 0 ){
+    if (datos.ok && datos.data.count > 0 ){
 
-      this.dep = datos.data;
+      this.dep = datos.data.records;
     }else{
       this.dep = [];
       alert('no existen Departamentos Para el pais seleccionado'); 
@@ -131,17 +133,17 @@ export class NewCiudadComponent implements OnInit {
         this.loading.hide() 
       } ,
       error => {this.loading.hide();
-        alert( error.error.error);});
+        alert(this.maestroServicio.getErrorMessage(error));});
    }}
 
 
    getDepartamento(){
     this.loading.show() 
     this.maestroServicio.getDepartamentos().subscribe(
-      (datos:any)=>{ 
-    this.numdep = datos.numdata;
-    if (datos.numdata > 0 ){
-      this.dep = datos.data;
+      (datos: ApiResponse<GenericRecordsPayload<departamento>>)=>{ 
+    this.numdep = datos.data.count;
+    if (datos.ok && datos.data.count > 0 ){
+      this.dep = datos.data.records;
     }else{
       this.dep = [];
       alert('no existen Departamentos Creados');
@@ -152,6 +154,6 @@ export class NewCiudadComponent implements OnInit {
         this.loading.hide() 
       } ,
       error => {this.loading.hide();
-        alert( error.error.error);});
+        alert(this.maestroServicio.getErrorMessage(error));});
    }
 }

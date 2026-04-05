@@ -6,6 +6,7 @@ import { usuarioService } from 'src/app/services/usuario.services';
 import { fndCliente } from 'src/app/interfaces/maestro-cliente';
 import { ClientesModel } from 'src/app/models/clientes/clientes.module';
 import Swal from 'sweetalert2';
+import { AdminUserResponse } from 'src/app/interfaces/admin-response.interface';
 @Component({
   selector: 'app-usuario-nuevo',
   template: ` <div class="container-fluid modal_container" >
@@ -129,13 +130,13 @@ export class UsuarioNuevoComponent implements OnInit {
     
     this.loading.show(); 
     this.userService.guardarUsuarios(this.newUsuario).subscribe({next : 
-     (respuesta:any)=>{//CustomConsole.log(respuesta)
+     (respuesta:AdminUserResponse)=>{//CustomConsole.log(respuesta)
       
-     if (respuesta.error === 'ok'){
-       alert('datos ingresados con exito');  
+     if (respuesta.ok){
+       alert(respuesta.data.message || 'datos ingresados con exito');  
        this.newUsuario =  new UsuarioModel(undefined); 
      }else{
-       alert(respuesta.error);
+       alert(respuesta.error?.message ?? 'No fue posible crear el usuario');
      }
      this.loading.hide();
      this.cerrarFormularioTrue()

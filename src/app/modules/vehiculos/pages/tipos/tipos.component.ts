@@ -6,6 +6,7 @@ import { VehiculosService } from 'src/app/services/vehiculos.service';
 import { select } from 'src/app/interfaces/generales.interface';
 import Swal from 'sweetalert2';
 import { CustomConsole } from 'src/app/models/CustomConsole';
+import { VehiculoMutationResponse, VehiculoTiposResponse } from 'src/app/interfaces/vehiculos-response.interface';
 @Component({
   selector: 'app-tipos',
   templateUrl: './tipos.component.html',
@@ -33,9 +34,9 @@ export class TiposComponent {
       /* Read more about isConfirmed, isDenied below */
       if (result.isConfirmed) {
         this.VehiculosService.eliminarTipoDeVehiculo(tipo).subscribe(
-          (respuesta: any) => {
+          (respuesta: VehiculoMutationResponse) => {
             CustomConsole.log(respuesta);
-            if (respuesta.error === 'ok') {
+            if (respuesta.ok) {
               this.getTiposVehiculos();
               Swal.fire('Elemento eliminado con exito!', '', 'success');
             }
@@ -49,11 +50,11 @@ export class TiposComponent {
     this.tiposVehiculo[0] = new TipoVehiculoModule('', '');
     this.loading.show();
     this.VehiculosService.geTiposVehiculos().subscribe(
-      (datos: any) => {
+      (datos: VehiculoTiposResponse) => {
         CustomConsole.log(datos);
 
-        if (datos.numdata > 0) {
-          datos.data!.forEach((dato: TipoVehiculoModule, index: number) => {
+        if (datos.data.count > 0) {
+          datos.data.records.forEach((dato: TipoVehiculoModule, index: number) => {
             this.tiposVehiculo[index] = new TipoVehiculoModule(
               dato.nombre,
 
@@ -86,15 +87,15 @@ export class TiposComponent {
 
     this.loading.show();
     this.VehiculosService.guardarTipoVehiculo(this.newTipoVehiculo).subscribe(
-      (respuesta: any) => {
+      (respuesta: VehiculoMutationResponse) => {
         CustomConsole.log(respuesta);
 
-        if (respuesta.error === 'ok') {
+        if (respuesta.ok) {
           Swal.fire('datos ingresados con exito');
           this.newTipoVehiculo = new TipoVehiculoModule('', '');
           this.getTiposVehiculos();
         } else {
-          Swal.fire(respuesta.error, '', 'error');
+          Swal.fire(respuesta.error?.message ?? 'error en el servidor', '', 'error');
         }
         this.loading.hide();
         return true;

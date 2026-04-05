@@ -11,8 +11,9 @@ import { BodegasModule } from 'src/app/models/bodegas/bodegas.module';
 import { ModalCntSubCuentasComponent } from '../../modals/cuentasContables/cnt-sub-cuentas.component';
 import { responseSubC } from 'src/app/interfaces/odoo-prd';
 import { tap } from 'rxjs';
-import { establecimientosRequest } from 'src/app/interfaces/producto-request';
 import { CustomConsole } from 'src/app/models/CustomConsole';
+import { ApiResponse } from 'src/app/interfaces/api-response.interface';
+import { GenericMutationPayload, GenericRecordsPayload } from 'src/app/interfaces/generic-response.interface';
 
 @Component({
   selector: 'app-crear',
@@ -125,13 +126,13 @@ export class CrearComponent implements OnInit {
   getLocacionPrincipales(){
 this.locationStore = [this.auxBodega];
     this.serviceCaja.getBodegasDisponibles()
-    .subscribe({next:     (datos:any)=>{
+    .subscribe({next:     (datos: ApiResponse<GenericRecordsPayload<{ obj: BodegasModule }>>)=>{
         CustomConsole.log(datos);
         this.locationStore = [];   
         this.locationPOS   = [];
       this.locationVirtual  = [];
-   if (datos.numdata > 0 ){  
-            this.locationStore = datos.data!.map((x:any)=>x.obj) 
+   if (datos.ok && datos.data.count > 0 ){  
+            this.locationStore = datos.data.records.map((x)=>x.obj) 
             this.locationStore.unshift(this.auxBodega);  
      CustomConsole.log("this.locationStore" , this.locationStore) 
      this.newEsta.tipo = 0;
@@ -142,7 +143,7 @@ this.locationStore = [this.auxBodega];
      } ,error:    error => {this.loading.hide();
        
    this.locationStore = [];
-       Swal.fire('error getLocacionPrincipales' , error.error.error);
+       Swal.fire('error getLocacionPrincipales' , this.serviceCaja.getErrorMessage(error));
       } }
      );
   }
@@ -164,11 +165,11 @@ this.locationStore = [this.auxBodega];
   }
   getEstablecimiento(){ 
     this.serviceCaja.getAllEstablecimientos()
-     .subscribe({next:   (datos:establecimientosRequest )=>{
+     .subscribe({next:   (datos: ApiResponse<GenericRecordsPayload<establecimientoModel>> )=>{
          CustomConsole.log(datos);   
-    if (datos.numdata > 0 ){ 
-      this.establecimientos = datos.data??[];
-      this.serviceCaja.asignarEstablecimientos(datos.data);
+    if (datos.ok && datos.data.count > 0 ){ 
+      this.establecimientos = datos.data.records ?? [];
+      this.serviceCaja.asignarEstablecimientos(datos.data.records);
       CustomConsole.log(this.establecimientos);
       this.newEsta.tipo = 0;
       this.newEsta.estado = 0;
@@ -178,7 +179,7 @@ this.locationStore = [this.auxBodega];
       } , error:    error => {this.loading.hide();
         
     this.establecimientos = [];
-        Swal.fire( error.error.error);
+        Swal.fire(this.serviceCaja.getErrorMessage(error));
       }}
       );
   }
@@ -186,12 +187,12 @@ this.locationStore = [this.auxBodega];
   
   getTiposEstablecimiento(){ 
     this.serviceCaja.getTiposEstablecimientos()
-     .subscribe({next:  (datos:any)=>{
+     .subscribe({next:  (datos: ApiResponse<GenericRecordsPayload<TiposEstablecimientosModel>>)=>{
          CustomConsole.log(datos);
          this.tiposEsta = [];   
-    if (datos.numdata > 0 ){ 
+    if (datos.ok && datos.data.count > 0 ){ 
       
-      datos.data!.forEach((dato:TiposEstablecimientos , index:number )=>{
+      datos.data.records.forEach((dato:TiposEstablecimientos , index:number )=>{
         this.tiposEsta[index] = new TiposEstablecimientosModel( dato );
       }) 
       CustomConsole.log(this.tiposEsta);
@@ -200,7 +201,7 @@ this.locationStore = [this.auxBodega];
         this.loading.hide()
       } ,error:  error => {this.loading.hide(); 
         this.tiposEsta = [];
-        Swal.fire( error.error.error);
+        Swal.fire(this.serviceCaja.getErrorMessage(error));
       }}
       );
   }
@@ -254,14 +255,14 @@ this.locationStore = [this.auxBodega];
    this.loading.show(); 
  
    this.serviceCaja.setEstablecimiento(this.newEsta).subscribe(
-    (respuesta:any)=>{CustomConsole.log(respuesta)
+    (respuesta: ApiResponse<GenericMutationPayload>)=>{CustomConsole.log(respuesta)
      
-    if (respuesta.error === 'ok'){
+    if (respuesta.ok){
       Swal.fire('datos ingresados con exito');  
       this.newEsta =  new establecimientoModel(undefined);
       this.getEstablecimiento();
     }else{
-      Swal.fire(respuesta.error);
+      Swal.fire(respuesta.error?.message || 'No fue posible guardar el establecimiento');
       this.loading.hide();
     }
     }

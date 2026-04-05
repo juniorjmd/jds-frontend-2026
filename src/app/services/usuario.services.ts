@@ -7,13 +7,14 @@ import { TABLA } from '../models/app.db.tables';
 import { httpOptions, url } from '../models/app.db.url';
 import { vistas } from '../models/app.db.view';
 import { UsuarioModel } from '../models/usuario.model';
-import { BehaviorSubject, map, Observable } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { Recurso } from '../interfaces/recurso';
 import { perfil, perfilRequest, recursoRequest } from '../interfaces/producto-request';
 import { CustomConsole } from '../models/CustomConsole';
 import { ConfigService } from './config.service';
 import { AdminProfileResourcesResponse, AdminResourcesResponse, AdminUserResponse } from '../interfaces/admin-response.interface';
 import { ApiResponse } from '../interfaces/api-response.interface';
+import { GenericMutationPayload, GenericRecordsPayload } from '../interfaces/generic-response.interface';
 
 @Injectable({
     providedIn: 'root'
@@ -44,56 +45,35 @@ constructor(private http: HttpClient , private configService:ConfigService,
         this.usuarioSource.next(usuario);
       }
 
-      getArrayRecursos():Observable<recursoRequest>{
+      getArrayRecursos():Observable<AdminResourcesResponse>{
         let datos = {"action": actions.getAllRecursosArr   
                     };
         CustomConsole.log('servicios de usuarios activo - getArrayRecursos' ,this.configService.url.actionAdmin , datos, httpOptions());
-        return this.http.post<AdminResourcesResponse>(this.configService.url.actionAdmin , datos, httpOptions()).pipe(
-          map((response) => ({
-            data: response.data.resources,
-            query: '',
-            numdata: response.data.count,
-            error: 'ok',
-          }))
-        );
+        return this.http.post<AdminResourcesResponse>(this.configService.url.actionAdmin , datos, httpOptions());
     } 
     
      
-      getArrayRecursosByPerfil(_idPerfil:number):Observable<recursoRequest>{
+      getArrayRecursosByPerfil(_idPerfil:number):Observable<AdminResourcesResponse>{
         let datos = {"action": actions.getAllRecursosArrByPerfil , _idPerfil };
         CustomConsole.log('servicios de usuarios activo - getArrayRecursosByPerfil' ,this.configService.url.actionAdmin , datos, httpOptions());
-        return this.http.post<AdminResourcesResponse>(this.configService.url.actionAdmin , datos, httpOptions()).pipe(
-          map((response) => ({
-            data: response.data.resources,
-            query: '',
-            numdata: response.data.count,
-            error: 'ok',
-          }))
-        );
+        return this.http.post<AdminResourcesResponse>(this.configService.url.actionAdmin , datos, httpOptions());
     } 
     
-    setArrayRecursos(_perfil:number , _recursos:Recurso):Observable<recursoRequest>{
+    setArrayRecursos(_perfil:number , _recursos:Recurso):Observable<AdminProfileResourcesResponse>{
         let datos = {"action": actions.setAllRecursosArr  , _perfil ,  _recursos           };
         CustomConsole.log('servicios de usuarios activo - setArrayRecursos' ,this.configService.url.actionAdmin , datos, httpOptions());
-        return this.http.post<AdminProfileResourcesResponse>(this.configService.url.actionAdmin , datos, httpOptions()).pipe(
-          map((response) => ({
-            data: [],
-            query: response.data.message,
-            numdata: response.data.updatedCount,
-            error: 'ok',
-          }))
-        );
+        return this.http.post<AdminProfileResourcesResponse>(this.configService.url.actionAdmin , datos, httpOptions());
     } 
-    getPerfiles():Observable<perfilRequest>{
+    getPerfiles():Observable<ApiResponse<GenericRecordsPayload<perfil>>>{
         let datos = {"action": actions.actionSelect ,
                      "_tabla" : TABLA.perfiles
                     };
         CustomConsole.log('servicios de usuarios activo - getPerfiles' ,this.configService.url.action , datos, httpOptions());
-        return this.http.post<perfilRequest>(this.configService.url.action , datos, httpOptions()) ;
+        return this.http.post<ApiResponse<GenericRecordsPayload<perfil>>>(this.configService.url.action , datos, httpOptions()) ;
     } 
 
 
-    setPerfil(p:perfil){
+    setPerfil(p:perfil):Observable<ApiResponse<GenericMutationPayload>>{
         let datos ;
         let  arraydatos ;
         if (p.id != undefined &&  p.id  > 0 ){
@@ -111,21 +91,21 @@ constructor(private http: HttpClient , private configService:ConfigService,
            };
         }  
        CustomConsole.log(datos); 
-       return this.http.post(this.configService.url.action , datos, httpOptions()) ; 
+       return this.http.post<ApiResponse<GenericMutationPayload>>(this.configService.url.action , datos, httpOptions()) ; 
     }
 
 
 
 
-    getUsuarios(){
+    getUsuarios():Observable<ApiResponse<GenericRecordsPayload<Usuarios>>>{
         let datos = {"action": actions.actionSelect ,
                      "_tabla" : vistas.usuario
                     };
         CustomConsole.log('servicios de usuarios activo - getUsuarios' ,this.configService.url.action , datos, httpOptions());
-        return this.http.post(this.configService.url.action , datos, httpOptions()) ;
+        return this.http.post<ApiResponse<GenericRecordsPayload<Usuarios>>>(this.configService.url.action , datos, httpOptions()) ;
     } 
 
-    guardarUsuarios(usuario : Usuarios|UsuarioModel){ 
+    guardarUsuarios(usuario : Usuarios|UsuarioModel):Observable<AdminUserResponse>{ 
         const { ID, ...datosRestantes } = usuario; 
          datosRestantes.nombreCompleto = undefined;
         datosRestantes.usr_registro = undefined;
@@ -137,17 +117,9 @@ constructor(private http: HttpClient , private configService:ConfigService,
                     };
 
         CustomConsole.log('servicios de usuarios activo - getUsuarios' ,this.configService.url.action , datos, httpOptions());
-        return this.http.post<AdminUserResponse>(this.configService.url.actionAdmin , datos, httpOptions()).pipe(
-          map((response) => ({
-            error: 'ok',
-            data: [response.data.usuario],
-            numdata: 1,
-            query: response.data.message,
-            usuarioID: response.data.usuarioID,
-          }))
-        );
+        return this.http.post<AdminUserResponse>(this.configService.url.actionAdmin , datos, httpOptions());
     }
-    guardarUsuarioPerfil(usuario : UsuarioModel ,  perfil:number){
+    guardarUsuarioPerfil(usuario : UsuarioModel ,  perfil:number):Observable<ApiResponse<{ message: string; result: unknown }>>{
       
         let datos = {"action": actions.actionInsertPerfilUsuario  ,
         "_parametro" : { 
@@ -158,10 +130,9 @@ constructor(private http: HttpClient , private configService:ConfigService,
 
         CustomConsole.log('servicios de usuarios activo - guardarUsuarioPerfil' ,this.configService.url.action , datos, httpOptions());
         return this.http
-          .post<ApiResponse<{ message: string; result: unknown }>>(this.configService.url.action , datos, httpOptions())
-          .pipe(map((response) => response.data));
+          .post<ApiResponse<{ message: string; result: unknown }>>(this.configService.url.action , datos, httpOptions());
     }
-    updateUsuarios(usuario : Usuarios){ 
+    updateUsuarios(usuario : Usuarios):Observable<ApiResponse<GenericMutationPayload>>{ 
         let where:any[] = []  
         const { ID, perfil, ...datosRestantes } = usuario; 
         datosRestantes.nombreCompleto = undefined ;
@@ -176,7 +147,7 @@ constructor(private http: HttpClient , private configService:ConfigService,
                     };
 
         CustomConsole.log('servicios de usuarios activo - getUsuarios' ,this.configService.url.action , datos, httpOptions());
-        return this.http.post(this.configService.url.action , datos, httpOptions()) ;
+        return this.http.post<ApiResponse<GenericMutationPayload>>(this.configService.url.action , datos, httpOptions()) ;
     }
 
     getErrorMessage(error: any): string {

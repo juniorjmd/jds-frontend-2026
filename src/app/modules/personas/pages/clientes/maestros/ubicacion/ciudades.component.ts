@@ -10,6 +10,8 @@ import { NewCiudadComponent } from './new-ciudad.component';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogoConfirmacionComponent } from 'src/app/modules/shared/components/dialogo-confirmacion/dialogo-confirmacion.component';
 import { CustomConsole } from 'src/app/models/CustomConsole';
+import { ApiResponse } from 'src/app/interfaces/api-response.interface';
+import { GenericMutationPayload, GenericRecordsPayload } from 'src/app/interfaces/generic-response.interface';
 
 
 @Component({
@@ -54,8 +56,8 @@ numCiudades : number = 0 ;
     .subscribe((confirmado: Boolean)=>{
       if (confirmado){
         this.maestroCliente.eliminarCiudades(CityD).subscribe(
-          (respuesta:any)=>{CustomConsole.log(respuesta)
-            if (respuesta.error === 'ok'){
+          (respuesta: ApiResponse<GenericMutationPayload>)=>{CustomConsole.log(respuesta)
+            if (respuesta.ok){
               alert('datos eliminados con exito');     
               this.listar();
             } 
@@ -68,18 +70,18 @@ numCiudades : number = 0 ;
     this.loading.show();
     this.maestroCliente.getCiudades()
       .subscribe(
-        (datos:any)=>{
+        (datos: ApiResponse<GenericRecordsPayload<ciudad>>)=>{
           
-      this.numCiudades = datos.numdata;
-      if (datos.numdata > 0 ){
-        this.ciudades = datos.data;
+      this.numCiudades = datos.data.count;
+      if (datos.ok && datos.data.count > 0 ){
+        this.ciudades = datos.data.records;
       }else{
         this.ciudades = [];
       }
           this.loading.hide()
         } ,
         error => {this.loading.hide();
-          alert( error.error.error);
+          alert(this.maestroCliente.getErrorMessage(error));
         }
         );
       

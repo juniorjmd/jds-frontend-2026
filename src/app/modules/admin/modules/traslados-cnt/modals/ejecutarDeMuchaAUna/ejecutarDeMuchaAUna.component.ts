@@ -10,6 +10,7 @@ import { cajasServices } from 'src/app/services/Cajas.services';
 import Swal from 'sweetalert2';
 import { establecimientoModel } from 'src/app/models/ventas/establecimientos.model';
 import { TrasladosCuentasModel } from 'src/app/models/trasladosCuentas.';
+import { AdminOperationResponse } from 'src/app/interfaces/admin-response.interface';
 
 @Component({
   selector: 'app-ejecutarDeMuchaAUna',
@@ -107,8 +108,8 @@ export class ejecutarDeMuchaAUnaComponent   {
        }
       
        this.cntService.ejecutarTrasladosCuentas(this.dataProceso!).subscribe(
-        {next:(val:ejecucionTrasladosRequest)=>{
-         this.printer_soporte_final(val.objeto);
+        {next:(val:AdminOperationResponse)=>{
+         this.printer_soporte_final(val.data.objeto as SoporteOperacion);
        },error:e=>Swal.fire('error' , this.cntService.getErrorMessage(e))
        })
    }

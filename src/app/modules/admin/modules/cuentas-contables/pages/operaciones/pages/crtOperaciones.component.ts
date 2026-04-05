@@ -17,6 +17,9 @@ import Swal from 'sweetalert2';
 import { ModalUpdateTransactionTmpComponent } from '../../../modals/modalUpdateTransactionTmp/modalUpdateTransactionTmp.component';
 import { FndClienteComponent } from 'src/app/modules/shared/modals/fnd-cliente/fnd-cliente.component';
 import { ClientesModel } from 'src/app/models/clientes/clientes.module';
+import { AdminOperationResponse } from 'src/app/interfaces/admin-response.interface';
+import { ApiResponse } from 'src/app/interfaces/api-response.interface';
+import { GenericMutationPayload, GenericRecordsPayload } from 'src/app/interfaces/generic-response.interface';
 
 @Component({
   selector: 'crear-operaciones',
@@ -92,9 +95,9 @@ export class CrearOperacionesComponent implements OnInit {
         if (response.confirmado && response.datoDevolucion !== undefined ) {  
           this.subCuentaCreacion = response.datoDevolucion.id_scuenta!; 
           this.load.show();
-          this.cntService.getCntCuentasById(this.subCuentaCreacion).subscribe({next:(value:cntSubCuentaVwRequest)=>{
-            if(value.numdata > 0 ){
-              this.Mcuentas = [...this.Mcuentas , ...value.data  ];
+          this.cntService.getCntCuentasById(this.subCuentaCreacion).subscribe({next:(value:ApiResponse<GenericRecordsPayload<vwCntSubCuentaModel>>)=>{
+            if(value.ok && value.data.count > 0 ){
+              this.Mcuentas = [...this.Mcuentas , ...value.data.records  ];
               this.cntService.changeSubCuenta(this.Mcuentas);
               this.cuentas  = this.Mcuentas.filter(x=>x.cod_cuenta == this.selectedCuentaMayor);
             }
@@ -115,7 +118,7 @@ export class CrearOperacionesComponent implements OnInit {
   eliminarDato(dato:TransaccionesModel){
     this.load.show()
     this.cntService.deleteItemListadoOprTmp(dato.cod_transaccion).
-    subscribe({next:(value:any)=>{ if(value.error == 'ok'){this.getTransaccionesTemporales();}else{Swal.fire('error',value.error,'error')} },
+    subscribe({next:(value:ApiResponse<GenericMutationPayload>)=>{ if(value.ok){this.getTransaccionesTemporales();}else{Swal.fire('error',value.error?.message ?? 'error en el servidor','error')} },
     error:error=>Swal.fire(this.cntService.getErrorMessage(error)), complete: () =>  this.load.hide()
     })
   }
@@ -149,8 +152,8 @@ export class CrearOperacionesComponent implements OnInit {
     //CustomConsole.log('guardaroperacion' , this.operacion);
     if(this.operacion.nombre == ''){Swal.fire('error', 'debe ingresar el nombre de la operacion' , 'warning') ; return;}
     if(this.operCntTransacciones.length <= 0 ){Swal.fire('error', 'No exiten movimientos para generar la operacion' , 'warning') ; return;}
-    this.cntService.setNewOperacion(this.operacion).subscribe({next:(value:any| null)=>{
-      if(value.error == 'ok'){
+    this.cntService.setNewOperacion(this.operacion).subscribe({next:(value:AdminOperationResponse)=>{
+      if(value.ok){
         this.limpiarMovimiento();
         this.getTransaccionesTemporales();
       }
@@ -213,9 +216,9 @@ export class CrearOperacionesComponent implements OnInit {
 
     if(this.cuentas.length == 0){
       this.load.show();
-      this.cntService.getCntCuentasByIdCM(this.selectedCuentaMayor).subscribe({next:(value:cntSubCuentaVwRequest)=>{
-        if(value.numdata > 0 ){
-          this.Mcuentas = [...this.Mcuentas , ...value.data  ];
+      this.cntService.getCntCuentasByIdCM(this.selectedCuentaMayor).subscribe({next:(value:ApiResponse<GenericRecordsPayload<vwCntSubCuentaModel>>)=>{
+        if(value.ok && value.data.count > 0 ){
+          this.Mcuentas = [...this.Mcuentas , ...value.data.records  ];
           this.cntService.changeSubCuenta(this.Mcuentas);
           this.cuentas  = this.Mcuentas.filter(x=>x.cod_cuenta == this.selectedCuentaMayor);
         }
@@ -238,14 +241,14 @@ export class CrearOperacionesComponent implements OnInit {
   }
   getTransaccionesTemporales(){
     this.load.show();
-    this.cntService.getCntTransaccionesTmp().subscribe({next:(value:cntTransaccionesRequest)=>{
+    this.cntService.getCntTransaccionesTmp().subscribe({next:(value:ApiResponse<GenericRecordsPayload<vwTransaccionesModel>>)=>{
       this.operCntTransacciones = [];      
       
       this.operacion.totalDebito = 0;
       this.operacion.totalCredito = 0;
 
-      if(value.numdata > 0 ){ 
-          this.operCntTransacciones = value.data ;                
+      if(value.ok && value.data.count > 0 ){ 
+          this.operCntTransacciones = value.data.records ;                
           this.operacion.totalDebito = this.operCntTransacciones.reduce((sum:number, x) => sum + parseFloat(x.valor_debito.toString()), 0);
           this.operacion.totalCredito = this.operCntTransacciones.reduce((sum:number, x) => sum + parseFloat(x.valor_credito.toString()), 0);
           console.clear()
@@ -272,7 +275,10 @@ export class CrearOperacionesComponent implements OnInit {
     this.newCntTransacciones.nombre_grupo = this.slcuentas.nombre_grupo ; 
     this.newCntTransacciones.nombre_clase = this.slcuentas.nombre_clase ;  
     //CustomConsole.log(this.newCntTransacciones);
-    this.cntService.setCntTransaccionesTmp(this.newCntTransacciones).subscribe({next:(value:any)=>{ 
+    this.cntService.setCntTransaccionesTmp(this.newCntTransacciones).subscribe({next:(value:ApiResponse<GenericMutationPayload>)=>{ 
+      if (!value.ok) {
+        return;
+      }
       this.getTransaccionesTemporales();
       this.limpiarMovimiento();
       this.operacion = new CntOperacionesModel();    }, error:error=>Swal.fire(this.cntService.getErrorMessage(error)),  complete: () =>  this.load.hide()})

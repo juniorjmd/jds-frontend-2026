@@ -1,13 +1,14 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog'; 
 import { MediosDePago } from 'src/app/interfaces/medios-de-pago.interface';
-import { DocumentoRequest } from 'src/app/interfaces/producto-request';
 import { loading } from 'src/app/models/app.loading'; 
 import { CustomConsole } from 'src/app/models/CustomConsole';
 import { DocumentosModel } from 'src/app/models/ventas/documento.model';
 import { DocpagosModel, pagosModel } from 'src/app/models/ventas/pagos.model';
 import { cajasServices } from 'src/app/services/Cajas.services'; 
 import { DocumentoService } from 'src/app/services/documento.service';
+import { ApiResponse } from 'src/app/interfaces/api-response.interface';
+import { GenericRecordsPayload } from 'src/app/interfaces/generic-response.interface';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -39,10 +40,9 @@ export class PagosCPPComponent implements OnInit {
   }
   buscarBono(pago:number){
     this.documentoService. getDocumentosByNumFactura(this.pagos[pago].referencia)
-    .subscribe({next:(retorno:DocumentoRequest)=>{
-      if(retorno.numdata!> 0){
-        let docs:DocumentosModel[] = retorno.data.map(x=>x.objeto); 
-        let docAbono:DocumentosModel =  docs[0];
+    .subscribe({next:(retorno:ApiResponse<GenericRecordsPayload<DocumentosModel>>)=>{
+      if(retorno.ok && retorno.data.count > 0){
+        let docAbono:DocumentosModel = retorno.data.records[0];
         CustomConsole.log('bono encontrado ==>' , retorno , docAbono); 
         let valPago = docAbono.valorTotal - docAbono.campo_auxiliar_6;
         this.pagos[pago].valorPagado = (valPago > this.pagos[this.indexEfectivo].valorPagado)? this.pagos[this.indexEfectivo].valorPagado : valPago ;
@@ -120,14 +120,14 @@ getMediosP(){
   this.listo = false;
   this.loading.show()
   this.serviceCaja.getMediosByEstablecimiento(this.Documento.establecimiento)
-     .subscribe( {next:(datos:any)=>{
+     .subscribe( {next:(datos:ApiResponse<GenericRecordsPayload<MediosDePago>>)=>{
          CustomConsole.log('getMediosCajaActiva',datos);
-      if (datos.numdata > 0 ){ 
+      if (datos.ok && datos.data.count > 0 ){ 
         this.pagos = []; 
          
       CustomConsole.log('pagos recibidos' , this.pagos);
       
-        datos.data!.forEach((dato:MediosDePago )=>{  
+        datos.data.records.forEach((dato:MediosDePago )=>{  
          let pago = new DocpagosModel();  
          pago.idMedioDePago = dato.id;
           pago.nombreMedio =dato.nombre;

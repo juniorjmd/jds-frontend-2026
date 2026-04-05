@@ -41,7 +41,7 @@ describe('usuarioService', () => {
     httpMock.verify();
   });
 
-  it('should unwrap resources from standard api response', () => {
+  it('should return resources in the standard api response', () => {
     let actualResponse: any;
 
     service.getArrayRecursos().subscribe((response) => {
@@ -65,12 +65,12 @@ describe('usuarioService', () => {
       error: null
     });
 
-    expect(actualResponse.error).toBe('ok');
-    expect(actualResponse.numdata).toBe(1);
-    expect(actualResponse.data[0].display_nombre).toBe('Dashboard');
+    expect(actualResponse.ok).toBeTrue();
+    expect(actualResponse.data.count).toBe(1);
+    expect(actualResponse.data.resources[0].display_nombre).toBe('Dashboard');
   });
 
-  it('should unwrap created user from standard api response', () => {
+  it('should return created user in the standard api response', () => {
     let actualResponse: any;
 
     service.guardarUsuarios({
@@ -110,9 +110,9 @@ describe('usuarioService', () => {
       error: null
     });
 
-    expect(actualResponse.error).toBe('ok');
-    expect(actualResponse.usuarioID).toBe(1025);
-    expect(actualResponse.data[0].Login).toBe('jdominguez');
+    expect(actualResponse.ok).toBeTrue();
+    expect(actualResponse.data.usuarioID).toBe(1025);
+    expect(actualResponse.data.usuario.Login).toBe('jdominguez');
   });
 
   it('should extract backend error messages from standard error payload', () => {
@@ -156,7 +156,8 @@ describe('usuarioService', () => {
       error: null
     });
 
-    expect(actualResponse.message).toBe('Perfil asignado correctamente');
-    expect(actualResponse.result._result).toBe(100);
+    expect(actualResponse.ok).toBeTrue();
+    expect(actualResponse.data.message).toBe('Perfil asignado correctamente');
+    expect((actualResponse.data.result as any)._result).toBe(100);
   });
 });

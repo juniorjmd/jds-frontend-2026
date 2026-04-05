@@ -11,6 +11,8 @@ import { DocumentosModel } from 'src/app/models/ventas/documento.model';
 import { FndClienteComponent } from 'src/app/modules/shared/modals/fnd-cliente/fnd-cliente.component';
 import { DocumentoService } from 'src/app/services/documento.service';
 import Swal from 'sweetalert2';
+import { ApiResponse } from 'src/app/interfaces/api-response.interface';
+import { DocumentoActionPayload } from 'src/app/services/documento.service';
 
 @Component({
   selector: 'modal-new-gasto',
@@ -66,15 +68,15 @@ export class NewGastoComponent {
     this.loading.show();
     this.documentoService.crearDocumentoGasto  
     (this.newGasto).pipe(
-      tap((respuesta: DocumentoCierreRequest) => {
+      tap((respuesta: ApiResponse<DocumentoActionPayload>) => {
         CustomConsole.log('crearDocumento', respuesta); 
-        if (respuesta.error == 'ok') {
+        if (respuesta.ok && respuesta.data.documentoFinal) {
           this.response.result = true;
           this.response.documento = respuesta.data.documentoFinal
           this.dialogo.close(this.response);
         } else {
           try {
-            Swal.fire(respuesta.error, '', 'error');
+            Swal.fire(respuesta.error?.message ?? 'error en el servidor', '', 'error');
            } catch (error : any) {
             Swal.fire('error en el servidor', '', 'error');
            }

@@ -6,6 +6,8 @@ import { cajasServices } from 'src/app/services/Cajas.services';
 import { DatosInicialesService } from 'src/app/services/DatosIniciales.services';
 import { DocumentoService } from 'src/app/services/documento.service';
 import Swal from 'sweetalert2';
+import { ApiResponse } from 'src/app/interfaces/api-response.interface';
+import { GenericRecordsPayload } from 'src/app/interfaces/generic-response.interface';
 
 @Component({
   selector: 'app-listarPagoProveedor',
@@ -102,16 +104,12 @@ export class  listarPagoProveedorComponent implements OnInit {
   getDocumentos(){
   
     this.documentoService.getPagosCPP( ).subscribe({next:
-      (datos:any)=>{
-        let cont = 0; 
+      (datos:ApiResponse<GenericRecordsPayload<DocumentosModel>>)=>{
          this.documentos = []; 
-         CustomConsole.log('getDocumentos', datos.numdata , 'datos', datos );
+         CustomConsole.log('getDocumentos', datos.data.count , 'datos', datos );
          
-    if (datos.numdata > 0 ){ 
-      datos.data!.forEach((dato:any , index :number )=>{  
-       this.documentos.push(dato.objeto);
-       
-      }) 
+    if (datos.ok && datos.data.count > 0 ){ 
+      this.documentos = datos.data.records as DevolucionModel[];
    } 
   } ,error:
   (error: any) =>{

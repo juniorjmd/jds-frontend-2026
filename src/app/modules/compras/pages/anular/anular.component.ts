@@ -1,5 +1,5 @@
 import { Component, inject, OnInit } from '@angular/core';
-import {   DocumentoCierreRequest, DocumentoCompraRequest } from 'src/app/interfaces/producto-request';
+import {   DocumentoCierreRequest } from 'src/app/interfaces/producto-request';
 import { CarteraModel } from 'src/app/models/cartera/cartera.model';
 import { PrinterManager } from 'src/app/models/printerManager';
 import { arrRetorno, documentoDev, DocumentosComprasModel, DocumentosModel } from 'src/app/models/ventas/documento.model';
@@ -11,6 +11,8 @@ import { MatDialog } from '@angular/material/dialog';
 import { tap } from 'rxjs';
 import { cajasServices } from 'src/app/services/Cajas.services';
 import { CustomConsole } from 'src/app/models/CustomConsole';
+import { ApiResponse } from 'src/app/interfaces/api-response.interface';
+import { GenericRecordsPayload } from 'src/app/interfaces/generic-response.interface';
 
 @Component({
   selector: 'app-anular',
@@ -56,10 +58,9 @@ printDocumento(doc:DocumentosModel){
   buscarDocumento(  ){
 
     this.docService.getDocComprasByNumFactura(this.docAbono.idDocumentoFinal )
-    .subscribe({next:(retorno:DocumentoCompraRequest)=>{
-      if(retorno.numdata!> 0){
-        let docs:DocumentosComprasModel[] = retorno.data.map(x=>x.objeto); 
-        this.docAbono =  docs[0];
+    .subscribe({next:(retorno:ApiResponse<GenericRecordsPayload<DocumentosComprasModel>>)=>{
+      if(retorno.ok && retorno.data.count > 0){
+        this.docAbono = retorno.data.records[0];
         this.docEnvio.idDocF = this.docAbono.idDocumentoFinal;
         this.docEnvio.idEsta = this.docAbono.establecimiento;
         CustomConsole.log('retorno' , retorno , this.docAbono);
@@ -121,8 +122,12 @@ printDocumento(doc:DocumentosModel){
       return
      }
      
-     this.docService.crearNotaDebito(this.docEnvio).subscribe({next:(value:DocumentoCierreRequest)=>{
+     this.docService.crearNotaDebito(this.docEnvio).subscribe({next:(value:ApiResponse<any>)=>{
       CustomConsole.log('crearDocumentoAbono',value); 
+      if (!value.ok || !value.data.documentoFinal) {
+        Swal.fire('error', value.error?.message ?? 'Error interno del servidor', 'error');
+        return;
+      }
       
       this.buscarDocumento();
      this.printDocumento(value.data.documentoFinal )

@@ -1,6 +1,8 @@
 import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
 import { ProductoModel } from 'src/app/models/producto/producto.module';
 import { ActiDescuentoService } from 'src/app/services/actiDescuento.service';
+import { ApiResponse } from 'src/app/interfaces/api-response.interface';
+import { GenericMutationPayload, GenericRecordsPayload } from 'src/app/interfaces/generic-response.interface';
 
 @Component({
   selector: 'app-find-productos', 
@@ -27,12 +29,20 @@ export class FindProductosComponent implements OnInit {
     let id:string = (typeof( item.id ) == 'string')? item.id! :item.id!.toString() ;
     if(!item.selected){
       item.selected= true;
-      this.actividadService.setProducto(id).subscribe({next:val=>{
+      this.actividadService.setProducto(id).subscribe({next:(val:ApiResponse<GenericMutationPayload>)=>{
+        if (!val.ok) {
+          item.selected = false;
+          return;
+        }
         item.selected= true;
       }})
     }else{
       
-      this.actividadService.deleteProducto(id  ) .subscribe({next:val=>{
+      this.actividadService.deleteProducto(id  ) .subscribe({next:(val:ApiResponse<GenericMutationPayload>)=>{
+        if (!val.ok) {
+          item.selected = true;
+          return;
+        }
         item.selected= false;
       }})
    
@@ -55,12 +65,12 @@ export class FindProductosComponent implements OnInit {
   busquedaFiltradoPorNombre(){ 
       this.actividadService.
       getProductosDisponiblesByName(this.filtroName)
-      .subscribe({next:(value)=>{ 
-        if(value.numdata > 0) { 
+      .subscribe({next:(value:ApiResponse<GenericRecordsPayload<ProductoModel>>)=>{ 
+        if(value.data.count > 0) { 
           //CustomConsole.log('termina la busqueda');
           
-          this.productosFiltrados = value.data;
-          const nuevosProductos = value.data.filter((nuevoProducto: ProductoModel) => 
+          this.productosFiltrados = value.data.records;
+          const nuevosProductos = value.data.records.filter((nuevoProducto: ProductoModel) => 
             !this.productos.some(producto => producto.id === nuevoProducto.id)
           ); 
           this.actividadService.setArrayProductos( [...this.productos, ...nuevosProductos] );

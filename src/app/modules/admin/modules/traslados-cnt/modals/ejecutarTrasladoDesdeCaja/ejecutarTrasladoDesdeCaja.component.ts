@@ -9,9 +9,11 @@ import { cajasResumenModel } from 'src/app/models/ventas/cajasResumen.model';
 import { cajaModel } from 'src/app/models/ventas/cajas.model';
 import { cajasServices } from 'src/app/services/Cajas.services';
 import Swal from 'sweetalert2';
-import { cajaRequest, ejecucionTrasladosRequest } from 'src/app/interfaces/producto-request';
 import { PrinterManager } from 'src/app/models/printerManager';
 import { SoporteOperacion } from 'src/app/interface/soporte-operacion';
+import { AdminOperationResponse } from 'src/app/interfaces/admin-response.interface';
+import { ApiResponse } from 'src/app/interfaces/api-response.interface';
+import { GenericRecordsPayload } from 'src/app/interfaces/generic-response.interface';
 
 @Component({
   selector: 'app-ejecutarTrasladoDesdeCaja',
@@ -32,9 +34,9 @@ export class ejecutarTrasladoDesdeCajaComponent {
 
   constructor(  @Inject(MAT_DIALOG_DATA) public dataIngreso:CntOperacionPrestablecidas,public dialogo: MatDialogRef<newTrasladoAsignarSaldoComponent>,  ){
     this.dataProceso =  new TrasladosCuentasModel();
-    this.cajasService.getCajasTraslados().subscribe({next:(value:cajaRequest)=>{
-      if(value.error != 'ok'){
-        Swal.fire('error',value.error,'error')
+    this.cajasService.getCajasTraslados().subscribe({next:(value:ApiResponse<GenericRecordsPayload<cajaModel>>)=>{
+      if(!value.ok){
+        Swal.fire('error',value.error?.message || 'No fue posible consultar las cajas','error')
       }else{ 
         let cajasel:cajaModel = { id: 0, nombre: 'Seleccione una caja origen', 
           idCCntCCobrar:  0,
@@ -47,7 +49,7 @@ export class ejecutarTrasladoDesdeCajaComponent {
           idCCntIngDifBonoRegalo:   0 
 };
 
-        this.cajas =[{...cajasel}  , ...value.data.filter(x=>(x.cuentaContableEfectivo||0) > 0)]  
+        this.cajas =[{...cajasel}  , ...value.data.records.filter(x=>(x.cuentaContableEfectivo||0) > 0)]  
         //CustomConsole.log('cajaas' , this.cajas);
         
       }
@@ -89,8 +91,8 @@ export class ejecutarTrasladoDesdeCajaComponent {
       newCuentaOrigen.nombre = this.cajas[this.cajaSeleccionada].nombre_scuenta_venta!;
 
       this.dataProceso?.cuentas.push(newCuentaOrigen);
-      this.cntService.ejecutarTrasladosCuentas(this.dataProceso!).subscribe({next:(val:ejecucionTrasladosRequest)=>{
-        this.printer_soporte_final(val.objeto);
+      this.cntService.ejecutarTrasladosCuentas(this.dataProceso!).subscribe({next:(val:AdminOperationResponse)=>{
+        this.printer_soporte_final(val.data.objeto as SoporteOperacion);
       },error:e=>Swal.fire('error' , this.cntService.getErrorMessage(e))
       })
       

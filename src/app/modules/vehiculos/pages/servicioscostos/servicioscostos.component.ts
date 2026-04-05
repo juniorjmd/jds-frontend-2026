@@ -7,6 +7,7 @@ import { VehiculosService } from 'src/app/services/vehiculos.service';
 import Swal from 'sweetalert2'; 
 import { loading } from 'src/app/models/app.loading';   
 import { CustomConsole } from 'src/app/models/CustomConsole';
+import { VehiculoMutationResponse, VehiculoNoAsignadosResponse, VehiculoServiciosCostosResponse, VehiculoServiciosResponse, VehiculoTiposServiciosResponse } from 'src/app/interfaces/vehiculos-response.interface';
 
 @Component({
   selector: 'app-servicioscostos',
@@ -45,9 +46,9 @@ Swal.fire({
   preConfirm: (valor) => {
     costo.valor = valor;
     this.VehiculosService.guardarCostoServicio(costo).subscribe(
-      (respuesta:any)=>{CustomConsole.log(respuesta)
+      (respuesta:VehiculoMutationResponse)=>{CustomConsole.log(respuesta)
        
-      Swal.fire(respuesta.message ?? 'datos ingresados con exito');  
+      Swal.fire(respuesta.data.message ?? 'datos ingresados con exito');  
       //-------------------
       this.limpiar();
     //----------------------------------
@@ -78,8 +79,8 @@ Swal.fire({
       if (result.isConfirmed) {
         
         this.VehiculosService.eliminarCostosServicios(costo).subscribe(
-          (respuesta:any)=>{CustomConsole.log(respuesta)
-            if (respuesta.error === 'ok'){
+          (respuesta:VehiculoMutationResponse)=>{CustomConsole.log(respuesta)
+            if (respuesta.ok){
               this.getTiposVehiculos();
               this.getCostosServiciosVehiculos();
               Swal.fire('Elemento eliminado con exito!', '', 'success');
@@ -110,11 +111,11 @@ Swal.fire({
     this.tiposServicio[0] =  new TiposServiciosModule('','' );
     this.loading.show()
     this.VehiculosService.getTiposServicios().subscribe({next:
-      (datos:any)=>{
+      (datos:VehiculoTiposServiciosResponse)=>{
          CustomConsole.log(datos);
          
-    if (datos.numdata > 0 ){ 
-      this.tiposServicio = datos.data!.map((x:any)=>x.obj) ; 
+    if (datos.data.count > 0 ){ 
+      this.tiposServicio = datos.data.records ; 
       CustomConsole.log(this.tiposServicio);
     }else{
       this.tiposServicio = [];
@@ -134,10 +135,10 @@ Swal.fire({
     if (this.tipo_servicio <=  0  ) { return;  }
     this.loading.show()
     this.VehiculosService.getServiciosPorTipo(this.tipo_servicio).subscribe(
-      (datos:any)=>{
+      (datos:VehiculoServiciosResponse)=>{
          CustomConsole.log(datos); 
-    if (datos.numdata > 0 ){ 
-      this.serviciosAVehiculos = datos.data!.map((x:any)=>x.obj) ;
+    if (datos.data.count > 0 ){ 
+      this.serviciosAVehiculos = datos.data.records ;
       CustomConsole.log(this.serviciosAVehiculos);
     }else{
       this.serviciosAVehiculos = [];
@@ -172,11 +173,11 @@ Swal.fire({
     this.tiposVehiculo[0] =  new TipoVehiculoModule('','');
     this.loading.show()
     this.VehiculosService.getVehiculoNoAsignadoAServicios(this.servicioSelecionado).subscribe(
-      (datos:any)=>{
+      (datos:VehiculoNoAsignadosResponse)=>{
          CustomConsole.log(datos);
          
-    if (datos.numdata > 0 ){
-      this.tiposVehiculo = datos.datos! 
+    if (datos.data.count > 0 ){
+      this.tiposVehiculo = datos.data.records 
       CustomConsole.log('getVehiculoNoAsignadoAServicios',this.tiposVehiculo);
     }else{
       this.tiposVehiculo = [];
@@ -212,9 +213,9 @@ this.loading.show();
 // newServiciosCostos:ServiciosCostosModule = new ServiciosCostosModule(0,0,0,0);
 this.newServiciosCostos = new ServiciosCostosModule(this.servicioSelecionado, this.tipoVehiculo ,this.precio );
 this.VehiculosService.guardarCostoServicio(this.newServiciosCostos).subscribe(
- (respuesta:any)=>{CustomConsole.log(respuesta)
+ (respuesta:VehiculoMutationResponse)=>{CustomConsole.log(respuesta)
   
- Swal.fire(respuesta.message ?? 'datos ingresados con exito');  
+ Swal.fire(respuesta.data.message ?? 'datos ingresados con exito');  
   //-------------------
  this.limpiar();
 //----------------------------------
@@ -233,12 +234,12 @@ this.VehiculosService.guardarCostoServicio(this.newServiciosCostos).subscribe(
   this.tiposVehiculo[0] =  new TipoVehiculoModule('','');
   this.loading.show()
   this.VehiculosService.getCostosServicios(this.servicioSelecionado).subscribe(
-    (datos:any)=>{
+    (datos:VehiculoServiciosCostosResponse)=>{
        CustomConsole.log(datos);
        
-  if (datos.numdata > 0 ){ 
+  if (datos.data.count > 0 ){ 
     
-    this.arrServiciosCostos = datos.data!; 
+    this.arrServiciosCostos = datos.data.records; 
    
     CustomConsole.log(this.arrServiciosCostos);
   }else{

@@ -8,9 +8,11 @@ import { ProductoService } from 'src/app/services/producto.service';
 import { ModalCntSubCuentasComponent } from '../cuentasContables/cnt-sub-cuentas.component';
 import { tap } from 'rxjs';
 import { loading } from 'src/app/models/app.loading';
-import { categoriaRequest } from 'src/app/interfaces/producto-request';
 import Swal from 'sweetalert2';
 import { CustomConsole } from 'src/app/models/CustomConsole';
+import { InventarioCategoriesResponse } from 'src/app/interfaces/inventario-response.interface';
+import { ApiResponse } from 'src/app/interfaces/api-response.interface';
+import { GenericMutationPayload } from 'src/app/interfaces/generic-response.interface';
  
 
 @Component({
@@ -110,20 +112,21 @@ filtrarPadre3(){
       this.newCateg.name_usuario_edicion = undefined ;  
 
       //CustomConsole.log(this.newCateg);
-      this.prdService.setCategorias(this.newCateg).subscribe({next:(value:any)=>{ 
-        //CustomConsole.log(value)
-        this.dialogo.close(true); 
+      this.prdService.setCategorias(this.newCateg).subscribe({next:(value:ApiResponse<GenericMutationPayload>)=>{ 
+        if (value.ok) {
+          this.dialogo.close(true); 
+        }
       },error:error=>Swal.fire(error)})
     } 
   }
   getAllCategorias(){ 
     this.loading.show()
     this.prdService.getCategorias().subscribe({
-       next :(datos:categoriaRequest)=>{
+       next :(datos:InventarioCategoriesResponse)=>{
          //CustomConsole.log('getAllCategorias',datos);
          
-    if (datos.numdata > 0 ){  
-        this.categorias = datos.data!.map((x:any)=>x.obj) 
+    if (datos.data.count > 0 ){  
+        this.categorias = datos.data.categories;
         this.prdService.asignarCategorias(this.categorias);
         //CustomConsole.log(this.categorias);
         this.newAbrirDialog.closeAll();

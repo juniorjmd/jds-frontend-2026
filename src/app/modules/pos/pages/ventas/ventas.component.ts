@@ -10,6 +10,7 @@ import { errorOdoo, responsePrd } from 'src/app/interfaces/odoo-prd';
 import { MediosDePago } from 'src/app/interfaces/medios-de-pago.interface';
 import { cajasServices } from 'src/app/services/Cajas.services';
 import { DocpagosModel, pagosModel } from 'src/app/models/ventas/pagos.model';
+import { cajaModel } from 'src/app/models/ventas/cajas.model';
 import { PagosVentaComponent } from '../../modals/pagos-venta/pagos-venta.component'; 
 import { BuscarProdDirectoComponent } from '../../modals/buscar-prod-directo/buscar-prod-directo.component'; 
 import { productoDocumento } from 'src/app/interfaces/clientes-odoo';
@@ -21,7 +22,7 @@ import { of } from 'rxjs';
 import Swal from 'sweetalert2';
 import { IngresarProductoVentaComponent } from '../../modals/ingresar-producto-venta/ingresar-producto-venta.component';
 import { DtoDocumentoProducto } from 'src/app/interfaces/dto-documento-producto';
-import { cajaRequest, DocumentoCierreRequest, DocumentoRequest } from 'src/app/interfaces/producto-request';
+import { cajaRequest } from 'src/app/interfaces/producto-request';
 import { DatosInicialesService } from 'src/app/services/DatosIniciales.services';
 import { vwsucursal } from 'src/app/models/app.db.interfaces';
 import { NewGastoComponent } from '../../modals/new-gasto/new-gasto.component';
@@ -34,6 +35,10 @@ import { EmpleadoModel } from 'src/app/models/empleados/empleados.module';
 import { ModalUpdateProductoVentaComponent } from '../../modals/ModalUpdateProductoVenta/ModalUpdateProductoVenta.component';
 import { IngresoServicioVehiculoComponent } from '../../modals/ingreso_servicio_vehiculos/ingreso.component';
 import { CustomConsole } from 'src/app/models/CustomConsole';
+import { ApiResponse } from 'src/app/interfaces/api-response.interface';
+import { DocumentoActionPayload, DocumentoMutationPayload, DocumentoRecordsPayload } from 'src/app/services/documento.service';
+import { InventarioProductResponse, InventarioReturnResponse } from 'src/app/interfaces/inventario-response.interface';
+import { GenericRecordsPayload } from 'src/app/interfaces/generic-response.interface';
 
 @Component({
   selector: 'app-ventas',
@@ -87,7 +92,7 @@ export class VentasComponent implements AfterViewInit, OnInit {
   ngOnInit(): void {   
     this.dInicialServ.getParametroValidarExistencia().subscribe({next:value=>{
       CustomConsole.log('validar existencia en venta', value ); 
-      this.dInicialServ.setParametroExistencia(value.data[0]);
+      this.dInicialServ.setParametroExistencia(value.data.records[0]);
     }});
     this.dInicialServ.currentVendedores.subscribe({next:value=>{
       this.empleados = value??[];
@@ -98,9 +103,9 @@ export class VentasComponent implements AfterViewInit, OnInit {
 
       if ( this.continuar ){
         
-        this.serviceCaja.getCajasActivasUsuarioActivo().subscribe({next:(value)=>{
+        this.serviceCaja.getCajasActivasUsuarioActivo().subscribe({next:(value: ApiResponse<{ records: cajaModel[]; count: number }>)=>{
           CustomConsole.log('CAJA USUARIO LOGUEADO',JSON.stringify(value))
-          if(value.numdata > 0 ){
+          if(value.data.count > 0 ){
             this.getMediosP();
             this.getAsyncDocumentos();
           }else{
@@ -112,9 +117,9 @@ export class VentasComponent implements AfterViewInit, OnInit {
       }
       else{
         
-        this.serviceCaja.getCajasActivasUsuarioActivo().subscribe({next:(value)=>{
+        this.serviceCaja.getCajasActivasUsuarioActivo().subscribe({next:(value: ApiResponse<{ records: cajaModel[]; count: number }>)=>{
           CustomConsole.log('CAJA USUARIO LOGUEADO',JSON.stringify(value))
-          if(value.numdata <= 0 ){  
+          if(value.data.count <= 0 ){  
             this._Router.navigate(['home','pos','abrir']);
           }
         },error:e=>Swal.fire(JSON.stringify(e))})
@@ -130,9 +135,9 @@ export class VentasComponent implements AfterViewInit, OnInit {
   }
 
   getDatosContables(){
-    this.serviceCaja.getCuentasContablesEstablecimientoUsuario().subscribe({next:(value:cajaRequest)=>{
+    this.serviceCaja.getCuentasContablesEstablecimientoUsuario().subscribe({next:(value:ApiResponse<{ records: cajaModel[]; count: number }>)=>{
       CustomConsole.log('getCuentasContablesEstablecimientoUsuario' , value)
-      this.dInicialServ.validarCuentasContablesEstablecimiento(value.data[0] ) 
+      this.dInicialServ.validarCuentasContablesEstablecimiento(value.data.records[0] ) 
     }})
   }
 
@@ -196,15 +201,15 @@ export class VentasComponent implements AfterViewInit, OnInit {
   async getAsyncDocumentos() { 
     this.loading.show();
     await this.documentoService.getDocumentosCaja().subscribe({
-      next:(datos: any) => {
+      next:(response: ApiResponse<DocumentoRecordsPayload>) => {
         this.documentos = [];
         let documentoSeleccionado: DocumentosModel[] ;
-        CustomConsole.log('getDocumentos', datos.numdata); 
-        if (datos.numdata > 0) {
-          this.documentos = datos.data ; 
+        CustomConsole.log('getDocumentos', response.data.count); 
+        if (response.data.count > 0) {
+          this.documentos = response.data.records ; 
           CustomConsole.log('getDocumentos_recuest', this.documentos);
-          if (datos.numdata === 1) {
-            this.documentoActivo = datos.data[0];
+          if (response.data.count === 1) {
+            this.documentoActivo = response.data.records[0];
           } else {
             documentoSeleccionado = this.documentos.filter((x: DocumentosModel) => x.estado == 1) ; 
           CustomConsole.log('documentoSeleccionado' , documentoSeleccionado);
@@ -222,7 +227,7 @@ export class VentasComponent implements AfterViewInit, OnInit {
         }
         this.loading.hide();
       },
-      error: (error) =>{ Swal.fire('getAsyncDocumentos - Error:', JSON.stringify(error) ) ;  this.loading.hide();},
+      error: (error) =>{ Swal.fire('getAsyncDocumentos - Error:', this.documentoService.getErrorMessage(error) ) ;  this.loading.hide();},
       complete: () =>this.loading.hide()
     });
   }
@@ -231,18 +236,18 @@ export class VentasComponent implements AfterViewInit, OnInit {
    getDocumentos() {  
     this.loading.show();
      this.documentoService.getDocumentosCaja().subscribe({
-      next: (datos: any) => 
+      next: (response: ApiResponse<DocumentoRecordsPayload>) => 
         {
         this.documentos = [];
         let documentoSeleccionado: DocumentosModel[] ;
-        CustomConsole.log('getDocumentos', datos.numdata);
-        CustomConsole.log('getDocumentos_recuest', datos);
+        CustomConsole.log('getDocumentos', response.data.count);
+        CustomConsole.log('getDocumentos_recuest', response);
 
-        if (datos.numdata > 0) {
-          this.documentos = datos.data ; 
+        if (response.data.count > 0) {
+          this.documentos = response.data.records ; 
           CustomConsole.log('getDocumentos_recuest', this.documentos);
-          if (datos.numdata === 1) {
-            this.documentoActivo = datos.data[0];
+          if (response.data.count === 1) {
+            this.documentoActivo = response.data.records[0];
           } else {
             documentoSeleccionado = this.documentos.filter((x: DocumentosModel) => x.estado == 1) ; 
           CustomConsole.log('documentoSeleccionado' , documentoSeleccionado);
@@ -261,7 +266,7 @@ export class VentasComponent implements AfterViewInit, OnInit {
         }
         
       },
-      error: (error) => {Swal.fire('getDocumentos - Error:', JSON.stringify(error) ) ;
+      error: (error) => {Swal.fire('getDocumentos - Error:', this.documentoService.getErrorMessage(error) ) ;
         this.loading.hide();},
       complete: () =>
         this.loading.hide() 
@@ -314,27 +319,20 @@ export class VentasComponent implements AfterViewInit, OnInit {
   crearDocumento() {
     this.loading.show();
     this.documentoService.crearDocumento().pipe(
-      tap((respuesta: any) => {
+      tap((response: ApiResponse<DocumentoMutationPayload>) => {
+        const respuesta = response.data;
         CustomConsole.log('crearDocumento', respuesta); 
-        if (respuesta.error === 'ok') {
+        if (response.ok) {
           this.getDocumentos();
         } else {
-          try {
-            Swal.fire(respuesta.error, '', 'error');
-           } catch (error : any) {
-            Swal.fire('error en el servidor', '', 'error');
-           }
+          Swal.fire('error en el servidor', '', 'error');
         }
         this.loading.hide();
         this.irbuscarProducto();
       }),
       catchError((error: any) => {
         this.loading.hide(); 
-        try {
-          Swal.fire(error.error.error, '', 'error');
-         } catch (error : any) {
-          Swal.fire('error en el servidor', '', 'error');
-         }
+        Swal.fire(this.documentoService.getErrorMessage(error), '', 'error');
         return of(null);
       })
     ).subscribe({
@@ -355,10 +353,10 @@ export class VentasComponent implements AfterViewInit, OnInit {
       this.loading.show();
       this.productoService.getProductoByIdOrCodBarra(this.codigoProducto).subscribe({
         next:(value)=>{CustomConsole.log(value)
-          if(value.numdata > 0 ){
-          if(value.numdata > 1 ){
+          if(value.data.count > 0 ){
+          if(value.data.count > 1 ){
             this.buscarClose = false;
-            this.newAbrirDialog.open(BuscarProdDirectoComponent, { data: value.data })
+            this.newAbrirDialog.open(BuscarProdDirectoComponent, { data: value.data.products })
             .afterClosed()
                   .pipe(
                     tap((response: responsePrd) => {
@@ -397,7 +395,7 @@ export class VentasComponent implements AfterViewInit, OnInit {
      
             }else{
           let datoAsignacion:DtoDocumentoProducto = {
-            'producto': value.data[0]    ,
+            'producto': value.data.products[0]    ,
              'documento':this.documentoActivo!
            }
            this.newAbrirDialog.open(IngresarProductoVentaComponent, { data:  datoAsignacion })
@@ -460,11 +458,11 @@ export class VentasComponent implements AfterViewInit, OnInit {
     CustomConsole.log(linea);
     this.loading.show();
     this.productoService.devolverPrdCompra(linea).pipe(
-      tap((respuesta: any) => {
+      tap((respuesta: InventarioReturnResponse) => {
         CustomConsole.log(JSON.stringify(respuesta));
-        if (respuesta.error !== 'ok') { 
+        if (!respuesta.ok) { 
           try {
-            Swal.fire(respuesta.error, '', 'error');
+            Swal.fire(respuesta.error?.message ?? 'error en el servidor', '', 'error');
            } catch (error : any) {
             Swal.fire('error en el servidor', '', 'error');
            }
@@ -518,9 +516,10 @@ export class VentasComponent implements AfterViewInit, OnInit {
             }else{
              // this.documentoActivo 
 
-             this.documentoService.getDocumentoActivo().subscribe({next:(value:DocumentoRequest)=>{
-              CustomConsole.log('docuemento activo actual',value.data[0].objeto)
-              this.documentoActivo = value.data[0].objeto
+             this.documentoService.getDocumentoActivo().subscribe({next:(value:ApiResponse<GenericRecordsPayload<DocumentosModel>>)=>{
+              if (!value.ok || value.data.count === 0) { return; }
+              CustomConsole.log('docuemento activo actual',value.data.records[0])
+              this.documentoActivo = value.data.records[0]
               this.empleadoActivo = (this.empleados.filter(x=> x.id == this.documentoActivo?.cod_vendedor )[0] )??[]
               if(this.empleadoActivo.id == undefined){
                 this.empleadoActivo.nombreCompleto =  this.documentoActivo?.vendedorNombre!;
@@ -559,9 +558,10 @@ export class VentasComponent implements AfterViewInit, OnInit {
             }else{
              // this.documentoActivo 
 
-             this.documentoService.getDocumentoActivo().subscribe({next:(value:DocumentoRequest)=>{
-              CustomConsole.log('docuemento activo actual',value.data[0].objeto)
-              this.documentoActivo = value.data[0].objeto
+             this.documentoService.getDocumentoActivo().subscribe({next:(value:ApiResponse<GenericRecordsPayload<DocumentosModel>>)=>{
+              if (!value.ok || value.data.count === 0) { return; }
+              CustomConsole.log('docuemento activo actual',value.data.records[0])
+              this.documentoActivo = value.data.records[0]
               this.empleadoActivo = (this.empleados.filter(x=> x.id == this.documentoActivo?.cod_vendedor )[0] )??[]
               if(this.empleadoActivo.id == undefined){
                 this.empleadoActivo.nombreCompleto =  this.documentoActivo?.vendedorNombre!;
@@ -718,17 +718,17 @@ export class VentasComponent implements AfterViewInit, OnInit {
     }
 
     this.loading.show();
-    this.documentoService.cerrarDocumento(this.documentoActivo!.orden).subscribe({next:(respuesta: DocumentoCierreRequest) => {
+    this.documentoService.cerrarDocumento(this.documentoActivo!.orden).subscribe({next:(respuesta: ApiResponse<DocumentoActionPayload>) => {
       console.clear();
       CustomConsole.log("respuesta cierre documento =>" , respuesta)
-      if (respuesta.error === 'ok') {  
+      if (respuesta.ok && respuesta.data.documentoFinal) {  
         this.documentoRetorno = Object.assign(new DocumentosModel(), respuesta.data.documentoFinal); 
         CustomConsole.log('facturarDocumento =>>>>>', this.documentoRetorno);
         this.printer_factura_final();
         this.crearDocumento();
       } else {
         try {
-          Swal.fire(respuesta.error, '', 'error');
+          Swal.fire(respuesta.error?.message ?? 'error en el servidor', '', 'error');
          } catch (error : any) {
           Swal.fire('error en el servidor', '', 'error');
          }
@@ -784,17 +784,17 @@ export class VentasComponent implements AfterViewInit, OnInit {
     }
 
     this.loading.show();
-    this.documentoService.cerrarDocumentoRemision(this.documentoActivo!.orden).subscribe({next:(respuesta: DocumentoCierreRequest) => {
+    this.documentoService.cerrarDocumentoRemision(this.documentoActivo!.orden).subscribe({next:(respuesta: ApiResponse<DocumentoActionPayload>) => {
       //console.clear();
       CustomConsole.log("respuesta cierre documento =>" , respuesta)
-      if (respuesta.error === 'ok') {  
+      if (respuesta.ok && respuesta.data.documentoFinal) {  
         this.documentoRetorno = Object.assign(new DocumentosModel(), respuesta.data.documentoFinal); 
         CustomConsole.log('facturarDocumento =>>>>>', this.documentoRetorno);
         this.printer_factura_final();
         this.crearDocumento();
       } else {
         try {
-          Swal.fire(respuesta.error, '', 'error');
+          Swal.fire(respuesta.error?.message ?? 'error en el servidor', '', 'error');
          } catch (error : any) {
           Swal.fire('error en el servidor', '', 'error');
          }
@@ -826,13 +826,9 @@ export class VentasComponent implements AfterViewInit, OnInit {
     this.documentoActivo = doc;
     this.loading.show();
     this.documentoService.cambiarDocumento(this.documentoActivo!.orden).pipe(
-      tap((respuesta: any) => {
-        if (respuesta.error !== 'ok') {  
-          try {
-            Swal.fire(respuesta.error, '', 'error');
-           } catch (error : any) {
-            Swal.fire('error en el servidor', '', 'error');
-           }
+      tap((response: ApiResponse<{ message: string; documentId: number }>) => {
+        if (!response.ok) {  
+          Swal.fire('error en el servidor', '', 'error');
         } else {  
           this.empleadoActivo = (this.empleados.filter(x=> x.id == this.documentoActivo?.cod_vendedor )[0])??[] 
 
@@ -854,11 +850,7 @@ export class VentasComponent implements AfterViewInit, OnInit {
       }),
       catchError((error: any) => {
         this.loading.hide();
-        try {
-          Swal.fire(error.error.error, '', 'error');
-         } catch (error : any) {
-          Swal.fire('error en el servidor', '', 'error');
-         }
+        Swal.fire(this.documentoService.getErrorMessage(error), '', 'error');
         return of(null);
       })
     ).subscribe({
@@ -871,13 +863,13 @@ export class VentasComponent implements AfterViewInit, OnInit {
   cancelarDocumento() {
     this.loading.show();
     this.documentoService.cancelarDocumento(this.documentoActivo!.orden).pipe(
-      tap((respuesta: any) => {
-        if (respuesta.error === 'ok') {
+      tap((respuesta: ApiResponse<DocumentoActionPayload>) => {
+        if (respuesta.ok) {
           this.getDocumentos(); 
         } else {
           this.getDocumentos();
           try {
-            Swal.fire(respuesta.error, '', 'error');
+            Swal.fire(respuesta.error?.message ?? 'error en el servidor', '', 'error');
            } catch (error : any) {
             Swal.fire('error en el servidor', '', 'error');
            }
@@ -906,8 +898,8 @@ export class VentasComponent implements AfterViewInit, OnInit {
     }
     this.loading.show();
     this.documentoService.convertirDocumentoEnCotizacion(this.documentoActivo!.orden).pipe(
-      tap((respuesta: DocumentoCierreRequest) => {
-        if (respuesta.error === 'ok') {
+      tap((respuesta: ApiResponse<DocumentoActionPayload>) => {
+        if (respuesta.ok && respuesta.data.documentoFinal) {
           this.documentoRetorno = Object.assign(new DocumentosModel(), respuesta.data.documentoFinal); 
           CustomConsole.log('facturarCotizacion =>>>>>', this.documentoRetorno);
           this.printer_factura_final();
@@ -915,7 +907,7 @@ export class VentasComponent implements AfterViewInit, OnInit {
         } else {
           this.getDocumentos();
           try {
-            Swal.fire(respuesta.error, '', 'error');
+            Swal.fire(respuesta.error?.message ?? 'error en el servidor', '', 'error');
            } catch (error : any) {
             Swal.fire('error en el servidor', '', 'error');
            }
@@ -974,13 +966,13 @@ export class VentasComponent implements AfterViewInit, OnInit {
   generarDomicilio() {
     this.loading.show();
     this.documentoService.generarDomicilioDocumento(this.documentoActivo!.orden).pipe(
-      tap((respuesta: any) => {
-        if (respuesta.error === 'ok') {
+      tap((respuesta: ApiResponse<DocumentoActionPayload>) => {
+        if (respuesta.ok) {
           this.getDocumentos(); 
         } else {
           this.getDocumentos();
           try {
-            Swal.fire(respuesta.error, '', 'error');
+            Swal.fire(respuesta.error?.message ?? 'error en el servidor', '', 'error');
            } catch (error : any) {
             Swal.fire('error en el servidor', '', 'error');
            }
@@ -1008,9 +1000,9 @@ export class VentasComponent implements AfterViewInit, OnInit {
     this.loading.show();
     this.serviceCaja.getMediosCajaActiva().pipe(
       tap((datos: any) => {
-        if (datos.numdata > 0) { 
-          this.MedioP = datos.data! ;
-          this.MedioPInicial = datos.data! ;
+        if (datos.ok && datos.data.count > 0) { 
+          this.MedioP = datos.data.records ;
+          this.MedioPInicial = datos.data.records ;
           this.getDocumentos();
         } else {
           this.MedioP = [];

@@ -9,6 +9,8 @@ import { MatDialog } from '@angular/material/dialog';
 import { tap } from 'rxjs';
 import Swal from 'sweetalert2';
 import { CustomConsole } from 'src/app/models/CustomConsole';
+import { ApiResponse } from 'src/app/interfaces/api-response.interface';
+import { GenericRecordsPayload } from 'src/app/interfaces/generic-response.interface';
 @Component({
   selector: 'app-cliente-inicio',
   templateUrl: './cliente-inicio.component.html',
@@ -47,13 +49,13 @@ export class ClienteInicioComponent implements OnInit {
   }
   getClientesOdoo(){
     this.loading.show();
-    this.ClienteService.getClientes().subscribe( {next:(respuesta:any)=>{ 
+    this.ClienteService.getClientes().subscribe( {next:(respuesta:ApiResponse<GenericRecordsPayload<ClientesModel>>)=>{ 
       //  CustomConsole.log('cerrarDocumento',respuesta); 
-       if (respuesta.error === 'ok'){ 
+       if (respuesta.ok){ 
         CustomConsole.log(respuesta);
-        this.clientes = respuesta.data ;  
+        this.clientes = respuesta.data.records;  
        }else{
-         alert(respuesta.error);
+         alert(respuesta.error?.message || 'No fue posible consultar los clientes');
        }
 },error:error=>{Swal.fire(JSON.stringify(error))} ,complete:()=> this.loading.hide()} )
   }

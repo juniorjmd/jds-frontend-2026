@@ -2,7 +2,7 @@ import { Component, inject, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { retry, tap } from 'rxjs';
 import { DocumentoListado } from 'src/app/interfaces/documento.interface';
-import { CarteraRequest, DocumentoCierreRequest } from 'src/app/interfaces/producto-request';
+import { DocumentoCierreRequest } from 'src/app/interfaces/producto-request';
 import { CarteraModel } from 'src/app/models/cartera/cartera.model';
 import { ClientesModel } from 'src/app/models/clientes/clientes.module';
 import { DocumentosModel } from 'src/app/models/ventas/documento.model';
@@ -18,6 +18,8 @@ import { DatosInicialesService } from 'src/app/services/DatosIniciales.services'
 import { establecimientoModel } from 'src/app/models/ventas/establecimientos.model';
 import { cajasServices } from 'src/app/services/Cajas.services';
 import { CustomConsole } from 'src/app/models/CustomConsole';
+import { ApiResponse } from 'src/app/interfaces/api-response.interface';
+import { DocumentoActionPayload, CarteraRecordsPayload } from 'src/app/services/documento.service';
 
 @Component({
   selector: 'modals-abonos-cuentas-por-pagar',
@@ -37,11 +39,11 @@ export class AbonosCuentasPorPagarComponent  implements OnInit {
 
       this.loading.show()
       this.serviceCaja.getEstablecimientosCompras().subscribe({next:value=>{
-        if(value.numdata > 0 ){this.establecimientos = value.data
+        if(value.ok && value.data.count > 0 ){this.establecimientos = value.data.records
           this.docAbono.establecimiento = this.establecimientos[0].id;
         }else{Swal.fire('error','No existen establecimientos disponibles','error')}
         
-      },error:e=>Swal.fire('error',e.error.error,'error'),complete:()=>this.loading.hide()    
+      },error:e=>Swal.fire('error',this.serviceCaja.getErrorMessage(e),'error'),complete:()=>this.loading.hide()    
     })
   }
   ngOnInit(): void {
@@ -76,11 +78,11 @@ export class AbonosCuentasPorPagarComponent  implements OnInit {
     this.docService
     .getCuentasXPagarByPersonaAbonos(( typeof( this.personaIngreso.id!) == "string"   ) ? parseInt(this.personaIngreso.id) :this.personaIngreso.id! ,
      this.docAbono.establecimiento )
-    .subscribe({next:(retorno:CarteraRequest)=>{
+    .subscribe({next:(retorno:ApiResponse<CarteraRecordsPayload>)=>{
       CustomConsole.log('getCuentasXPagarByPersonaAbonos',retorno);
       
-      if(retorno.numdata!> 0){
-        this.lisCartera =  retorno.data;
+      if(retorno.ok && retorno.data.count > 0){
+        this.lisCartera =  retorno.data.records;
         this.docAbono.campo_auxiliar_1 =   this.lisCartera.reduce((acc:number, item) => acc + parseFloat(item.totalActual.toString()), 0);
        
         this.docAbono.campo_auxiliar_4 =   this.lisCartera.reduce((acc:number, item) => acc + parseFloat(item.suma_plazos_vencidos.toString()), 0);
@@ -151,16 +153,16 @@ export class AbonosCuentasPorPagarComponent  implements OnInit {
     }
 
     this.loading.show();
-    this.docService .cerrarDocumento(this.docActivo!.orden).subscribe({next:(respuesta: DocumentoCierreRequest) => {
+    this.docService .cerrarDocumento(this.docActivo!.orden).subscribe({next:(respuesta: ApiResponse<DocumentoActionPayload>) => {
       //console.clear();
       CustomConsole.log("respuesta cierre documento =>" , respuesta)
-      if (respuesta.error === 'ok') {  
+      if (respuesta.ok && respuesta.data.documentoFinal) {  
         this.docActivo = Object.assign(new DocumentosModel(), respuesta.data.documentoFinal); 
         CustomConsole.log('facturarDocumento =>>>>>', this.docActivo);
         this.printer_factura_final(); 
       } else {
         try {
-          Swal.fire(respuesta.error, '', 'error');
+          Swal.fire(respuesta.error?.message ?? 'error en el servidor', '', 'error');
          } catch (error : any) {
           Swal.fire('error en el servidor', '', 'error');
          }
@@ -191,9 +193,12 @@ export class AbonosCuentasPorPagarComponent  implements OnInit {
       Swal.fire('Error en el envio' , 'debe ingresar minimo un abono' , 'error')
     }
      CustomConsole.log('documento a enviar',this.docAbono);
-     this.docService.crearDocumentoAbonoCredito(this.docAbono).subscribe({next:(value:DocumentoCierreRequest)=>{
+     this.docService.crearDocumentoAbonoCredito(this.docAbono).subscribe({next:(value:ApiResponse<DocumentoActionPayload>)=>{
       CustomConsole.log('crearDocumentoAbonoCredito', value);
-      
+      if (!value.ok || !value.data.documentoFinal) {
+        Swal.fire('error', value.error?.message ?? 'Error interno del servidor', 'error');
+        return;
+      }
      this.docActivo =   value.data.documentoFinal;
       
     this.newAbrirDialog.open(PagosCPPComponent,{ data: this.docActivo  })

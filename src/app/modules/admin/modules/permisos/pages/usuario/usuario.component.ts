@@ -12,6 +12,8 @@ import { UsuarioPerfilComponent } from './perfil/usuario-perfil.component';
 import { UsuarioDetalleComponent } from './detalle/usuario-detalle.component';
 import { UsuarioEditarComponent } from './editar/usuario-editar.component';
 import Swal from 'sweetalert2';
+import { ApiResponse } from 'src/app/interfaces/api-response.interface';
+import { GenericRecordsPayload } from 'src/app/interfaces/generic-response.interface';
 
 @Component({
   selector: 'app-usuario',
@@ -76,11 +78,11 @@ export class UsuarioComponent implements OnInit {
     this.loading.show()
     this.userService.getUsuarios().subscribe(
 
-      {next: (datos:any)=>{
+      {next: (datos:ApiResponse<GenericRecordsPayload<Usuarios>>)=>{
           //CustomConsole.log(datos);
           
-     if (datos.numdata > 0 ){ 
-       datos.data!.forEach((dato:Usuarios , index:number )=>{
+     if (datos.data.count > 0 ){ 
+       datos.data.records.forEach((dato:Usuarios , index:number )=>{
          this.usuarios[index] = new UsuarioModel( dato );
        }) 
        //CustomConsole.log(this.usuarios);
@@ -92,7 +94,7 @@ export class UsuarioComponent implements OnInit {
        } ,
        error : (error : any) => {this.loading.hide();
          //CustomConsole.log(error)
-         alert( error.error.error);
+         alert(this.userService.getErrorMessage(error));
        }
       
       

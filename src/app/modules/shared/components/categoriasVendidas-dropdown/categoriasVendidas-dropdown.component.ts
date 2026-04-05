@@ -1,10 +1,9 @@
 import { Component, EventEmitter, inject, Input, OnInit, Output } from '@angular/core';
-import { categoriaRequest, categoriaVendidosRequest } from 'src/app/interfaces/producto-request';
 import { CategoriasVendidasModel } from 'src/app/models/categorias.model';
 import { CustomConsole } from 'src/app/models/CustomConsole';
-import { EmpleadoModel } from 'src/app/models/empleados/empleados.module';
-import { DatosInicialesService } from 'src/app/services/DatosIniciales.services';
 import { ProductoService } from 'src/app/services/producto.service';
+import { ApiResponse } from 'src/app/interfaces/api-response.interface';
+import { GenericRecordsPayload } from 'src/app/interfaces/generic-response.interface';
 
 @Component({
   selector: 'elemt-categoriasVendidasDropdown',
@@ -33,16 +32,17 @@ export class categoriasVendidasDropdownComponent implements OnInit{
 
   getAllCategorias(){  
     this.prdService.getCategoriasVendidas().subscribe({
-       next :(datos:categoriaVendidosRequest)=>{
+       next :(datos:ApiResponse<GenericRecordsPayload<CategoriasVendidasModel>>)=>{
          CustomConsole.log('getAllCategorias',datos);
       let opt:CategoriasVendidasModel = new CategoriasVendidasModel(null);
        opt.id = 0;
        opt.nombre = 'Seleccione una categoria para filtrar'; 
-    if (datos.numdata > 0 ){   
-        this.options = datos.data!.map((x:any)=>x.obj) ;   
+    if (datos.ok && datos.data.count > 0 ){   
+        this.options = datos.data.records ;   
         this.filteredOptions = [opt ,...this.options];  
     }else{
-      this.options = [opt];
+      this.options = [];
+      this.filteredOptions = [opt];
     }
 
        

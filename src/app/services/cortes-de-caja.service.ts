@@ -8,6 +8,11 @@ import { HttpClient } from '@angular/common/http';
 import { httpOptions } from '../models/app.db.url'; 
 import { CustomConsole } from '../models/CustomConsole';
 import { ConfigService } from './config.service';
+import { ApiResponse } from '../interfaces/api-response.interface';
+import { GenericMultiRecordsPayload, GenericRecordsPayload } from '../interfaces/generic-response.interface';
+import { CortesDeCajaModule } from '../models/cortes-de-caja/cortes-de-caja.module';
+import { CortesDeCajaPagosModule } from '../models/cortes-de-caja-pagos/cortes-de-caja-pagos.module';
+import { CortesDeCajaProductosVendidosModule } from '../models/cortes-de-caja-productos-vendidos/cortes-de-caja-productos-vendidos.module';
 
 @Injectable({
   providedIn: 'root'
@@ -23,7 +28,7 @@ constructor(private http: HttpClient, private configService :ConfigService ) { }
                  "_tablas" : [vistas.corte_de_caja ,vistas.corte_de_caja_parcial ,vistas.corte_de_caja_pagos ]             
                 };
     CustomConsole.log('servicios de cierres getCierresTotalesYparciales' ,this.configService.url.action , datos, httpOptions());
-    return this.http.post(this.configService.url.action , datos, httpOptions()) ;
+    return this.http.post<ApiResponse<GenericMultiRecordsPayload<CortesDeCajaModule | CortesDeCajaPagosModule>>>(this.configService.url.action , datos, httpOptions()) ;
 } 
 
   
@@ -34,6 +39,6 @@ getProductosPorCierres(id:number){
                 //"_tablas" : [vistas.corte_de_caja ,vistas.corte_de_caja_parcial ,vistas.corte_de_caja_pagos ]             
               };
   CustomConsole.log('servicios de cierres getCierresTotalesYparciales' ,this.configService.url.action , datos, httpOptions());
-  return this.http.post(this.configService.url.action , datos, httpOptions()) ;
+  return this.http.post<ApiResponse<GenericRecordsPayload<CortesDeCajaProductosVendidosModule>>>(this.configService.url.action , datos, httpOptions()) ;
 } 
 }

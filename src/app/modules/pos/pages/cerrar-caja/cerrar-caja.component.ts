@@ -13,6 +13,7 @@ import { ResumenCajaComponent } from '../../modals/resumen-caja/resumen-caja.com
 
 import { loading } from 'src/app/models/app.loading'; 
 import { CarwashCloseBoxData, CarwashBoxSummaryData, CarwashSummaryData } from 'src/app/interfaces/carwash-response.interface';
+import { ApiResponse } from 'src/app/interfaces/api-response.interface';
 @Component({
   selector: 'app-cerrar-caja',
   templateUrl: './cerrar-caja.component.html',
@@ -32,9 +33,9 @@ export class CerrarCajaComponent implements OnInit {
     private loading : loading, private cajaService : cajasServices,
     private newAbrirCajaDialog : MatDialog) { 
       this.getCajas()
-      this.serviceCaja.getCuentasContablesEstablecimientoUsuario().subscribe({next:(value:cajaRequest)=>{
+      this.serviceCaja.getCuentasContablesEstablecimientoUsuario().subscribe({next:(value:ApiResponse<{ records: cajaModel[]; count: number }>)=>{
         CustomConsole.log('getCuentasContablesEstablecimientoUsuario' , value)
-        this.inicioService.validarCuentasContablesEstablecimiento(value.data[0] )  
+        this.inicioService.validarCuentasContablesEstablecimiento(value.data.records[0] )  
       }})
     
     }
@@ -58,9 +59,9 @@ export class CerrarCajaComponent implements OnInit {
     this.loading.show()
     this.serviceCaja.cerrarCajaParcial(caja)
        .subscribe({
-        next: (respuesta: CarwashCloseBoxData)=>{
+        next: (respuesta: ApiResponse<CarwashCloseBoxData>)=>{
           CustomConsole.log(respuesta)
-          this.abrirResumen(this.toResumenModel(respuesta.summary));
+          this.abrirResumen(this.toResumenModel(respuesta.data.summary));
           this.loading.hide();
         },
         error: (error: any) => {
@@ -73,9 +74,9 @@ export class CerrarCajaComponent implements OnInit {
     this.loading.show()
     this.serviceCaja.cerrarCaja(caja)
        .subscribe({
-        next: (respuesta: CarwashCloseBoxData)=>{
+        next: (respuesta: ApiResponse<CarwashCloseBoxData>)=>{
           CustomConsole.log(respuesta)
-          this.abrirResumen(this.toResumenModel(respuesta.summary));
+          this.abrirResumen(this.toResumenModel(respuesta.data.summary));
           this.loading.hide();
         },
         error: (error: any) => {
@@ -89,9 +90,9 @@ export class CerrarCajaComponent implements OnInit {
     this.loading.show()
     this.serviceCaja.resumenCaja(caja)
        .subscribe({
-        next: (datos: CarwashBoxSummaryData)=>{
+        next: (datos: ApiResponse<CarwashBoxSummaryData>)=>{
            CustomConsole.log(datos);  
-          this.abrirResumen(this.toResumenModel(datos.summary));
+          this.abrirResumen(this.toResumenModel(datos.data.summary));
           this.loading.hide();
         },
         error: (error: any) => {
@@ -107,12 +108,12 @@ export class CerrarCajaComponent implements OnInit {
     this.loading.show()
     this.serviceCaja.getCajasActivas()
        .subscribe( {next:
-        (datos:cajaRequest)=>{        
+        (datos:ApiResponse<{ records: cajaModel[]; count: number }>)=>{        
           let cont = 0;
            CustomConsole.log('getCajasUsuario',datos);
            this.cajaAbiertaFlag = false;   
-      if (datos.numdata > 0 ){ 
-          this.cajas = datos.data;
+      if (datos.data.count > 0 ){ 
+          this.cajas = datos.data.records;
          }else{
         this.cajas = [];
         this.flagCajasDisponibles = false;

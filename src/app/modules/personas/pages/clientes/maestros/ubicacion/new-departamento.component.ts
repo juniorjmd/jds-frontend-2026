@@ -9,6 +9,8 @@ import { loading } from 'src/app/models/app.loading';
 import { pais } from 'src/app/interfaces/maestros.interface';
 import { select } from 'src/app/interfaces/generales.interface';
 import { CustomConsole } from 'src/app/models/CustomConsole';
+import { ApiResponse } from 'src/app/interfaces/api-response.interface';
+import { GenericMutationPayload, GenericRecordsPayload } from 'src/app/interfaces/generic-response.interface';
 
 @Component({
   selector: 'app-new-departamento',
@@ -34,10 +36,10 @@ export class NewDepartamentoComponent implements OnInit {
   getPaises(){
     this.loading.show() 
     this.maestroServicio.getPaises().subscribe(
-      (datos:any)=>{ 
-    this.numpaises = datos.numdata;
-    if (datos.numdata > 0 ){
-      this.paises = datos.data;
+      (datos: ApiResponse<GenericRecordsPayload<pais>>)=>{ 
+    this.numpaises = datos.data.count;
+    if (datos.ok && datos.data.count > 0 ){
+      this.paises = datos.data.records;
     }else{
       this.paises = [];
     }
@@ -46,7 +48,7 @@ export class NewDepartamentoComponent implements OnInit {
         this.loading.hide() 
       } ,
       error => {this.loading.hide();
-        alert( error.error.error);});
+        alert(this.maestroServicio.getErrorMessage(error));});
    }
    
 
@@ -64,10 +66,9 @@ export class NewDepartamentoComponent implements OnInit {
     this.loading.show();
     if(this.deprto.id > 0 ){
         this.maestroServicio.actualizarDepartamentos(this.deprto).subscribe(
-
-          (respuesta:any)=>{CustomConsole.log(respuesta)
+          (respuesta: ApiResponse<GenericMutationPayload>)=>{CustomConsole.log(respuesta)
             this.loading.hide();
-            if (respuesta.error === 'ok'){
+            if (respuesta.ok){
               alert('datos ingresados con exito'); 
               this.confirmado(); 
                  
@@ -78,9 +79,9 @@ export class NewDepartamentoComponent implements OnInit {
         );
     }else{
       this.maestroServicio.setDepartamentos(this.deprto).subscribe(
-        (respuesta:any)=>{CustomConsole.log(respuesta)
+        (respuesta: ApiResponse<GenericMutationPayload>)=>{CustomConsole.log(respuesta)
           this.loading.hide();
-        if (respuesta.error === 'ok'){
+        if (respuesta.ok){
           alert('datos ingresados con exito'); 
           this.confirmado(); 
              

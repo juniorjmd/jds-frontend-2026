@@ -7,6 +7,8 @@ import { ActividadesDescuentoModel } from 'src/app/models/actividadesDescuentoMo
 import { ProductoModel } from 'src/app/models/producto/producto.module';
 import { ActiDescuentoService } from 'src/app/services/actiDescuento.service';
 import Swal from 'sweetalert2';
+import { ApiResponse } from 'src/app/interfaces/api-response.interface';
+import { GenericMutationPayload, GenericRecordsPayload } from 'src/app/interfaces/generic-response.interface';
 
 @Component({
   selector: 'modal-inout-detalle-actividad', 
@@ -22,10 +24,10 @@ export class ModalInOutDetalleActividad  {
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public actividad:ActividadesDescuentoModel ){
-      this.actividadService.getProductosActividad(actividad.id).subscribe({next:(value:ProductoRequest)=>{ 
+      this.actividadService.getProductosActividad(actividad.id).subscribe({next:(value:ApiResponse<GenericRecordsPayload<ProductoModel>>)=>{ 
         //CustomConsole.log(value);
         
-        this.productos = [...value.data??[]];  
+        this.productos = [...value.data.records??[]];  
         this.productosFiltrados = [...this.productos]; 
       },error:error=>Swal.fire(error.error.error)
       })
@@ -36,11 +38,17 @@ export class ModalInOutDetalleActividad  {
   enviarProducto(item:ProductoModel){
     let id:string = (typeof( item.id ) == 'string')? item.id! :item.id!.toString() ;
     if(item.selected){ 
-      this.actividadService.excluirProducto(id ,this.actividad.id).subscribe({next:val=>{
+      this.actividadService.excluirProducto(id ,this.actividad.id).subscribe({next:(val:ApiResponse<GenericMutationPayload>)=>{
+        if (!val.ok) {
+          return;
+        }
         item.selected= false;
       }})
     }else{
-       this.actividadService.quitarDeExcluidoProducto(id , this.actividad.id ) .subscribe({next:val=>{
+       this.actividadService.quitarDeExcluidoProducto(id , this.actividad.id ) .subscribe({next:(val:ApiResponse<GenericMutationPayload>)=>{
+        if (!val.ok) {
+          return;
+        }
         item.selected= true;
       }})
    

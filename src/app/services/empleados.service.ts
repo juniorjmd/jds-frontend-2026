@@ -6,8 +6,11 @@ import { TABLA } from '../models/app.db.tables';
 import { httpOptions, url } from '../models/app.db.url';
 import { vistas } from '../models/app.db.view';
 import { EmpleadoModel } from '../models/empleados/empleados.module';
+import { TiposEmpleadoModule } from '../models/tipos-empleado/tipos-empleado.module';
 import { CustomConsole } from '../models/CustomConsole';
 import { ConfigService } from './config.service';
+import { ApiResponse } from '../interfaces/api-response.interface';
+import { GenericRecordsPayload, GenericMutationPayload } from '../interfaces/generic-response.interface';
 
 @Injectable({
   providedIn: 'root'
@@ -22,7 +25,7 @@ constructor(private readonly http: HttpClient ,  private configService:ConfigSer
                  "_tabla" : vistas.empleados_tipo ,   
                 };
     CustomConsole.log('servicios de empleados - getTiposEmpleados' ,this.configService.url.action , datos, httpOptions());
-    return this.http.post(this.configService.url.action , datos, httpOptions()) ;
+    return this.http.post<ApiResponse<GenericRecordsPayload<TiposEmpleadoModule>>>(this.configService.url.action , datos, httpOptions()) ;
 } 
 
 getEmpleados(){
@@ -32,11 +35,11 @@ getEmpleados(){
                "_obj" : ['objeto'],             
               };
   CustomConsole.log('servicios de empleados - getEmpleados' ,this.configService.url.action , datos, httpOptions());
-  return this.http.post(this.configService.url.action , datos, httpOptions()) ;
+  return this.http.post<ApiResponse<GenericRecordsPayload<{ objeto: EmpleadoModel }>>>(this.configService.url.action , datos, httpOptions()) ;
 }
 
 
-getEmpleadosLavador(){
+  getEmpleadosLavador(){
   let where = [{"columna" : "tipo" , "tipocomp" : '=f' , "dato" :  "getIdEmpleadoPorTipNombre('operario')" ,"relacion" : 'or'  },
     {"columna" : "tipo" , "tipocomp" : '=f' , "dato" :  "getIdEmpleadoPorTipNombre('operario vendedor')" 
       }
@@ -48,7 +51,7 @@ getEmpleadosLavador(){
                "_obj" : ['objeto'],             
               };
   CustomConsole.log('servicios de empleados - getEmpleados' ,this.configService.url.action , datos, httpOptions());
-  return this.http.post(this.configService.url.action , datos, httpOptions()) ;
+  return this.http.post<ApiResponse<GenericRecordsPayload<EmpleadoModel>>>(this.configService.url.action , datos, httpOptions()) ;
 } 
 
 
@@ -64,7 +67,7 @@ getEmpleadosAcumulados( id:number|string , fechas:fechaBusqueda){
                "_obj" : ['obj'],             
               };
   CustomConsole.log('servicios de empleados - getEmpleadosAcumulados' ,this.configService.url.action , datos, httpOptions());
-  return this.http.post(this.configService.url.action , datos, httpOptions()) ;
+  return this.http.post<ApiResponse<GenericRecordsPayload<{ obj: any; valor: string; porcDescMaximo: number }>>>(this.configService.url.action , datos, httpOptions()) ;
 } 
 
 
@@ -94,7 +97,7 @@ guardarAnticipoEmpleado(nuevoTipo:EmpleadoModel , valor:any , descripcion:string
    }; 
   
   CustomConsole.log('servicios de creacion anticipos empleados' ,this.configService.url.action , datos, httpOptions());
-  return this.http.post(this.configService.url.action , datos, httpOptions()) ;
+  return this.http.post<ApiResponse<GenericMutationPayload>>(this.configService.url.action , datos, httpOptions()) ;
  }
 
 guardarEmpleado(nuevoTipo:EmpleadoModel){ 
@@ -120,11 +123,11 @@ guardarEmpleado(nuevoTipo:EmpleadoModel){
   }
   
   CustomConsole.log('servicios de creacion servicios de vehiculos activo' ,this.configService.url.action , datos, httpOptions());
-  return this.http.post(this.configService.url.action , datos, httpOptions()) ;
+  return this.http.post<ApiResponse<GenericMutationPayload>>(this.configService.url.action , datos, httpOptions()) ;
  }
 
 
- guardarPagoEmpleado(empleado:EmpleadoModel , fechas:fechaBusqueda){ 
+guardarPagoEmpleado(empleado:EmpleadoModel , fechas:fechaBusqueda){ 
 
   /** "fecha1"=>$_FECHA_1 , 
  * "fecha2" =>  $_FECHA_2, 
@@ -147,7 +150,13 @@ guardarEmpleado(nuevoTipo:EmpleadoModel){
   
   
   CustomConsole.log('servicios de creacion de pagos a empleados' ,this.configService.url.action , datos, httpOptions());
-  return this.http.post(this.configService.url.action , datos, httpOptions()) ;
+  return this.http.post<ApiResponse<GenericMutationPayload>>(this.configService.url.action , datos, httpOptions()) ;
+ }
+
+ getErrorMessage(error: any): string {
+  const rawApiError = error?.error?.error;
+  const apiMessage = typeof rawApiError === 'string' ? rawApiError : rawApiError?.message;
+  return apiMessage || error?.error?.message || error?.message || 'Error inesperado';
  }
 
 

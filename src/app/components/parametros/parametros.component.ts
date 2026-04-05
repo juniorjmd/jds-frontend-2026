@@ -5,6 +5,8 @@ import { loading } from 'src/app/models/app.loading';
 import { select } from 'src/app/interfaces/generales.interface';
 import Swal from 'sweetalert2';
 import { ParametrosModel } from 'src/app/models/parametros/parametros.model';
+import { ApiResponse } from 'src/app/interfaces/api-response.interface';
+import { GenericRecordsPayload } from 'src/app/interfaces/generic-response.interface';
 @Component({
   selector: 'app-parametros',
   templateUrl: './parametros.component.html',
@@ -22,19 +24,19 @@ export class ParametrosComponent implements OnInit {
     this.parametros = []; 
      this.loading.show()
      this.parServices.getParametros().subscribe(
-       (datos:any )=>{
+       (datos: ApiResponse<GenericRecordsPayload<ParametrosModel>> )=>{
           //console.log(datos);
           
-     if (datos.numdata > 0 ){ 
-      this.parametros = datos.data  
+     if (datos.ok && datos.data.count > 0 ){ 
+      this.parametros = datos.data.records  
        this.parametros!.forEach((parametro,index)=>
        {
         if(parametro.tip_parametro.trim() === 'identificacion' && parametro.nombreTabla!.trim() !== ''){
         this.loading.show()
         this.parServices.getDatosParametrosTabla(parametro.nombreTabla , `${parametro.columnaId!}|id` , `${parametro.columnaDescripcion!}|nombre`).subscribe(
-        (datos2:any )=>{ 
-          if (datos2.numdata > 0 ){  
-            this.parametros[index].datosTabla=  datos2.data
+        (datos2: ApiResponse<GenericRecordsPayload<select>> )=>{ 
+          if (datos2.ok && datos2.data.count > 0 ){  
+            this.parametros[index].datosTabla = datos2.data.records as any
           this.loading.hide();} 
         }
     )
@@ -53,7 +55,7 @@ export class ParametrosComponent implements OnInit {
        } ,
        error => {this.loading.hide();
          console.log(error)
-         Swal.fire( error.error.error, '', 'error');
+         Swal.fire(this.parServices.getErrorMessage(error), '', 'error');
        }
        );
    }  

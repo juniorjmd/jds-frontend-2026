@@ -34,7 +34,7 @@ describe('CntContablesService', () => {
     httpMock.verify();
   });
 
-  it('should unwrap manual operation from standard api response', () => {
+  it('should return manual operation in the standard api response', () => {
     let actualResponse: any;
 
     service.setNewOperacion({
@@ -60,12 +60,12 @@ describe('CntContablesService', () => {
       error: null
     });
 
-    expect(actualResponse.error).toBe('ok');
-    expect(actualResponse.operationId).toBe(9001);
-    expect(actualResponse.operation.nombre).toBe('Ajuste contable');
+    expect(actualResponse.ok).toBeTrue();
+    expect(actualResponse.data.operationId).toBe(9001);
+    expect((actualResponse.data.operation as any).nombre).toBe('Ajuste contable');
   });
 
-  it('should unwrap executed transfer payload from standard api response', () => {
+  it('should return executed transfer payload in the standard api response', () => {
     let actualResponse: any;
 
     service.ejecutarTrasladosCuentas({
@@ -91,8 +91,8 @@ describe('CntContablesService', () => {
       error: null
     });
 
-    expect(actualResponse.error).toBe('ok');
-    expect(actualResponse.objeto.idOperacion).toBe(8001);
+    expect(actualResponse.ok).toBeTrue();
+    expect((actualResponse.data.objeto as any).idOperacion).toBe(8001);
   });
 
   it('should extract backend error messages from standard error payload', () => {

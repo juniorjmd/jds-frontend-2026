@@ -8,6 +8,7 @@ import { cajaModel } from 'src/app/models/ventas/cajas.model';
 import { DocumentosModel } from 'src/app/models/ventas/documento.model';
 import { cajasServices } from 'src/app/services/Cajas.services';
 import { DocumentoService } from 'src/app/services/documento.service';
+import { ApiResponse } from 'src/app/interfaces/api-response.interface';
 
 
 @Component({
@@ -32,12 +33,12 @@ getCajas(){
   this.loading.show()
   this.serviceCaja.getCajasActivas()
      .subscribe(
-      (datos:any)=>{
+      (datos:ApiResponse<{ records: cajaModel[]; count: number }>)=>{
         let cont = 0;
          CustomConsole.log('getCajas',datos); 
-    if (datos.numdata > 0 ){ 
-      datos.data!.forEach((dato:caja   )=>{
-        cajaAux =  new cajaModel( dato ); 
+    if (datos.data.count > 0 ){ 
+      datos.data.records.forEach((dato) =>{
+        cajaAux =  new cajaModel(dato as any); 
         this.cajas.push(cajaAux); 
              
       }) 

@@ -3,6 +3,8 @@ import { MAT_DIALOG_DATA , MatDialogRef} from '@angular/material/dialog';
 import { UsuarioModel } from 'src/app/models/usuario.model';
 import { usuarioService } from 'src/app/services/usuario.services';
 import { loading } from 'src/app/models/app.loading';
+import { ApiResponse } from 'src/app/interfaces/api-response.interface';
+import { GenericMutationPayload } from 'src/app/interfaces/generic-response.interface';
 
 @Component({
   selector: 'app-usuario-editar',
@@ -117,13 +119,13 @@ export class UsuarioEditarComponent implements OnInit {
     
     this.loading.show(); 
     this.userService.updateUsuarios(this.newUsuario).subscribe(
-     (respuesta:any)=>{//CustomConsole.log(respuesta)
+     (respuesta:ApiResponse<GenericMutationPayload>)=>{//CustomConsole.log(respuesta)
       
-     if (respuesta.error === 'ok'){
-       alert('datos ingresados con exito');  
+     if (respuesta.ok){
+       alert(respuesta.data.message || 'datos ingresados con exito');  
        this.newUsuario =  new UsuarioModel(undefined); 
      }else{
-       alert(respuesta.error);
+       alert(respuesta.error?.message ?? 'No fue posible actualizar el usuario');
      }
      this.loading.hide();
      this.cerrarFormularioTrue()

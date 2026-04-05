@@ -8,6 +8,8 @@ import { loading } from 'src/app/models/app.loading';
 import { DocumentoCierreRequest } from 'src/app/interfaces/producto-request';
 import Swal from 'sweetalert2';
 import { CustomConsole } from 'src/app/models/CustomConsole';
+import { ApiResponse } from 'src/app/interfaces/api-response.interface';
+import { GenericRecordsPayload } from 'src/app/interfaces/generic-response.interface';
 
 @Component({
   selector: 'modal-generar-cnt-por-cobrar',
@@ -97,7 +99,7 @@ getMediosP(){
      .subscribe( {next:(datos:any)=>{
          CustomConsole.log(datos);
         
-    if (datos.numdata > 0 ){ 
+    if (datos.ok && datos.data.count > 0 ){ 
       let  index : number = this.inData.Documento.pagos.length; 
       if (index <= 0 ) index = -1;
       if (index > 0 )
@@ -120,7 +122,7 @@ getMediosP(){
       }).filter((pago): pago is DocpagosModel => pago !== undefined);
     CustomConsole.log('pagos recibidos' , this.pagos);
         }
-      datos.data!.forEach((dato:MediosDePago )=>{  
+      datos.data.records.forEach((dato:MediosDePago )=>{  
        let pago = new DocpagosModel();  
        pago.idMedioDePago = dato.id;
         pago.nombreMedio =dato.nombre;

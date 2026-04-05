@@ -5,6 +5,9 @@ import { loading } from 'src/app/models/app.loading';
 import { Perfil } from 'src/app/interfaces/usuario.interface';
 import { usuarioService } from 'src/app/services/usuario.services'; 
 import Swal from 'sweetalert2';
+import { ApiResponse } from 'src/app/interfaces/api-response.interface';
+import { GenericRecordsPayload } from 'src/app/interfaces/generic-response.interface';
+import { perfil } from 'src/app/interfaces/producto-request';
 
 @Component({
   selector: 'app-usuario-perfil',
@@ -85,9 +88,9 @@ export class UsuarioPerfilComponent implements OnInit {
      
     this.loading.show(); 
     this.userService.guardarUsuarioPerfil(this.usuarioActual , this.perfilUsuario).subscribe(
-     (respuesta:any)=>{//CustomConsole.log(respuesta)
+     (respuesta:ApiResponse<{ message: string; result: unknown }>)=>{//CustomConsole.log(respuesta)
       
-     alert(respuesta.message ?? 'datos ingresados con exito');
+     alert(respuesta.data.message ?? 'datos ingresados con exito');
      this.loading.hide();
      this.dialogo.close(true);
      }, error => {
@@ -99,14 +102,17 @@ export class UsuarioPerfilComponent implements OnInit {
   getPerfiles(){ 
     this.loading.show()
     this.userService.getPerfiles().subscribe(
-      (datos:any )=>{
+      (datos:ApiResponse<GenericRecordsPayload<perfil>> )=>{
          //CustomConsole.log(datos);
          
-    if (datos.numdata > 0 ){ 
-      datos.data!.forEach((dato:Perfil , index : number )=>{
-        dato.select = false;
-        if ( this.perfilUsuario  == dato.id) {dato.select = true;}
-        this.perfiles[index] =  dato ;
+    if (datos.data.count > 0 ){ 
+      datos.data.records.forEach((dato, index : number )=>{
+        const perfilItem: Perfil = {
+          id: dato.id!,
+          Perf_Nombre: dato.Perf_Nombre,
+          select: this.perfilUsuario == dato.id,
+        };
+        this.perfiles[index] =  perfilItem ;
       }) 
       //CustomConsole.log('perfiles',this.perfiles , this.perfiles.length);
     }else{

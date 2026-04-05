@@ -6,10 +6,12 @@ import { vistas } from '../models/app.db.view';
 import { DocumentosModel } from '../models/ventas/documento.model';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { ClientesModel } from '../models/clientes/clientes.module';
-import { clienteRequest, proveedorHistoricoRequest } from '../interfaces/producto-request';
 import { TABLA } from '../models/app.db.tables';
 import { CustomConsole } from '../models/CustomConsole';
 import { ConfigService } from './config.service';
+import { ApiResponse } from '../interfaces/api-response.interface';
+import { GenericMutationPayload, GenericRecordsPayload } from '../interfaces/generic-response.interface';
+import { proveedorHistorico } from '../interfaces/producto-request';
 
 @Injectable({
     providedIn: 'root'
@@ -44,7 +46,7 @@ constructor(private http: HttpClient ,private configService :ConfigService,
         "_arraydatos" : arraydatos
        };
        CustomConsole.log(this.configService.url.action , datos, httpOptions())
-       return this.http.post<any>(this.configService.url.action , datos, httpOptions()) ;
+       return this.http.post<ApiResponse<GenericMutationPayload>>(this.configService.url.action , datos, httpOptions()) ;
     }
     getDatosIniClientes(){
    
@@ -61,12 +63,12 @@ constructor(private http: HttpClient ,private configService :ConfigService,
       
     }
 
-    getClientes():Observable<ClientesModel>{
+    getClientes():Observable<ApiResponse<GenericRecordsPayload<ClientesModel>>>{
         let datos = {"action": actions.actionSelect , "_tabla" : vistas.vw_mst_per_clientes, _limit: 300 }
         CustomConsole.log('getClientes  ' ,this.configService.url.action , datos, httpOptions());
-        return this.http.post<ClientesModel>(this.configService.url.action , datos, httpOptions()) ;
+        return this.http.post<ApiResponse<GenericRecordsPayload<ClientesModel>>>(this.configService.url.action , datos, httpOptions()) ;
     }
-    getClientesByNumAndTipId( numId:string , tipId:number):Observable<clienteRequest>{
+    getClientesByNumAndTipId( numId:string , tipId:number):Observable<ApiResponse<GenericRecordsPayload<ClientesModel>>>{
         let datos = {
             "_where" : [
             {columna : 'tipoIdentificacion' , tipocomp : '=' , dato : tipId},
@@ -74,44 +76,44 @@ constructor(private http: HttpClient ,private configService :ConfigService,
         ]   , 
         "action": actions.actionSelect , "_tabla" : vistas.vw_mst_per_clientes, _limit: 300 }
         CustomConsole.log('getClientes  ' ,this.configService.url.action , datos, httpOptions());
-        return this.http.post<clienteRequest>(this.configService.url.action , datos, httpOptions()) ;
+        return this.http.post<ApiResponse<GenericRecordsPayload<ClientesModel>>>(this.configService.url.action , datos, httpOptions()) ;
     }
 
-    getClientesByNombre(nombreCliente:string  ):Observable<clienteRequest>{
+    getClientesByNombre(nombreCliente:string  ):Observable<ApiResponse<GenericRecordsPayload<ClientesModel>>>{
         let datos = {
             "_where" : [{columna : 'nombreCompleto' , tipocomp : 'like' , dato : nombreCliente} 
         ]   , 
         "action": actions.actionSelect , "_tabla" : vistas.vw_mst_per_clientes, _limit: 300 }
         CustomConsole.log('getClientes  ' ,this.configService.url.action , datos, httpOptions());
-        return this.http.post<clienteRequest>(this.configService.url.action , datos, httpOptions()) ;
+        return this.http.post<ApiResponse<GenericRecordsPayload<ClientesModel>>>(this.configService.url.action , datos, httpOptions()) ;
     }
 
-    getProveedorByNombre(nombreCliente:string  ):Observable<clienteRequest>{
+    getProveedorByNombre(nombreCliente:string  ):Observable<ApiResponse<GenericRecordsPayload<ClientesModel>>>{
         let datos = {
             "_where" : [{columna : 'nombreCompleto' , tipocomp : 'like' , dato : nombreCliente} 
         ]   , 
         "action": actions.actionSelect , "_tabla" : vistas.vw_proveedor, _limit: 300 }
         CustomConsole.log('getClientes  ' ,this.configService.url.action , datos, httpOptions());
-        return this.http.post<clienteRequest>(this.configService.url.action , datos, httpOptions()) ;
+        return this.http.post<ApiResponse<GenericRecordsPayload<ClientesModel>>>(this.configService.url.action , datos, httpOptions()) ;
     }
- getProveedor(  ):Observable<clienteRequest>{
+ getProveedor(  ):Observable<ApiResponse<GenericRecordsPayload<ClientesModel>>>{
         let datos = { 
         "action": actions.actionSelect , "_tabla" : vistas.vw_proveedor, _limit: 300 }
         CustomConsole.log('getClientes  ' ,this.configService.url.action , datos, httpOptions());
-        return this.http.post<clienteRequest>(this.configService.url.action , datos, httpOptions()) ;
+        return this.http.post<ApiResponse<GenericRecordsPayload<ClientesModel>>>(this.configService.url.action , datos, httpOptions()) ;
     }
-    getProveedorParaHistorico(  ):Observable<proveedorHistoricoRequest>{
+    getProveedorParaHistorico(  ):Observable<ApiResponse<GenericRecordsPayload<proveedorHistorico>>>{
         let datos = { 
         "action": actions.actionSelect , "_tabla" : vistas.vw_proveedorHist, _limit: 300 }
         CustomConsole.log('getClientes  ' ,this.configService.url.action , datos, httpOptions());
-        return this.http.post<proveedorHistoricoRequest>(this.configService.url.action , datos, httpOptions()) ;
+        return this.http.post<ApiResponse<GenericRecordsPayload<proveedorHistorico>>>(this.configService.url.action , datos, httpOptions()) ;
     }
 
-    getClienteParaHistorico(  ):Observable<proveedorHistoricoRequest>{
+    getClienteParaHistorico(  ):Observable<ApiResponse<GenericRecordsPayload<proveedorHistorico>>>{
         let datos = { 
         "action": actions.actionSelect , "_tabla" : vistas.vw_clienteHist, _limit: 300 }
         CustomConsole.log('getClientes  ' ,this.configService.url.action , datos, httpOptions());
-        return this.http.post<proveedorHistoricoRequest>(this.configService.url.action , datos, httpOptions()) ;
+        return this.http.post<ApiResponse<GenericRecordsPayload<proveedorHistorico>>>(this.configService.url.action , datos, httpOptions()) ;
     }
     getMaestroClientes():Observable<any>{
         let datos = {"action": actions.MAESTROS_CLIENTES  }
@@ -137,7 +139,7 @@ constructor(private http: HttpClient ,private configService :ConfigService,
         "_limit":limit
        }
         CustomConsole.log('actionSelectClienteOdoo  ' ,JSON.stringify(cliente),this.configService.url.action , datos, httpOptions());
-        return this.http.post(this.configService.url.action , datos, httpOptions()) ;
+        return this.http.post<ApiResponse<GenericMutationPayload>>(this.configService.url.action , datos, httpOptions()) ;
     }
  
     setClienteOdoo( cliente:ClientesModel   ){
@@ -158,7 +160,7 @@ constructor(private http: HttpClient ,private configService :ConfigService,
         datos._arraydatos.usuario_creacion = 'USUARIO_LOGUEADO'
        }
         CustomConsole.log('setClienteOdoo  ' ,JSON.stringify(cliente),this.configService.url.action , datos, httpOptions());
-        return this.http.post(this.configService.url.action , datos, httpOptions()) ;
+        return this.http.post<ApiResponse<GenericMutationPayload>>(this.configService.url.action , datos, httpOptions()) ;
     }
 
     pasarClienteOdooACntYasignarDoc( cliente:ClientesModel , documento : DocumentosModel  ){
@@ -169,7 +171,7 @@ constructor(private http: HttpClient ,private configService :ConfigService,
           "_documento_orden" : documento.orden 
        }
         CustomConsole.log('setClienteOdoo  ' ,JSON.stringify(cliente),this.configService.url.action , datos, httpOptions());
-        return this.http.post(this.configService.url.action , datos, httpOptions()) ;
+        return this.http.post<ApiResponse<unknown>>(this.configService.url.action , datos, httpOptions()) ;
     }
     updateClienteOdoo( cliente:ClientesModel   ){
 
@@ -188,7 +190,13 @@ constructor(private http: HttpClient ,private configService :ConfigService,
         "_limit":1
        }
         CustomConsole.log('actionSelectClienteOdoo  ' ,JSON.stringify(cliente),this.configService.url.action , datos, httpOptions());
-        return this.http.post(this.configService.url.action , datos, httpOptions()) ;
+        return this.http.post<ApiResponse<unknown>>(this.configService.url.action , datos, httpOptions()) ;
+    }
+
+    getErrorMessage(error: any): string {
+        const rawApiError = error?.error?.error;
+        const apiMessage = typeof rawApiError === 'string' ? rawApiError : rawApiError?.message;
+        return apiMessage || error?.error?.message || error?.message || 'Error inesperado';
     }
 
 }

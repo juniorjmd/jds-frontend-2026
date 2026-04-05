@@ -5,6 +5,7 @@ import { loading } from 'src/app/models/app.loading';
 import { cajaModel } from 'src/app/models/ventas/cajas.model';
 import { UsuarioModel } from 'src/app/models/usuario.model';
 import { cajasServices } from 'src/app/services/Cajas.services'; 
+import { ApiResponse } from 'src/app/interfaces/api-response.interface';
 
 @Component({
   selector: 'app-usuario-detalle',
@@ -74,12 +75,12 @@ getCajas(){
   this.loading.show()
   this.serviceCaja.getCajasPorUsuario(this.usuarioActual.ID)
      .subscribe(
-      (datos:any)=>{
+      (datos:ApiResponse<{ boxes: cajaModel[]; count: number }>)=>{
          //CustomConsole.log('getCajasPorUsuario',datos);
          
-    if (datos.count > 0 ){ 
-      datos.boxes!.forEach((dato:caja , index :number)=>{
-        this.cajas[index] = new cajaModel( dato );
+    if (datos.data.count > 0 ){ 
+      datos.data.boxes.forEach((dato, index:number)=>{
+        this.cajas[index] = new cajaModel(dato as any);
         this.opciones[index] = this.cajas[index].asignada!;
       }) 
       //CustomConsole.log(this.cajas);
@@ -111,9 +112,9 @@ guardarRelacion(){
   if (OpcionesEnvio.length > 0){
     this.loading.show(); 
    this.serviceCaja.setCajasAUsuarios(this.usuarioActual.ID,OpcionesEnvio).subscribe(
-    (respuesta:any)=>{//CustomConsole.log(respuesta)
+    (respuesta:ApiResponse<{ message: string; assignedBoxIds: number[]; inserted: number; deleted: number }>)=>{//CustomConsole.log(respuesta)
      
-    alert(respuesta.message ?? 'datos ingresados con exito');  
+    alert(respuesta.data.message ?? 'datos ingresados con exito');  
     this.loading.hide();
     this.cerrarDialog()
     }

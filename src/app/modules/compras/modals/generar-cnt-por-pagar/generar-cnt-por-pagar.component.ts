@@ -9,6 +9,8 @@ import { DocumentoCierreRequest,  plazoRequest } from 'src/app/interfaces/produc
 import { DocumentoService } from 'src/app/services/documento.service';
 import Swal from 'sweetalert2';
 import { CustomConsole } from 'src/app/models/CustomConsole';
+import { ApiResponse } from 'src/app/interfaces/api-response.interface';
+import { GenericRecordsPayload } from 'src/app/interfaces/generic-response.interface';
 
 @Component({
   selector: 'modal-generar-cnt-por-pagar',
@@ -123,10 +125,10 @@ getMediosP(){
   this.listo = false;
   this.loading.show()
   this.serviceCaja.getMediosByEstablecimiento(this.inData.Documento.establecimiento)
-     .subscribe( {next:(datos:any)=>{
+     .subscribe( {next:(datos:ApiResponse<GenericRecordsPayload<MediosDePago>>)=>{
          CustomConsole.log(datos);
         
-    if (datos.numdata > 0 ){ 
+    if (datos.ok && datos.data.count > 0 ){ 
       let  index : number = this.inData.Documento.pagos.length; 
       if (index <= 0 ) index = -1;
       if (index > 0 )
@@ -149,7 +151,7 @@ getMediosP(){
       }).filter((pago): pago is DocpagosModel => pago !== undefined);
     CustomConsole.log('pagos recibidos' , this.pagos);
         }
-      datos.data!.forEach((dato:MediosDePago )=>{  
+      datos.data.records.forEach((dato:MediosDePago )=>{  
        let pago = new DocpagosModel();  
        pago.idMedioDePago = dato.id;
         pago.nombreMedio =dato.nombre;

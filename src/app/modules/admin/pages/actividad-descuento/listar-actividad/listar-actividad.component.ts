@@ -13,6 +13,8 @@ import { ModalInOutDetalleActividad } from '../../../modals/modalExcluirIncluirD
 import { ModalChangeFechaActividadComponent } from '../../../modals/modalChangeFechaActividad/modalChangeFechaActividad.component';
 import { tap } from 'rxjs';
 import { CustomConsole } from 'src/app/models/CustomConsole';
+import { ApiResponse } from 'src/app/interfaces/api-response.interface';
+import { GenericMutationPayload, GenericRecordsPayload } from 'src/app/interfaces/generic-response.interface';
 
 @Component({
   selector: 'app-listar-actividad',
@@ -32,8 +34,8 @@ export class ListarActividadComponent {
     constructor(    private newAbrirDialog: MatDialog,){
       CustomConsole.log('entro primero aqui en ListarActividadComponent');
       
-      this.serviceAct.getActividades().subscribe({next:(value:actividadesRequest)=>{
-        this.actividades = value.data;
+      this.serviceAct.getActividades().subscribe({next:(value:ApiResponse<GenericRecordsPayload<ActividadesDescuentoModel>>)=>{
+        this.actividades = value.data.records;
       }})
     }
     activarDesactivarActividad(actividad:ActividadesDescuentoModel){
@@ -41,10 +43,10 @@ export class ListarActividadComponent {
 CustomConsole.log((act.estado! == 1 ) );
       act.estado = (act.estado! == 1 )?  2 : 1 ;
 
-      this.serviceAct.updateActividad(act).subscribe({next:(value:any)=>{
-        if(value.error == 'ok'){
-          this.serviceAct.getActividades().subscribe({next:(value:actividadesRequest)=>{
-            this.actividades = value.data;
+      this.serviceAct.updateActividad(act).subscribe({next:(value:ApiResponse<GenericMutationPayload>)=>{
+        if(value.ok){
+          this.serviceAct.getActividades().subscribe({next:(value:ApiResponse<GenericRecordsPayload<ActividadesDescuentoModel>>)=>{
+            this.actividades = value.data.records;
           }})
         }
       }, error:error=>Swal.fire(error.error.error)       })
@@ -55,8 +57,8 @@ CustomConsole.log((act.estado! == 1 ) );
       .pipe(
         tap((confirmado: Boolean) => {      
           if(confirmado){     
-          this.serviceAct.getActividades().subscribe({next:(value:actividadesRequest)=>{
-            this.actividades = value.data;  }})
+          this.serviceAct.getActividades().subscribe({next:(value:ApiResponse<GenericRecordsPayload<ActividadesDescuentoModel>>)=>{
+            this.actividades = value.data.records;  }})
         }})
       ).subscribe({
         next: () => {},
@@ -77,21 +79,21 @@ CustomConsole.log((act.estado! == 1 ) );
     }
     verDetalle(detalle:ActividadesDescuentoModel){
       CustomConsole.log(detalle);
-      this.serviceAct.getDetalleActividad(detalle).subscribe({next:(value:actividadesDetalleRequest)=>{ 
+      this.serviceAct.getDetalleActividad(detalle).subscribe({next:(value:ApiResponse<GenericRecordsPayload<any>>)=>{ 
 
-        CustomConsole.log('data response detalle' , value.data);
+        CustomConsole.log('data response detalle' , value.data.records);
         let html = '<table class ="table" >';
-      if(value.numdata > 0 ){
+      if(value.data.count > 0 ){
         switch(detalle.tipo){
           case 'PRD' : 
-              this.productos = value.data ;
+              this.productos = value.data.records ;
               html += `<tr><td> Productos en descuento </td></tr>      `;
             this.productos.forEach(x=>{
               html += `<tr style=" text-align: left; "><td>cod : ${x.id}</td> <td> Nombre : ${x.nombre} | ${x.nombre2} | ${x.nombre3} </td></tr>      `;
             })
           break;
           case 'CAT' : 
-          this.categorias = value.data ;
+          this.categorias = value.data.records ;
           
           html += `<tr><td colspan='2'>  Categorias en descuento </td></tr>      `;
           this.categorias.forEach(x=>{
@@ -99,14 +101,14 @@ CustomConsole.log((act.estado! == 1 ) );
           })
           break;
           case 'CLI' : 
-          this.clientes = value.data ;
+          this.clientes = value.data.records ;
           html += `<tr><td colspan='2'>  Clientes con descuento </td></tr>      `;
           this.clientes.forEach(x=>{
             html += `<tr style=" text-align: left; "><td>Identificacion : ${x.numIdentificacion} </td> <td style='text-align=center'> Nombre : ${x.nombreCompleto}  </td></tr>      `;
           })
           break;
           case 'BRD' : 
-          this.marcas = value.data ;
+          this.marcas = value.data.records ;
           this.marcas.forEach(x=>{
             html += `<tr style=" text-align: left; "><td>cod : ${x.id} </td><td>  Nombre : ${x.nombre}  </td></tr>      `;
           })

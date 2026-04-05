@@ -6,6 +6,8 @@ import { CustomConsole } from 'src/app/models/CustomConsole';
 import { cajaModel } from 'src/app/models/ventas/cajas.model';
 import { DocumentosModel } from 'src/app/models/ventas/documento.model';
 import { DocumentoService } from 'src/app/services/documento.service';
+import { ApiResponse } from 'src/app/interfaces/api-response.interface';
+import { GenericRecordsPayload } from 'src/app/interfaces/generic-response.interface';
 
 @Component({
   selector: 'app-mover-documentos',
@@ -26,7 +28,7 @@ export class MoverDocumentosComponent implements OnInit {
     caja.documentoActivoCaja = this.Documento.orden
     this.loading.show();
   this.documentoService.cambiarDocumentoDeCaja(caja).subscribe(
-    (datos:any)=>{ 
+    (datos)=>{ 
        CustomConsole.log('asignarACaja',datos);  
        this.loading.hide();
        this.dialogo.close(true);
@@ -36,12 +38,11 @@ export class MoverDocumentosComponent implements OnInit {
   getCajasActivasEstablecimiento(){
     this.documentoService.getCajasActivas(this.Documento.establecimiento).
     subscribe(
-      (datos:any)=>{
-        let cont = 0;
+      (datos:ApiResponse<GenericRecordsPayload<cajaModel>>)=>{
          CustomConsole.log('getCajasActivas',datos); 
          this.cajasActivas = []; 
-    if (datos.numdata > 0 ){ 
-      datos.data!.forEach((dato:any    )=>{  
+    if (datos.ok && datos.data.count > 0 ){ 
+      datos.data.records.forEach((dato:cajaModel)=>{  
        this.cajasActivas.push(dato); 
        
        CustomConsole.log(dato);

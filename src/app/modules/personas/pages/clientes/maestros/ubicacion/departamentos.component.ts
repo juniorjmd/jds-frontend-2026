@@ -8,6 +8,8 @@ import { DepartamentoModel } from 'src/app/models/maestros.model';
 import { MaestroClienteServices } from 'src/app/services/MaestroCliente.services';
 import { NewDepartamentoComponent } from './new-departamento.component';
 import { CustomConsole } from 'src/app/models/CustomConsole';
+import { ApiResponse } from 'src/app/interfaces/api-response.interface';
+import { GenericMutationPayload, GenericRecordsPayload } from 'src/app/interfaces/generic-response.interface';
 
 @Component({
   selector: 'app-departamentos',
@@ -29,10 +31,10 @@ export class DepartamentosComponent implements OnInit {
     this.loading.show();
     this.maestroCliente.getDepartamentos()
     .subscribe({next:
-      (datos:any)=>{ 
-    this.numdepartamentos = datos.numdata;
-    if (datos.numdata > 0 ){
-      this.departamentos = datos.data;
+      (datos: ApiResponse<GenericRecordsPayload<departamento>>)=>{ 
+    this.numdepartamentos = datos.data.count;
+    if (datos.ok && datos.data.count > 0 ){
+      this.departamentos = datos.data.records;
     }else{
       this.departamentos = [];
     }
@@ -41,7 +43,7 @@ export class DepartamentosComponent implements OnInit {
         this.loading.hide();
       } ,
       error:(error : any) => { this.loading.hide();
-        alert( error.error.error);}});
+        alert(this.maestroCliente.getErrorMessage(error));}});
   }
   
   borrar(dep:DepartamentoModel ){
@@ -52,8 +54,8 @@ export class DepartamentosComponent implements OnInit {
     .subscribe((confirmado: Boolean)=>{
       if (confirmado){
         this.maestroCliente.eliminarDepartamento(dep).subscribe(
-          (respuesta:any)=>{CustomConsole.log(respuesta)
-            if (respuesta.error === 'ok'){
+          (respuesta: ApiResponse<GenericMutationPayload>)=>{CustomConsole.log(respuesta)
+            if (respuesta.ok){
               alert('datos eliminados con exito');     
               this.listarDepartamentos();
             } 

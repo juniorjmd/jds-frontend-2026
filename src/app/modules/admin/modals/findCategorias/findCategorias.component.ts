@@ -5,6 +5,8 @@ import { CategoriasModel } from 'src/app/models/categorias.model';
 import { ProductoModel } from 'src/app/models/producto/producto.module';
 import { ActiDescuentoService } from 'src/app/services/actiDescuento.service';
 import Swal from 'sweetalert2';
+import { ApiResponse } from 'src/app/interfaces/api-response.interface';
+import { GenericMutationPayload, GenericRecordsPayload } from 'src/app/interfaces/generic-response.interface';
 
 @Component({
   selector: 'app-find-categorias',  
@@ -29,12 +31,18 @@ export class FindCategoriasComponent {
     //CustomConsole.log(item); 
     let id:number = (typeof( item.id ) == 'string')? parseInt(item.id!) :item.id! ;  
     if(!item.selected){
-      this.actividadService.setCategoria(id).subscribe({next:val=>{
+      this.actividadService.setCategoria(id).subscribe({next:(val:ApiResponse<GenericMutationPayload>)=>{
+        if (!val.ok) {
+          return;
+        }
         item.selected= true; 
         this.marcarCategoriaYDescendientes(item, true);
       }})
     }else{ 
-      this.actividadService.deleteCategoria(id) .subscribe({next:val=>{  
+      this.actividadService.deleteCategoria(id) .subscribe({next:(val:ApiResponse<GenericMutationPayload>)=>{  
+        if (!val.ok) {
+          return;
+        }
         item.selected= false; 
         this.marcarCategoriaYDescendientes(item, false);
       },error:error=>Swal.fire(error.error.error)
@@ -50,14 +58,20 @@ export class FindCategoriasComponent {
     let id:number = (typeof( hijo.id ) == 'string')? parseInt(hijo.id!) :hijo.id! ; 
     if (seleccionado) {
       this.actividadService.setCategoria( id).subscribe({
-        next: () => {
+        next: (response: ApiResponse<GenericMutationPayload>) => {
+          if (!response.ok) {
+            return;
+          }
           this.marcarCategoriaYDescendientes(hijo, true);
         },
         error: (error) => Swal.fire(error.error.error),
       });
     } else {
       this.actividadService.deleteCategoria(id).subscribe({
-        next: () => {
+        next: (response: ApiResponse<GenericMutationPayload>) => {
+          if (!response.ok) {
+            return;
+          }
           this.marcarCategoriaYDescendientes(hijo, false);
         },
         error: (error) => Swal.fire(error.error.error),
@@ -85,14 +99,14 @@ export class FindCategoriasComponent {
   busquedaFiltradoPorNombre(){ 
       this.actividadService.
       getCategoriasDisponiblesByName(this.filtroName)
-      .subscribe({next:(value)=>{ 
+      .subscribe({next:(value:ApiResponse<GenericRecordsPayload<CategoriasModel>>)=>{ 
         //CustomConsole.log('resultado busqueda' , value);
         
-        if(value.numdata > 0) { 
+        if(value.data.count > 0) { 
           //CustomConsole.log('termina la busqueda');
           
-          this.categoriasFiltrados = value.data;
-          const nuevosProductos = value.data.filter((nuevoProducto: CategoriasModel) => 
+          this.categoriasFiltrados = value.data.records;
+          const nuevosProductos = value.data.records.filter((nuevoProducto: CategoriasModel) => 
             !this.categorias.some(producto => producto.id === nuevoProducto.id)
           ); 
           this.actividadService.setArrayCategorias( [...this.categorias, ...nuevosProductos] );

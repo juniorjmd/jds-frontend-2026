@@ -37,7 +37,7 @@ describe('ProductoService', () => {
     httpMock.verify();
   });
 
-  it('should unwrap inventory products from standard api response', () => {
+  it('should return inventory products using the standard api response', () => {
     let actualResponse: any;
 
     service.getProductosGeneral([0, 10]).subscribe((response) => {
@@ -63,13 +63,13 @@ describe('ProductoService', () => {
       error: null
     });
 
-    expect(actualResponse.error).toBe('ok');
-    expect(actualResponse.numdata).toBe(1);
-    expect(actualResponse.data[0].nombre).toBe('Shampoo Premium');
-    expect(actualResponse.producto.id).toBe(101);
+    expect(actualResponse.ok).toBeTrue();
+    expect(actualResponse.data.count).toBe(1);
+    expect(actualResponse.data.products[0].nombre).toBe('Shampoo Premium');
+    expect(actualResponse.data.products[0].id).toBe(101);
   });
 
-  it('should unwrap inventory precargue response from standard api response', () => {
+  it('should return inventory precargue using the standard api response', () => {
     let actualResponse: any;
 
     service.guardarNuevoProductoPrecargue({
@@ -98,10 +98,39 @@ describe('ProductoService', () => {
       error: null
     });
 
-    expect(actualResponse.error).toBe('ok');
-    expect(actualResponse.numdata).toBe(1);
-    expect(actualResponse.datos[0].idProducto).toBe(101);
-    expect(actualResponse.estado).toBe('GUARDADO');
+    expect(actualResponse.ok).toBeTrue();
+    expect(actualResponse.data.count).toBe(1);
+    expect(actualResponse.data.items[0].idProducto).toBe(101);
+    expect(actualResponse.data.status).toBe('GUARDADO');
+  });
+
+  it('should return a single product lookup using the standard api response', () => {
+    let actualResponse: any;
+
+    service.getProductoByIdOrCodBarra('770101').subscribe((response) => {
+      actualResponse = response;
+    });
+
+    const req = httpMock.expectOne('/api/inventario/');
+    expect(req.request.body).toEqual({
+      action: 'BUSCAR_PRODUCTO_COD_BARRAS',
+      _id_producto: '770101'
+    });
+
+    req.flush({
+      ok: true,
+      data: {
+        product: { id: 101, nombre: 'Shampoo Premium', precios: [], existencias: [] },
+        products: [{ id: 101, nombre: 'Shampoo Premium', precios: [], existencias: [] }],
+        count: 1,
+        query: 'single_product'
+      },
+      error: null
+    });
+
+    expect(actualResponse.ok).toBeTrue();
+    expect(actualResponse.data.count).toBe(1);
+    expect(actualResponse.data.product.id).toBe(101);
   });
 
   it('should extract backend error messages from standard error payload', () => {

@@ -14,6 +14,8 @@ import { ModalCntSubCuentasComponent } from "src/app/modules/admin/modals/cuenta
 import { IngresarProductoVentaComponent } from "src/app/modules/pos/modals/ingresar-producto-venta/ingresar-producto-venta.component";
 import { CntContablesService } from "src/app/services/cntContables.service";
 import Swal from "sweetalert2";
+import { ApiResponse } from "src/app/interfaces/api-response.interface";
+import { GenericMutationPayload, GenericRecordsPayload } from "src/app/interfaces/generic-response.interface";
  
 
 @Component({
@@ -72,7 +74,10 @@ export class ModalUpdateTransactionTmpComponent implements OnInit{
     if(((this.newCntTransacciones.valor_debito||0) <= 0 ) && ((this.newCntTransacciones.valor_credito||0) <= 0)){  
        return ;}
 
-    this.cntService.setCntTransaccionesTmp(this.newCntTransacciones).subscribe({next:(value:any)=>{  
+    this.cntService.setCntTransaccionesTmp(this.newCntTransacciones).subscribe({next:(value:ApiResponse<GenericMutationPayload>)=>{  
+      if (!value.ok) {
+        return;
+      }
       this.load.hide(); 
       this.dialogo.close(true);
     }, error:error=>Swal.fire(error.error.error),  complete: () =>  this.load.hide()})
@@ -84,10 +89,10 @@ export class ModalUpdateTransactionTmpComponent implements OnInit{
     this.slcuentas= this.Mcuentas.filter(x=>x.id_scuenta == this.newCntTransacciones.id_cuenta)[0]; 
     //CustomConsole.log('buscarCuentasContables',this.slcuentas);
     if(this.slcuentas == undefined){
-       this.cntService.getCntCuentasById(this.newCntTransacciones.id_cuenta).subscribe({next:(value:cntSubCuentaVwRequest)=>{
+       this.cntService.getCntCuentasById(this.newCntTransacciones.id_cuenta).subscribe({next:(value:ApiResponse<GenericRecordsPayload<vwCntSubCuentaModel>>)=>{
         let data :subCuenta ;
-            if(value.numdata > 0 ){
-              this.Mcuentas = [...this.Mcuentas , ...value.data  ];
+            if(value.ok && value.data.count > 0 ){
+              this.Mcuentas = [...this.Mcuentas , ...value.data.records  ];
               this.cntService.changeSubCuenta(this.Mcuentas);
               this.cuentas  = this.Mcuentas.filter(x=>x.cod_cuenta == this.selectedCuentaMayor);
               this.slcuentas= this.Mcuentas.filter(x=>x.id_scuenta == this.newCntTransacciones.id_cuenta)[0]; 
@@ -131,9 +136,9 @@ export class ModalUpdateTransactionTmpComponent implements OnInit{
           this.newCntTransacciones.nro_subcuenta = response.datoDevolucion!.nro_scuenta||0;
           this.newCntTransacciones.nombre_subcuenta = response.datoDevolucion!.nombre_scuenta||'';
           if(this.slcuentas == undefined){
-          this.cntService.getCntCuentasById(this.subCuentaCreacion).subscribe({next:(value:cntSubCuentaVwRequest)=>{
-            if(value.numdata > 0 ){
-              this.Mcuentas = [...this.Mcuentas , ...value.data  ]; 
+          this.cntService.getCntCuentasById(this.subCuentaCreacion).subscribe({next:(value:ApiResponse<GenericRecordsPayload<vwCntSubCuentaModel>>)=>{
+            if(value.ok && value.data.count > 0 ){
+              this.Mcuentas = [...this.Mcuentas , ...value.data.records  ]; 
             }
     
           }, error:error=>Swal.fire(error.error.error), complete: () =>  this.load.hide()

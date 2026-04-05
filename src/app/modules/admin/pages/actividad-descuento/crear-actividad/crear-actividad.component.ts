@@ -2,7 +2,6 @@ import { Component, inject, OnInit } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { tap } from 'rxjs';
-import { categoriaRequest, clienteRequest, DescuentoRequest, marcaRequest, ProductoRequest } from 'src/app/interfaces/producto-request';
 import { CategoriasModel } from 'src/app/models/categorias.model';
 import { ClientesModel } from 'src/app/models/clientes/clientes.module';
 import { DescuentoModule } from 'src/app/models/descuento/descuento.model';
@@ -16,6 +15,8 @@ import { FindMarcasComponent } from '../../../modals/findMarcas/findMarcas.compo
 import { ModalFndClienteComponent } from '../../../modals/modalFndCliente/modalFndCliente.component';
 import { error } from 'jquery';
 import { CustomConsole } from 'src/app/models/CustomConsole';
+import { ApiResponse } from 'src/app/interfaces/api-response.interface';
+import { GenericMutationPayload, GenericRecordsPayload } from 'src/app/interfaces/generic-response.interface';
 
 @Component({
   selector: 'app-crear-actividad',
@@ -80,27 +81,27 @@ export class CrearActividadComponent  implements OnInit{
   }
 
   iniciaPrd(){ 
-  this.actividadService.getProductosDisponibles().subscribe({next : (value:ProductoRequest)=>{
+  this.actividadService.getProductosDisponibles().subscribe({next : (value:ApiResponse<GenericRecordsPayload<ProductoModel>>)=>{
     CustomConsole.log('getProductosDisponibles',value); 
-    this.actividadService.setArrayProductos(value.data)
+    this.actividadService.setArrayProductos(value.data.records)
   }})
   }
   iniciaCat(){ 
-    this.actividadService.getCategoriasDisponibles().subscribe({next : (value:categoriaRequest)=>{
-    this.actividadService.setArrayCategorias(value.data)
+    this.actividadService.getCategoriasDisponibles().subscribe({next : (value:ApiResponse<GenericRecordsPayload<CategoriasModel>>)=>{
+    this.actividadService.setArrayCategorias(value.data.records)
   }})}
   iniciaCli(){
-    this.actividadService.getClientesDisponibles().subscribe({next : (value:clienteRequest)=>{
-      this.actividadService.setArrayClientes(value.data)
+    this.actividadService.getClientesDisponibles().subscribe({next : (value:ApiResponse<GenericRecordsPayload<ClientesModel>>)=>{
+      this.actividadService.setArrayClientes(value.data.records)
     }})}
   
   iniciaMar(){
-    this.actividadService.getMarcasDisponibles().subscribe({next : (value:marcaRequest)=>{
-      this.actividadService.setArrayMarcas(value.data)
+    this.actividadService.getMarcasDisponibles().subscribe({next : (value:ApiResponse<GenericRecordsPayload<MarcasModel>>)=>{
+      this.actividadService.setArrayMarcas(value.data.records)
     }})}
  iniciaDescuentos(){ 
-  this.actividadService.getDescuentos().subscribe({next : (value:DescuentoRequest)=>{
-    this.descuentos = value.data??[]
+  this.actividadService.getDescuentos().subscribe({next : (value:ApiResponse<GenericRecordsPayload<DescuentoModule>>)=>{
+    this.descuentos = value.data.records ?? []
   }})
  }
 
@@ -173,7 +174,10 @@ export class CrearActividadComponent  implements OnInit{
   }
   eliminarPrdTemp(id:any){
     const tipo = this.actividadForm.get('tipo')?.value;
-    this.actividadService.deleteItemDescuentoTmp(id ,tipo ).subscribe({next:(value)=>{
+    this.actividadService.deleteItemDescuentoTmp(id ,tipo ).subscribe({next:(value:ApiResponse<GenericMutationPayload>)=>{
+     if (!value.ok) {
+      return;
+     }
      if( this.showprd  ) {
       this.iniciaPrd();
       this.getTmpProductos();
@@ -224,9 +228,9 @@ onSubmitActividad() {
       Swal.fire('error' , 'Debe escoger minimo un cliente al cual aplicarle el descuento' , 'info')
           return;} 
 
-          this.actividadService.createDescuentoActividad(this.actividadForm.value).subscribe({next:(response:any) => {
+          this.actividadService.createDescuentoActividad(this.actividadForm.value).subscribe({next:(response:ApiResponse<GenericMutationPayload>) => {
       CustomConsole.log('Descuento actividad creado:', response);
-      if(response.error == 'ok'){
+      if(response.ok){
         if(this.showprd ) this.getTmpProductos()
         if( this.showcat ) this.getTmpCategorias()
         if( this.showmar  ) this.getTmpMarcas()
@@ -236,23 +240,23 @@ onSubmitActividad() {
 }
 
 getTmpCategorias(){ 
-  this.actividadService.getCategoriaActividadTmp().subscribe({next : (value:categoriaRequest)=>{
-    this.categorias = value.data??[]
+  this.actividadService.getCategoriaActividadTmp().subscribe({next : (value:ApiResponse<GenericRecordsPayload<CategoriasModel>>)=>{
+    this.categorias = value.data.records??[]
   }})
  }
  getTmpMarcas(){ 
-  this.actividadService.getMarcaActividadTmp().subscribe({next : (value:marcaRequest)=>{
-    this.marcas = value.data??[]
+  this.actividadService.getMarcaActividadTmp().subscribe({next : (value:ApiResponse<GenericRecordsPayload<MarcasModel>>)=>{
+    this.marcas = value.data.records??[]
   }})
  }
  getTmpClientes(){ 
-  this.actividadService.getClienteActividadTmp().subscribe({next : (value:clienteRequest)=>{
-    this.clientes = value.data??[]
+  this.actividadService.getClienteActividadTmp().subscribe({next : (value:ApiResponse<GenericRecordsPayload<ClientesModel>>)=>{
+    this.clientes = value.data.records??[]
   }})
  }
  getTmpProductos(){ 
-  this.actividadService.getProductosActividadTmp().subscribe({next : (value:ProductoRequest)=>{
-    this.productos = value.data??[]
+  this.actividadService.getProductosActividadTmp().subscribe({next : (value:ApiResponse<GenericRecordsPayload<ProductoModel>>)=>{
+    this.productos = value.data.records??[]
   }})
  }
 

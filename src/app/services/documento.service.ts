@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { actions } from '../models/app.db.actions';
 import { httpOptions, url } from '../models/app.db.url';
 import { vistas } from '../models/app.db.view';
@@ -14,6 +14,28 @@ import { EmpleadoModel } from '../models/empleados/empleados.module';
 import { DocumentoListado } from '../interfaces/documento.interface';
 import { CustomConsole } from '../models/CustomConsole';
 import { ConfigService } from './config.service';
+import { ApiResponse, ApiErrorResponse } from '../interfaces/api-response.interface';
+import { GenericMutationPayload, GenericRecordsPayload } from '../interfaces/generic-response.interface';
+
+export interface DocumentoRecordsPayload {
+  records: DocumentosModel[];
+  count: number;
+}
+
+export interface DocumentoMutationPayload extends DocumentoRecordsPayload {
+  message: string;
+  documentId: number | null;
+}
+
+export interface DocumentoActionPayload extends GenericMutationPayload {
+  documentoFinal?: DocumentosModel;
+  documentId?: number | null;
+}
+
+export interface CarteraRecordsPayload {
+  records: any[];
+  count: number;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -24,10 +46,28 @@ constructor(private http: HttpClient, private loading: loading , private configS
     CustomConsole.log('servicio documentos');
   }
 
+  private postObjectRecords<T>(datos: any): Observable<ApiResponse<GenericRecordsPayload<T>>> {
+    return this.http
+      .post<ApiResponse<GenericRecordsPayload<any>>>(this.configService.url.action, datos, httpOptions())
+      .pipe(
+        map((response) => ({
+          ...response,
+          data: {
+            records: (response.data.records ?? []).map((item: any) => item.objeto ?? item.obj ?? item),
+            count: response.data.count ?? 0,
+          },
+        }))
+      );
+  }
+
+  private postGenericRecords<T>(datos: any): Observable<ApiResponse<GenericRecordsPayload<T>>> {
+    return this.http.post<ApiResponse<GenericRecordsPayload<T>>>(this.configService.url.action, datos, httpOptions());
+  }
+
   
 
 
-  getDocumentoActivo(): Observable<DocumentoRequest> {
+  getDocumentoActivo(): Observable<ApiResponse<GenericRecordsPayload<DocumentosModel>>> {
     let datos = {
       "action": actions.actionSelectPorUsuario,
       "_tabla": vistas.documento,
@@ -37,10 +77,10 @@ constructor(private http: HttpClient, private loading: loading , private configS
       "_where": [{"columna": 'estado', "tipocomp": '=', "dato": 1}]
     };
     CustomConsole.log('servicios de usuarios activo - getDocumentoActivo', this.configService.url.action, datos, httpOptions());
-    return this.http.post<DocumentoRequest>(this.configService.url.action, datos, httpOptions());
+    return this.postObjectRecords<DocumentosModel>(datos);
   }
 
-   getCompras(): Observable<any> {
+   getCompras(): Observable<ApiResponse<GenericRecordsPayload<DocumentosModel>>> {
     let datos = {
       "action": actions.actionSelect,
       "_tabla": vistas.documentosCompra, 
@@ -48,9 +88,9 @@ constructor(private http: HttpClient, private loading: loading , private configS
       "_columnas": ['objeto'] 
     };
     CustomConsole.log('servicios de usuarios activo - getDocumentoActivo', this.configService.url.action, datos, httpOptions());
-    return this.http.post(this.configService.url.action, datos, httpOptions());
+    return this.postObjectRecords<DocumentosModel>(datos);
   }
-  getPagosCPP(): Observable<any> {
+  getPagosCPP(): Observable<ApiResponse<GenericRecordsPayload<DocumentosModel>>> {
     let datos = {
       "action": actions.actionSelect,
       "_tabla": vistas.documentosPagosCPP, 
@@ -58,7 +98,7 @@ constructor(private http: HttpClient, private loading: loading , private configS
       "_columnas": ['objeto'] 
     };
     CustomConsole.log('servicios de usuarios activo - getDocumentoActivo', this.configService.url.action, datos, httpOptions());
-    return this.http.post(this.configService.url.action, datos, httpOptions());
+    return this.postObjectRecords<DocumentosModel>(datos);
   }
 
   getPlazoCreditoPorDocumentoBase(orden:number): Observable<any> {
@@ -73,7 +113,7 @@ constructor(private http: HttpClient, private loading: loading , private configS
     CustomConsole.log('getPlazoCreditoPorDocumentoBase', this.configService.url.action, datos, httpOptions());
     return this.http.post(this.configService.url.action, datos, httpOptions());
   }
-  getCxPProveedores(): Observable<any> {
+  getCxPProveedores(): Observable<ApiResponse<GenericRecordsPayload<DocumentosModel>>> {
     let datos = {
       "action": actions.actionSelect,
       "_tabla": vistas.documentosCuentasPorPagar, 
@@ -81,9 +121,9 @@ constructor(private http: HttpClient, private loading: loading , private configS
       "_columnas": ['objeto'] 
     };
     CustomConsole.log('servicios de usuarios activo - getDocumentoActivo', this.configService.url.action, datos, httpOptions());
-    return this.http.post(this.configService.url.action, datos, httpOptions());
+    return this.postObjectRecords<DocumentosModel>(datos);
   }
-  getDevoluciones(): Observable<any> {
+  getDevoluciones(): Observable<ApiResponse<GenericRecordsPayload<DocumentosModel>>> {
     let datos = {
       "action": actions.actionSelect,
       "_tabla": vistas.documentoDev, 
@@ -91,11 +131,11 @@ constructor(private http: HttpClient, private loading: loading , private configS
       "_columnas": ['objeto'] 
     };
     CustomConsole.log('servicios de usuarios activo - getDocumentoActivo', this.configService.url.action, datos, httpOptions());
-    return this.http.post(this.configService.url.action, datos, httpOptions());
+    return this.postObjectRecords<DocumentosModel>(datos);
   }
 
   
-  getDevolucionesSinUso(): Observable<any> {
+  getDevolucionesSinUso(): Observable<ApiResponse<GenericRecordsPayload<DocumentosModel>>> {
     
     let _where = [{"columna": 'uso_del_bono', "tipocomp": '=', "dato": 'SinUso'}];
     let datos = {
@@ -105,10 +145,10 @@ constructor(private http: HttpClient, private loading: loading , private configS
       "_columnas": ['objeto'] , _where
     };
     CustomConsole.log('servicios de usuarios activo - getDocumentoActivo', this.configService.url.action, datos, httpOptions());
-    return this.http.post(this.configService.url.action, datos, httpOptions());
+    return this.postObjectRecords<DocumentosModel>(datos);
   }
 
-  getCuentasXCobrarByPersona( idPersona :number): Observable<CarteraRequest> {
+  getCuentasXCobrarByPersona( idPersona :number): Observable<ApiResponse<CarteraRecordsPayload>> {
     let where = [{"columna": 'idTercero', "tipocomp": '=', "dato": idPersona}];
     let datos = {
       "action": actions.actionSelect,
@@ -116,7 +156,7 @@ constructor(private http: HttpClient, private loading: loading , private configS
       "_where": where
     };
     CustomConsole.log('servicios de usuarios activo - getDocumentos', this.configService.url.action, datos, httpOptions());
-    return this.http.post<CarteraRequest>(this.configService.url.action, datos, httpOptions());
+    return this.postGenericRecords<any>(datos) as Observable<ApiResponse<CarteraRecordsPayload>>;
   }
 
   getCuentasXCobrarByfecha(_fechaInicio:string, _fechaFin:string): Observable<CreditosResumenRequest> { 
@@ -153,7 +193,7 @@ getCuentasXPagarByfecha(_fechaInicio:string, _fechaFin:string): Observable<Credi
     CustomConsole.log('servicios de getCuentasXCobrarByfecha', this.configService.url.actionDocumentos, datos, httpOptions());
     return this.http.post<CreditosResumenRequest>(this.configService.url.actionDocumentos, datos, httpOptions());
   }
-  getCuentasXCobrarByPersonaAbonos( idPersona :number): Observable<CarteraRequest> {
+  getCuentasXCobrarByPersonaAbonos( idPersona :number): Observable<ApiResponse<CarteraRecordsPayload>> {
     let where = [{"columna": 'idTercero', "tipocomp": '=', "dato": idPersona},
       {"columna": 'totalActual', "tipocomp": '>', "dato": 0}];
     let datos = {
@@ -162,9 +202,9 @@ getCuentasXPagarByfecha(_fechaInicio:string, _fechaFin:string): Observable<Credi
       "_where": where
     };
     CustomConsole.log('servicios de usuarios activo - getDocumentos', this.configService.url.action, datos, httpOptions());
-    return this.http.post<CarteraRequest>(this.configService.url.action, datos, httpOptions());
+    return this.postGenericRecords<any>(datos) as Observable<ApiResponse<CarteraRecordsPayload>>;
   }
-  getCuentasXPagarByPersonaAbonos( idPersona :number , idEstablecimiento:any): Observable<CarteraRequest> {
+  getCuentasXPagarByPersonaAbonos( idPersona :number , idEstablecimiento:any): Observable<ApiResponse<CarteraRecordsPayload>> {
     let where = [{"columna": 'idTercero', "tipocomp": '=', "dato": idPersona},
       {"columna": 'establecimiento', "tipocomp": '=', "dato": idEstablecimiento},
       {"columna": 'totalActual', "tipocomp": '>', "dato": 0}];
@@ -174,21 +214,21 @@ getCuentasXPagarByfecha(_fechaInicio:string, _fechaFin:string): Observable<Credi
       "_where": where
     };
     CustomConsole.log('servicios de usuarios activo - getDocumentos', this.configService.url.action, datos, httpOptions());
-    return this.http.post<CarteraRequest>(this.configService.url.action, datos, httpOptions());
+    return this.postGenericRecords<any>(datos) as Observable<ApiResponse<CarteraRecordsPayload>>;
   }
 
-  getCuentasXCobrar(): Observable<CarteraRequest> { 
+  getCuentasXCobrar(): Observable<ApiResponse<CarteraRecordsPayload>> { 
     let datos = {
       "action": actions.actionSelect,
       "_tabla": vistas.cartera  ,
       "_limit" : 300
     };
     CustomConsole.log('servicios de usuarios activo - getDocumentos', this.configService.url.action, datos, httpOptions());
-    return this.http.post<CarteraRequest>(this.configService.url.action, datos, httpOptions());
+    return this.postGenericRecords<any>(datos) as Observable<ApiResponse<CarteraRecordsPayload>>;
   }
 
 
-  getDocumentos(): Observable<any> {
+  getDocumentos(): Observable<ApiResponse<GenericRecordsPayload<DocumentosModel>>> {
     let where = [{"columna": 'tipoDocumentoFinal', "tipocomp": '=', "dato": 1}];
     let datos = {
       "action": actions.actionSelect,
@@ -199,11 +239,11 @@ getCuentasXPagarByfecha(_fechaInicio:string, _fechaFin:string): Observable<Credi
       "_where": where
     };
     CustomConsole.log('servicios de usuarios activo - getDocumentos', this.configService.url.action, datos, httpOptions());
-    return this.http.post(this.configService.url.action, datos, httpOptions());
+    return this.postObjectRecords<DocumentosModel>(datos);
   }
 
   
-  getDocumentosByOrden(orden:number): Observable<any> {
+  getDocumentosByOrden(orden:number): Observable<ApiResponse<GenericRecordsPayload<DocumentosModel>>> {
     let where = [{"columna": 'orden', "tipocomp": '=', "dato": orden}];
     let datos = {
       "action": actions.actionSelect,
@@ -214,10 +254,10 @@ getCuentasXPagarByfecha(_fechaInicio:string, _fechaFin:string): Observable<Credi
       "_where": where
     };
     CustomConsole.log('servicios de usuarios activo - getDocumentosByOrden', this.configService.url.action, datos, httpOptions());
-    return this.http.post(this.configService.url.action, datos, httpOptions());
+    return this.postObjectRecords<DocumentosModel>(datos);
   }
 
-  getDocumentosByNumFactura( codFactura : string): Observable<any> {
+  getDocumentosByNumFactura( codFactura : string): Observable<ApiResponse<GenericRecordsPayload<DocumentosModel>>> {
     let where = [{"columna": 'idDocumentoFinal', "tipocomp": '=', "dato": codFactura}];
     let datos = {
       "action": actions.actionSelect,
@@ -228,9 +268,9 @@ getCuentasXPagarByfecha(_fechaInicio:string, _fechaFin:string): Observable<Credi
       "_where": where
     };
     CustomConsole.log('servicios de usuarios activo - getDocumentos', this.configService.url.action, datos, httpOptions());
-    return this.http.post(this.configService.url.action, datos, httpOptions());
+    return this.postObjectRecords<DocumentosModel>(datos);
   } 
-  getVentasByNumFactura( codFactura : string): Observable<any> {
+  getVentasByNumFactura( codFactura : string): Observable<ApiResponse<GenericRecordsPayload<DocumentosModel>>> {
     let where = [{"columna": 'idDocumentoFinal', "tipocomp": '=', "dato": codFactura}];
     let datos = {
       "action": actions.actionSelect,
@@ -241,9 +281,9 @@ getCuentasXPagarByfecha(_fechaInicio:string, _fechaFin:string): Observable<Credi
       "_where": where
     };
     CustomConsole.log('servicios de usuarios activo - getDocumentos', this.configService.url.action, datos, httpOptions());
-    return this.http.post(this.configService.url.action, datos, httpOptions());
+    return this.postObjectRecords<DocumentosModel>(datos);
   } 
-   getDocComprasByNumFactura( codFactura : string): Observable<any> {
+   getDocComprasByNumFactura( codFactura : string): Observable<ApiResponse<GenericRecordsPayload<DocumentosModel>>> {
     let where = [{"columna": 'idDocumentoFinal', "tipocomp": '=', "dato": codFactura}];
     let datos = {
       "action": actions.actionSelect,
@@ -254,9 +294,9 @@ getCuentasXPagarByfecha(_fechaInicio:string, _fechaFin:string): Observable<Credi
       "_where": where
     };
     CustomConsole.log('servicios de usuarios activo - getDocumentos', this.configService.url.action, datos, httpOptions());
-    return this.http.post(this.configService.url.action, datos, httpOptions());
+    return this.postObjectRecords<DocumentosModel>(datos);
   }
-  getDocumentosUsuario(): Observable<any> {
+  getDocumentosUsuario(): Observable<ApiResponse<GenericRecordsPayload<DocumentosModel>>> {
     let where = [{"columna": 'tipoDocumentoFinal', "tipocomp": '=', "dato": 1}];
     let datos = {
       "action": actions.actionSelectPorUsuario,
@@ -267,10 +307,10 @@ getCuentasXPagarByfecha(_fechaInicio:string, _fechaFin:string): Observable<Credi
       "_where": where
     };
     CustomConsole.log('servicios de usuarios activo - getDocumentos', this.configService.url.action, datos, httpOptions());
-    return this.http.post(this.configService.url.action, datos, httpOptions());
+    return this.postObjectRecords<DocumentosModel>(datos);
   }
 
-  getCajasActivas(establecimiento: number): Observable<any> {
+  getCajasActivas(establecimiento: number): Observable<ApiResponse<GenericRecordsPayload<cajaModel>>> {
     let where = [{"columna": 'establecimiento', "tipocomp": '=', "dato": establecimiento}];
     let datos = {
       "action": actions.actionSelect,
@@ -278,20 +318,20 @@ getCuentasXPagarByfecha(_fechaInicio:string, _fechaFin:string): Observable<Credi
       "_where": where
     };
     CustomConsole.log('servicios de documentos - getCajasActivas', this.configService.url.action, datos, httpOptions());
-    return this.http.post(this.configService.url.action, datos, httpOptions());
+    return this.postGenericRecords<cajaModel>(datos);
   }
  
 
-  getDocumentosCaja():Observable<any>{
+  getDocumentosCaja():Observable<ApiResponse<DocumentoRecordsPayload>>{
     let datos = { 
             "action": actions.action_get_documentos_caja  
           }
           CustomConsole.log('servicios de documentos - getDocumentosCaja', this.configService.url.actionDocumentos, datos, httpOptions());
  
-      return this.http.post<any>(this.configService.url.actionDocumentos, datos, httpOptions());
+      return this.http.post<ApiResponse<DocumentoRecordsPayload>>(this.configService.url.actionDocumentos, datos, httpOptions());
   }
 
-  getDocumentosCompraBlanco():Observable<any>{
+  getDocumentosCompraBlanco():Observable<ApiResponse<GenericRecordsPayload<DocumentosModel>>>{
     let _where = [{"columna": 'tipoDocumentoFinal', "tipocomp": '=f', "dato": "getIdTipoDocumentoPorNombre('compra_activa') "}];
     let datos = {
       "action": actions.actionSelect,
@@ -300,10 +340,10 @@ getCuentasXPagarByfecha(_fechaInicio:string, _fechaFin:string): Observable<Credi
       "_tabla": vistas.documentos_por_tip_documento , _where
     };
     CustomConsole.log('servicios de documentos - getCajasActivas', this.configService.url.action, datos, httpOptions());
-    return this.http.post(this.configService.url.action, datos, httpOptions());
+    return this.postObjectRecords<DocumentosModel>(datos);
   }
 
-  getDocumentosCompra( idCliente?:any):Observable<any>{
+  getDocumentosCompra( idCliente?:any):Observable<ApiResponse<GenericRecordsPayload<DocumentosModel>>>{
     let _tabla = vistas.documentos_por_tip_documento;
     let _where = [{"columna": 'tipoDocumentoFinal', "tipocomp": '=f', "dato": "getIdTipoDocumentoPorNombre('comprobante_compras') " }];
     if(idCliente !=undefined){
@@ -317,10 +357,10 @@ getCuentasXPagarByfecha(_fechaInicio:string, _fechaFin:string): Observable<Credi
       "_obj": ['objeto'],_tabla ,  _where
     };
     CustomConsole.log('servicios de documentos - getCajasActivas', this.configService.url.action, datos, httpOptions());
-    return this.http.post(this.configService.url.action, datos, httpOptions());
+    return this.postObjectRecords<DocumentosModel>(datos);
   }
 
-  getDocumentosCompraById( idDocumentoFinal?:any):Observable<any>{
+  getDocumentosCompraById( idDocumentoFinal?:any):Observable<ApiResponse<GenericRecordsPayload<DocumentosModel>>>{
     let _tabla = vistas.documento;
     let _where = [{"columna": 'tipoDocumentoFinal', "tipocomp": '=f', "dato": "getIdTipoDocumentoPorNombre('comprobante_compras') " } ,
                  {"columna": 'idDocumentoFinal', "tipocomp": '=', "dato": idDocumentoFinal}]
@@ -330,7 +370,7 @@ getCuentasXPagarByfecha(_fechaInicio:string, _fechaFin:string): Observable<Credi
       "_obj": ['objeto'],_tabla ,  _where
     };
     CustomConsole.log('servicios de documentos - getCajasActivas', this.configService.url.action, datos, httpOptions());
-    return this.http.post(this.configService.url.action, datos, httpOptions());
+    return this.postObjectRecords<DocumentosModel>(datos);
   }
 
   getVentasFinalizadas(codVenta: string = ''): Observable<any> {
@@ -657,20 +697,20 @@ getCuentasXPagarByfecha(_fechaInicio:string, _fechaFin:string): Observable<Credi
     CustomConsole.log('servicios de documentos - getVentasFinalizadasPorFecha', this.configService.url.action, datos, httpOptions());
     return this.http.post(this.configService.url.action, datos, httpOptions());
   }
-  cambiarDocumento(documento: number): Observable<any> {
+  cambiarDocumento(documento: number): Observable<ApiResponse<{ message: string; documentId: number }>> {
     let datos = {"action": actions.actionChangeDocumentos, "_docActual": documento};
     CustomConsole.log('cambiarDocumento activo', this.configService.url.actionDocumentos, datos, httpOptions());
-    return this.http.post(this.configService.url.actionDocumentos, datos, httpOptions());
+    return this.http.post<ApiResponse<{ message: string; documentId: number }>>(this.configService.url.actionDocumentos, datos, httpOptions());
   }
 
-  cambiarDocumentoCompra(documento: number): Observable<any> {
+  cambiarDocumentoCompra(documento: number): Observable<ApiResponse<{ message: string; documentId: number }>> {
     let datos = {"action": actions.actionChangeCompraDocumentos, "_docActual": documento};
     CustomConsole.log('cambiarDocumento activo', this.configService.url.actionDocumentos, datos, httpOptions());
-    return this.http.post(this.configService.url.actionDocumentos, datos, httpOptions());
+    return this.http.post<ApiResponse<{ message: string; documentId: number }>>(this.configService.url.actionDocumentos, datos, httpOptions());
   }
 
   
-  editarLineaDocumento(item:DocumentoListado): Observable<any> {
+  editarLineaDocumento(item:DocumentoListado): Observable<ApiResponse<GenericMutationPayload>> {
    
     let where =   [{"columna" : "id" , "tipocomp" : "=" , "dato" : item.id }]
     
@@ -704,9 +744,9 @@ getCuentasXPagarByfecha(_fechaInicio:string, _fechaFin:string): Observable<Credi
 
     }
     CustomConsole.log('editarLineaDocumento activo', this.configService.url.action, datos, httpOptions());
-    return this.http.post(this.configService.url.action, datos, httpOptions());
+    return this.http.post<ApiResponse<GenericMutationPayload>>(this.configService.url.action, datos, httpOptions());
   }
-  cambiarVendedorDocumento(documento: number , vendedor : EmpleadoModel): Observable<any> {
+  cambiarVendedorDocumento(documento: number , vendedor : EmpleadoModel): Observable<ApiResponse<GenericMutationPayload>> {
     let where =   [{"columna" : "orden" , "tipocomp" : "=" , "dato" : documento }]
     let arraydatos =  {  "cod_vendedor" : vendedor.id ,
 
@@ -717,77 +757,95 @@ getCuentasXPagarByfecha(_fechaInicio:string, _fechaFin:string): Observable<Credi
       "_arraydatos" : arraydatos
      };
     CustomConsole.log('cambiarDocumento activo', this.configService.url.action, datos, httpOptions());
-    return this.http.post(this.configService.url.action, datos, httpOptions());
+    return this.http.post<ApiResponse<GenericMutationPayload>>(this.configService.url.action, datos, httpOptions());
   }
 
-  cancelarDocumento(documento: number): Observable<any> {
+  cancelarDocumento(documento: number): Observable<ApiResponse<GenericMutationPayload>> {
     let datos = {"action": actions.actionCancelarDocumentos, "_documento": documento};
     CustomConsole.log('cancelarDocumento activo', this.configService.url.actionDocumentos, datos, httpOptions());
-    return this.http.post(this.configService.url.actionDocumentos, datos, httpOptions());
+    return this.http.post<ApiResponse<GenericMutationPayload>>(this.configService.url.actionDocumentos, datos, httpOptions());
   }
 
-  convertirDocumentoEnCotizacion(documento: number): Observable<DocumentoCierreRequest> {
+  convertirDocumentoEnCotizacion(documento: number): Observable<ApiResponse<DocumentoActionPayload>> {
     let datos = {"action": actions.actionCambiarDocumentosACotizacion, "_documento": documento};
     CustomConsole.log('generar cotizacion activo', this.configService.url.actionDocumentos, datos, httpOptions());
-    return this.http.post<DocumentoCierreRequest>(this.configService.url.actionDocumentos, datos, httpOptions());
+    return this.http.post<ApiResponse<DocumentoActionPayload>>(this.configService.url.actionDocumentos, datos, httpOptions());
   }
-  generarDomicilioDocumento(documento: number): Observable<any> {
+  generarDomicilioDocumento(documento: number): Observable<ApiResponse<GenericMutationPayload>> {
     let datos = {"action": actions.actionCambiarDocADomicilio, "_documento": documento};
     CustomConsole.log('actionCambiarDocADomicilio', this.configService.url.actionDocumentos, datos, httpOptions());
-    return this.http.post(this.configService.url.actionDocumentos, datos, httpOptions());
+    return this.http.post<ApiResponse<GenericMutationPayload>>(this.configService.url.actionDocumentos, datos, httpOptions());
   }
 
-  cerrarDocumento(documento: number): Observable<any> {
+  cerrarDocumento(documento: number): Observable<ApiResponse<GenericMutationPayload>> {
     let datos = {"action": actions.actionCerarDocumentos, "_documento": documento};
     CustomConsole.log('crearDocumento activo', this.configService.url.actionDocumentos, datos, httpOptions());
-    return this.http.post(this.configService.url.actionDocumentos, datos, httpOptions());
+    return this.http.post<ApiResponse<GenericMutationPayload>>(this.configService.url.actionDocumentos, datos, httpOptions());
   }
 
-  cerrarDocumentoRemision(documento: number): Observable<any> {
+  cerrarDocumentoRemision(documento: number): Observable<ApiResponse<GenericMutationPayload>> {
     let datos = {"action": actions.actionCerarDocumentosRemision, "_documento": documento};
     CustomConsole.log('crearDocumento activo', this.configService.url.actionDocumentos, datos, httpOptions());
-    return this.http.post(this.configService.url.actionDocumentos, datos, httpOptions());
+    return this.http.post<ApiResponse<GenericMutationPayload>>(this.configService.url.actionDocumentos, datos, httpOptions());
   }
-  cambiarDocumentoDeCaja(caja: cajaModel): Observable<any> {
+  cambiarDocumentoDeCaja(caja: cajaModel): Observable<ApiResponse<GenericMutationPayload>> {
     let datos = {"action": actions.actionCambioCajaDocumento, "datos": caja};
     CustomConsole.log('crearDocumento activo', this.configService.url.actionDocumentos, datos, httpOptions());
-    return this.http.post(this.configService.url.actionDocumentos, datos, httpOptions());
+    return this.http.post<ApiResponse<GenericMutationPayload>>(this.configService.url.actionDocumentos, datos, httpOptions());
   }
 
-  crearDocumento(): Observable<any> {
+  crearDocumento(): Observable<ApiResponse<DocumentoMutationPayload>> {
     let datos = {"action": actions.actionCrearDocumentos};
     CustomConsole.log('crearDocumento activo', this.configService.url.actionDocumentos, datos, httpOptions());
-    return this.http.post(this.configService.url.actionDocumentos, datos, httpOptions());
+    return this.http.post<ApiResponse<DocumentoMutationPayload>>(this.configService.url.actionDocumentos, datos, httpOptions());
   }
-  crearDocumentoCompraEnBlanco(_establecimiento:number): Observable<any> {
+  crearDocumentoCompraEnBlanco(_establecimiento:number): Observable<ApiResponse<DocumentoMutationPayload>> {
     let datos = {"action": actions.actionCrearDocumentosCompraBlank , _establecimiento};
     CustomConsole.log('crearDocumento activo', this.configService.url.actionDocumentos, datos, httpOptions());
-    return this.http.post(this.configService.url.actionDocumentos, datos, httpOptions());
+    return this.http.post<ApiResponse<DocumentoMutationPayload>>(this.configService.url.actionDocumentos, datos, httpOptions());
   }
-   crearDocumentoGasto(nuevoGasto:ValuesFormuGasto): Observable<any> {
+   crearDocumentoGasto(nuevoGasto:ValuesFormuGasto): Observable<ApiResponse<GenericMutationPayload>> {
     let datos = {"action": actions.actionCrearNewGasto ,"_arraydatos" : nuevoGasto};
     CustomConsole.log('crearDocumentoGasto activo', this.configService.url.actionDocumentos, datos, httpOptions());
-    return this.http.post(this.configService.url.actionDocumentos, datos, httpOptions());
+    return this.http.post<ApiResponse<GenericMutationPayload>>(this.configService.url.actionDocumentos, datos, httpOptions());
   }
-  crearDocumentoAbono(nuevoGasto:DocumentosModel): Observable<any> {
+  crearDocumentoAbono(nuevoGasto:DocumentosModel): Observable<ApiResponse<GenericMutationPayload>> {
     let datos = {"action": actions.actionCrearNewAbono ,"_documentoAbono" : nuevoGasto};
     CustomConsole.log('crearDocumentoGasto activo', this.configService.url.actionDocumentos, datos, httpOptions());
-    return this.http.post(this.configService.url.actionDocumentos, datos, httpOptions());
+    return this.http.post<ApiResponse<GenericMutationPayload>>(this.configService.url.actionDocumentos, datos, httpOptions());
   }
-  crearDocumentoAbonoCredito(nuevoGasto:DocumentosModel): Observable<DocumentoCierreRequest> {
+  crearDocumentoAbonoCredito(nuevoGasto:DocumentosModel): Observable<ApiResponse<DocumentoActionPayload>> {
     let datos = {"action": actions.actionCrearNewAbonoCredito ,"_documentoAbono" : nuevoGasto};
     CustomConsole.log('crearDocumentoGasto activo', this.configService.url.actionDocumentos, datos, httpOptions());
-    return this.http.post<DocumentoCierreRequest>(this.configService.url.actionDocumentos, datos, httpOptions());
+    return this.http.post<ApiResponse<DocumentoActionPayload>>(this.configService.url.actionDocumentos, datos, httpOptions());
   }
-  crearDocumentoDevolucion(nuevoGasto:DocumentosModel): Observable<any> {
+  crearDocumentoDevolucion(nuevoGasto:DocumentosModel): Observable<ApiResponse<DocumentoActionPayload>> {
     let datos = {"action": actions.actionCrearNewDevolucion ,"_documentoAbono" : nuevoGasto};
     CustomConsole.log('crearDocumentoGasto activo', this.configService.url.actionDocumentos, datos, httpOptions());
-    return this.http.post(this.configService.url.actionDocumentos, datos, httpOptions());
+    return this.http.post<ApiResponse<DocumentoActionPayload>>(this.configService.url.actionDocumentos, datos, httpOptions());
   }
   
-  crearNotaDebito(nuevoGasto:documentoDev): Observable<any> {
+  crearNotaDebito(nuevoGasto:documentoDev): Observable<ApiResponse<DocumentoActionPayload>> {
     let datos = {"action": actions.actionCrearNewNotaDebito ,"_documentoAbono" : nuevoGasto};
     CustomConsole.log('crearDocumentoGasto activo', this.configService.url.actionDocumentos, datos, httpOptions());
-    return this.http.post(this.configService.url.actionDocumentos, datos, httpOptions());
+    return this.http.post<ApiResponse<DocumentoActionPayload>>(this.configService.url.actionDocumentos, datos, httpOptions());
+  }
+
+  getErrorMessage(error: any): string {
+    const apiError = error?.error?.error as ApiErrorResponse | string | undefined;
+
+    if (typeof apiError === 'string' && apiError.trim() !== '') {
+      return apiError;
+    }
+
+    if (apiError && typeof apiError === 'object' && 'message' in apiError) {
+      return String(apiError.message);
+    }
+
+    if (typeof error?.message === 'string' && error.message.trim() !== '') {
+      return error.message;
+    }
+
+    return 'Error interno del servidor';
   }
 }

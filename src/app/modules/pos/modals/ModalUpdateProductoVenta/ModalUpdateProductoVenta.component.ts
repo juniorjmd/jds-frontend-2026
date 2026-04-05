@@ -10,6 +10,9 @@ import { DatosInicialesService } from 'src/app/services/DatosIniciales.services'
 import { DocumentoService } from 'src/app/services/documento.service';
 import { ProductoService } from 'src/app/services/producto.service';
 import Swal from 'sweetalert2';
+import { InventarioExistenceResponse } from 'src/app/interfaces/inventario-response.interface';
+import { ApiResponse } from 'src/app/interfaces/api-response.interface';
+import { GenericMutationPayload } from 'src/app/interfaces/generic-response.interface';
 
 @Component({
   selector: 'app-modal-update-producto-venta', 
@@ -39,24 +42,24 @@ export class ModalUpdateProductoVentaComponent implements OnInit {
 
   editar(){
     CustomConsole.log('ModalUpdateProductoVentaComponent' ,this.item );
-    this.service.editarLineaDocumento(this.item).subscribe({next:value=>{
-      if (value.error == 'ok'){
+    this.service.editarLineaDocumento(this.item).subscribe({next:(value:ApiResponse<GenericMutationPayload>)=>{
+      if (value.ok){
         this.dialogo.close(true)   
          }
-    }, error:e=>Swal.fire(e.error.error)})
+    }, error:e=>Swal.fire(this.service.getErrorMessage(e))})
 
     
   } 
   enviarCntDirecto(){
     if (this.validarExistencia){ 
         this.loading.show()
-        this.prdService.getProductoExtistenciaDocById(this.item.idProducto,this.item.idDocumento!).subscribe({next:(value:ProductoExitenciaRequest)=>{
+        this.prdService.getProductoExtistenciaDocById(this.item.idProducto,this.item.idDocumento!).subscribe({next:(value:InventarioExistenceResponse)=>{
           CustomConsole.log('producto completo', value); 
           this.loading.hide()    
 
-          if(value.data.existencia  <    this.item.cantidadVendida) 
+          if(value.data.productExistence.existencia  <    this.item.cantidadVendida) 
             {this.item.cantidadVendida = this.item.cant_real_descontada 
-              Swal.fire('El producto no posee la existencia requerida en la bodega ' + value.data.nombreBodega )
+              Swal.fire('El producto no posee la existencia requerida en la bodega ' + value.data.productExistence.nombreBodega )
             }
           else{
             this.item.cant_real_descontada = this.item.cantidadVendida;

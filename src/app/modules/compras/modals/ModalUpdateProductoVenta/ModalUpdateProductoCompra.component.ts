@@ -7,6 +7,8 @@ import { loading } from 'src/app/models/app.loading';
 import { CustomConsole } from 'src/app/models/CustomConsole';
 import { DocumentoService } from 'src/app/services/documento.service';
 import Swal from 'sweetalert2';
+import { ApiResponse } from 'src/app/interfaces/api-response.interface';
+import { GenericMutationPayload } from 'src/app/interfaces/generic-response.interface';
 
 @Component({
   selector: 'app-modal-update-producto-venta', 
@@ -33,11 +35,11 @@ export class ModalUpdateProductoCompraComponent {
       Swal.fire('Debe ingresar la cantidad a comprar');
       return;
     }
-    this.service.editarLineaDocumento(this.item).subscribe({next:value=>{
-      if (value.error == 'ok'){
+    this.service.editarLineaDocumento(this.item).subscribe({next:(value:ApiResponse<GenericMutationPayload>)=>{
+      if (value.ok){
         this.dialogo.close(true)   
-         }else{Swal.fire(value.error);this.disable = true}
-    }, error:e=>{Swal.fire(e.error.error);
+         }else{Swal.fire('error', value.error?.message ?? 'Error interno del servidor', 'error');this.disable = false}
+    }, error:e=>{Swal.fire(this.service.getErrorMessage(e));
                 this.disable = true}})
 
     

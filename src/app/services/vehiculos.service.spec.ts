@@ -40,7 +40,7 @@ describe('VehiculosService', () => {
     httpMock.verify();
   });
 
-  it('should unwrap insert select response for service costs', () => {
+  it('should return insert select response for service costs using the standard api envelope', () => {
     let actualResponse: any;
 
     service.guardarCostoServicio({
@@ -68,9 +68,10 @@ describe('VehiculosService', () => {
       error: null
     });
 
-    expect(actualResponse.message).toBe('Insercion realizada correctamente');
-    expect(actualResponse.affected).toBe(4);
-    expect(actualResponse.deleted).toBe(1);
+    expect(actualResponse.ok).toBeTrue();
+    expect(actualResponse.data.message).toBe('Insercion realizada correctamente');
+    expect(actualResponse.data.affected).toBe(4);
+    expect(actualResponse.data.deleted).toBe(1);
   });
 
   it('should extract backend error messages from standard error payload', () => {

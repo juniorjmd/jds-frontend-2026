@@ -12,6 +12,8 @@ import { MatDialog } from '@angular/material/dialog';
 import { tap } from 'rxjs';
 import Swal from 'sweetalert2';
 import { CustomConsole } from 'src/app/models/CustomConsole';
+import { ApiResponse } from 'src/app/interfaces/api-response.interface';
+import { GenericMutationPayload, GenericRecordsPayload } from 'src/app/interfaces/generic-response.interface';
 
 @Component({
   selector: 'app-medios-de-pago',
@@ -88,14 +90,14 @@ MedioP:MediosDePago[] = [] ;
     this.loading.show(); 
   
     this.serviceCaja.setMedioDePago(this.newMedioP).subscribe(
-     (respuesta:any)=>{CustomConsole.log(respuesta)
+     (respuesta: ApiResponse<GenericMutationPayload>)=>{CustomConsole.log(respuesta)
       
-     if (respuesta.error === 'ok'){
+     if (respuesta.ok){
        alert('datos ingresados con exito');  
        this.newMedioP =  new MediosDePagoModel(); 
        this.getMedios();
      }else{
-       alert(respuesta.error);
+       alert(respuesta.error?.message || 'No fue posible guardar el medio de pago');
      }
      
      this.loading.hide();
@@ -117,12 +119,12 @@ MedioP:MediosDePago[] = [] ;
   getEstablecimiento(){ 
     this.serviceCaja.getEstablecimientos()
      .subscribe(
-      (datos:any)=>{
+      (datos: ApiResponse<GenericRecordsPayload<establecimientoModel>>)=>{
          CustomConsole.log(datos);
          this.esta = [];   
-    if (datos.numdata > 0 ){ 
+    if (datos.ok && datos.data.count > 0 ){ 
       
-      datos.data!.forEach((dato:Establecimientos , index:number )=>{
+      datos.data.records.forEach((dato:Establecimientos , index:number )=>{
         this.esta[index] = new establecimientoModel( dato );
       }) 
       CustomConsole.log(this.esta);
@@ -133,7 +135,7 @@ MedioP:MediosDePago[] = [] ;
       error => {this.loading.hide();
         
     this.esta = [];
-        alert( error.error.error);
+        alert(this.serviceCaja.getErrorMessage(error));
       }
       );
   }  
@@ -142,11 +144,11 @@ getMedios(){
   this.loading.show()
   this.serviceCaja.getMedios()
      .subscribe(
-      (datos:any)=>{
+      (datos: ApiResponse<GenericRecordsPayload<MediosDePagoModel>>)=>{
          CustomConsole.log(datos);
-         
-    if (datos.numdata > 0 ){ 
-      datos.data!.forEach((dato:MediosDePago , index:number )=>{
+         this.MedioP = [];
+    if (datos.ok && datos.data.count > 0 ){ 
+      datos.data.records.forEach((dato:MediosDePago , index:number )=>{
         this.MedioP[index] =   dato ;
       }) 
       CustomConsole.log(this.MedioP);
@@ -157,7 +159,7 @@ getMedios(){
         this.loading.hide()
       } ,
       error => {this.loading.hide();
-        alert( error.error.error);
+        alert(this.serviceCaja.getErrorMessage(error));
       }
       );
 }

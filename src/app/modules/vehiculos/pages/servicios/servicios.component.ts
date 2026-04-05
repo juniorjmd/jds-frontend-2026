@@ -6,6 +6,7 @@ import Swal from 'sweetalert2';
 import { loading } from 'src/app/models/app.loading';
 import { TiposServiciosModule } from 'src/app/models/tipos-servicios/tipos-servicios.module';
 import { CustomConsole } from 'src/app/models/CustomConsole';
+import { VehiculoMutationResponse, VehiculoServiciosResponse, VehiculoTiposServiciosResponse } from 'src/app/interfaces/vehiculos-response.interface';
 @Component({
   selector: 'app-servicios',
   templateUrl: './servicios.component.html',
@@ -49,11 +50,11 @@ export class ServiciosComponent implements OnInit {
     this.tiposServicio[0] = new TiposServiciosModule('', '');
     this.loading.show();
     this.VehiculosService.getTiposServicios().subscribe({next:
-      (datos: any) => {
+      (datos: VehiculoTiposServiciosResponse) => {
         CustomConsole.log(datos);
 
-        if (datos.numdata > 0) {
-          this.tiposServicio = datos.data!.map((x:any)=> x.obj);
+        if (datos.data.count > 0) {
+          this.tiposServicio = datos.data.records;
           CustomConsole.log(this.tiposServicio);
         } else {
           this.tiposServicio = [];
@@ -77,9 +78,9 @@ export class ServiciosComponent implements OnInit {
       /* Read more about isConfirmed, isDenied below */
       if (result.isConfirmed) {
         this.VehiculosService.eliminarServicios(tipo).subscribe(
-          (respuesta: any) => {
+          (respuesta: VehiculoMutationResponse) => {
             CustomConsole.log(respuesta);
-            if (respuesta.error === 'ok') {
+            if (respuesta.ok) {
               this.getServiciosVehiculos();
               Swal.fire('Elemento eliminado con exito!', '', 'success');
             }
@@ -92,10 +93,10 @@ export class ServiciosComponent implements OnInit {
     this.serviciosAVehiculos[0] = new ServiciosModule('', 0, 0);
     this.loading.show();
     this.VehiculosService.getServicios().subscribe({next:
-      (datos: any) => {
+      (datos: VehiculoServiciosResponse) => {
         CustomConsole.log(datos);
-        if (datos.numdata > 0) {
-          this.serviciosAVehiculos = datos.data!.map((x:any)=>x.obj);
+        if (datos.data.count > 0) {
+          this.serviciosAVehiculos = datos.data.records;
           CustomConsole.log(this.serviciosAVehiculos);
         } else {
           this.serviciosAVehiculos = [];
@@ -128,15 +129,15 @@ export class ServiciosComponent implements OnInit {
     //newServicioAVehiculo.tipo_servicio
     this.loading.show();
     this.VehiculosService.guardarServicios(this.newServicioAVehiculo).subscribe(
-      (respuesta: any) => {
+      (respuesta: VehiculoMutationResponse) => {
         CustomConsole.log(respuesta);
 
-        if (respuesta.error === 'ok') {
+        if (respuesta.ok) {
           Swal.fire('datos ingresados con exito');
           this.newServicioAVehiculo = new ServiciosModule('', 0, 0);
           this.getServiciosVehiculos();
         } else {
-          Swal.fire(respuesta.error, '', 'error');
+          Swal.fire(respuesta.error?.message ?? 'error en el servidor', '', 'error');
         }
         this.loading.hide();
       }

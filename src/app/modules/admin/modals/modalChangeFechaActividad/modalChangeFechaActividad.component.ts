@@ -3,6 +3,8 @@ import {   Component, inject, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog'; 
 import { ActividadesDescuentoModel } from 'src/app/models/actividadesDescuentoModel'; 
 import { ActiDescuentoService } from 'src/app/services/actiDescuento.service';
+import { ApiResponse } from 'src/app/interfaces/api-response.interface';
+import { GenericMutationPayload } from 'src/app/interfaces/generic-response.interface';
 
 @Component({
   selector: 'app-modal-change-fecha-actividad', 
@@ -22,8 +24,8 @@ export class ModalChangeFechaActividadComponent {
 
 
     enviar(){
-      this.actividadService.updateActividad(this.actividad).subscribe({next:(value:any)=>{
-        if(value.error== 'ok') this.dialogo.close(true);
+      this.actividadService.updateActividad(this.actividad).subscribe({next:(value:ApiResponse<GenericMutationPayload>)=>{
+        if(value.ok) this.dialogo.close(true);
       }})
     }
     cancelar(){this.dialogo.close(false);}

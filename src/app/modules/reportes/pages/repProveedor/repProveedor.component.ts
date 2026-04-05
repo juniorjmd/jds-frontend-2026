@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { clienteRequest, CreditosResumenRequest, proveedorHistorico, proveedorHistoricoRequest } from 'src/app/interfaces/producto-request';
+import { CreditosResumenRequest, proveedorHistorico } from 'src/app/interfaces/producto-request';
 import { ResumenCreditos } from 'src/app/interfaces/resumenCuentas';
 import { ClientesModel } from 'src/app/models/clientes/clientes.module';
 import { CustomConsole } from 'src/app/models/CustomConsole';
@@ -10,6 +10,8 @@ import { cajasServices } from 'src/app/services/Cajas.services';
 import { ClientesService } from 'src/app/services/Clientes.services';
 import { DocumentoService } from 'src/app/services/documento.service';
 import Swal from 'sweetalert2';
+import { ApiResponse } from 'src/app/interfaces/api-response.interface';
+import { GenericRecordsPayload } from 'src/app/interfaces/generic-response.interface';
 
 @Component({
   selector: 'app-repProveedor', 
@@ -38,15 +40,15 @@ export class repProveedorComponent {
     this.fecha1 = fecha.getFullYear().toString() +'-'+ (fecha.getMonth() + 1).toString().padStart(2,'0')+'-01';
     this.fecha2 = fecha.getFullYear().toString() +'-'+ (fecha.getMonth() + 1).toString().padStart(2,'0')+'-'+ (fecha.getDate()).toString().padStart(2,'0') ;
     this.maximo = this.fecha2 ; 
-    this.clienteService.getProveedorParaHistorico().subscribe({next:(prov:proveedorHistoricoRequest)=>{
+    this.clienteService.getProveedorParaHistorico().subscribe({next:(prov:ApiResponse<GenericRecordsPayload<proveedorHistorico>>)=>{
       let aux : proveedorHistorico = {
         idTercero: 0,
         terceroNombre: 'Seleccione un Proveedor',
         fin: new Date( this.fecha2 ) ,
         inicio: new Date( this.fecha1),
       }
-      this.proveedores= [{...aux},...prov.data];
-      this.proveedoresFiltrados= [{...aux},...prov.data];
+      this.proveedores= [{...aux},...prov.data.records];
+      this.proveedoresFiltrados= [{...aux},...prov.data.records];
     },error:e=>Swal.fire(JSON.stringify(e))})
   }
 

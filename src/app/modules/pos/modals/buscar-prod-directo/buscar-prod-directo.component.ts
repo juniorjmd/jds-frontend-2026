@@ -10,6 +10,8 @@ import Swal from 'sweetalert2';
 import { CategoriasModel } from 'src/app/models/categorias.model';
 import { MarcasModel } from 'src/app/models/marcas/marcas.module';
 import { CustomConsole } from 'src/app/models/CustomConsole';
+import { ApiResponse } from 'src/app/interfaces/api-response.interface';
+import { GenericRecordsPayload } from 'src/app/interfaces/generic-response.interface';
 @Component({ 
   selector: 'app-buscar-prod-directo',
   templateUrl: './buscar-prod-directo.component.html',
@@ -88,14 +90,14 @@ export class BuscarProdDirectoComponent implements OnInit  {
      this.listPrdBusqueda = [];
      this.prdService.get_producto_simple_by_nombre( this.textFindProductos  )
      .subscribe({next:
-      (respuesta:any)=>{
-        if (respuesta.error === 'ok'){
-           if (respuesta.numdata > 0 ){ 
-             this.listPrdBusqueda = respuesta.data?? [] ;   
+      (respuesta:ApiResponse<GenericRecordsPayload<ProductoModel>>)=>{
+        if (respuesta.ok){
+           if (respuesta.data.count > 0 ){ 
+             this.listPrdBusqueda = respuesta.data.records?? [] ;   
            }else{Swal.fire(  "error", 'no existen productos con la referencia o nombre '+ this.textFindProductos  ) 
               } 
          }else{
-           Swal.fire(  "error", respuesta.error);
+           Swal.fire(  "error", respuesta.error?.message ?? 'error en el servidor');
          } 
          CustomConsole.log('buscarPorCategoria',JSON.stringify(respuesta));
          this.loading.hide();
@@ -110,19 +112,19 @@ export class BuscarProdDirectoComponent implements OnInit  {
      this.loading.show() 
      this.listPrdBusqueda = [];
      this.prdService.get_producto_simple().subscribe({
-      next :  (respuesta:any)=>{
+      next :  (respuesta:ApiResponse<GenericRecordsPayload<ProductoModel>>)=>{
         CustomConsole.log('busqueda productos inicial'  , respuesta);
         
-         if (respuesta.error === 'ok'){
-            if (respuesta.numdata > 0 ){ 
-              const productos = respuesta.data; 
+         if (respuesta.ok){
+            if (respuesta.data.count > 0 ){ 
+              const productos = respuesta.data.records; 
               CustomConsole.log('producto general ===>>>' , productos)
               this.listPrdBusqueda = productos   
             }else{Swal.fire(  "error", 'la busqueda no genero ningun resultado') 
                } 
           }else{ 
             
-            Swal.fire(  "error - getProductosGeneral" , respuesta.error ,"error"  );
+            Swal.fire(  "error - getProductosGeneral" , respuesta.error?.message ?? 'error en el servidor' ,"error"  );
           } 
            
           this.loading.hide();
@@ -138,14 +140,14 @@ export class BuscarProdDirectoComponent implements OnInit  {
       this.prdService.get_producto_simple_by_categoria(categoria.id )
       
       .subscribe({next:
-        (respuesta:any)=>{
-          if (respuesta.error === 'ok'){
-             if (respuesta.numdata > 0 ){ 
-               this.listPrdBusqueda = respuesta.data?? [] ;   
+        (respuesta:ApiResponse<GenericRecordsPayload<ProductoModel>>)=>{
+          if (respuesta.ok){
+             if (respuesta.data.count > 0 ){ 
+               this.listPrdBusqueda = respuesta.data.records?? [] ;   
              }else{Swal.fire(  "error", 'no existen productos con la categoria '+ categoria.nombre) 
                 } 
            }else{
-             Swal.fire(  "error", respuesta.error);
+             Swal.fire(  "error", respuesta.error?.message ?? 'error en el servidor');
            } 
            CustomConsole.log('buscarPorCategoria',JSON.stringify(respuesta));
            this.loading.hide();
@@ -169,14 +171,14 @@ export class BuscarProdDirectoComponent implements OnInit  {
     this.loading.show() 
       this.prdService.get_producto_simple_by_marca(marca.id! ).subscribe( {
         next:
-        (respuesta:any)=>{
-          if (respuesta.error === 'ok'){
-             if (respuesta.numdata > 0 ){
-                this.listPrdBusqueda = respuesta.data?? [] ;  
+        (respuesta:ApiResponse<GenericRecordsPayload<ProductoModel>>)=>{
+          if (respuesta.ok){
+             if (respuesta.data.count > 0 ){
+                this.listPrdBusqueda = respuesta.data.records?? [] ;  
              }else{Swal.fire(  "error", 'no existen productos de la marca '+ marca.nombre) 
                 } 
            }else{
-             Swal.fire(  "error", respuesta.error);
+             Swal.fire(  "error", respuesta.error?.message ?? 'error en el servidor');
            } 
            CustomConsole.log('getProductosPorMarca',JSON.stringify(respuesta)); 
           

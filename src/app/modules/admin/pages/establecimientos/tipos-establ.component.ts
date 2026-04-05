@@ -4,6 +4,8 @@ import { TiposEstablecimientosModel } from 'src/app/models/ventas/tipos-establec
 import { cajasServices } from 'src/app/services/Cajas.services';
 import { loading } from 'src/app/models/app.loading';
 import { CustomConsole } from 'src/app/models/CustomConsole';
+import { ApiResponse } from 'src/app/interfaces/api-response.interface';
+import { GenericMutationPayload, GenericRecordsPayload } from 'src/app/interfaces/generic-response.interface';
 @Component({
   selector: 'app-tipos-establ',
   templateUrl: './tipos-establ.component.html',
@@ -25,12 +27,12 @@ export class TiposEstablComponent implements OnInit {
   
   getTiposEstablecimiento(){ 
     this.serviceCaja.getAllTiposEstablecimientos()
-         .subscribe({next: (datos:any)=>{
+         .subscribe({next: (datos: ApiResponse<GenericRecordsPayload<TiposEstablecimientosModel>>)=>{
          CustomConsole.log(datos);
          this.tiposEsta = [];   
-    if (datos.numdata > 0 ){ 
+    if (datos.ok && datos.data.count > 0 ){ 
       
-      datos.data!.forEach((dato:TiposEstablecimientosModel , index:number )=>{
+      datos.data.records.forEach((dato:TiposEstablecimientosModel , index:number )=>{
         this.tiposEsta[index] = new TiposEstablecimientosModel( dato );
       }) 
       CustomConsole.log(this.tiposEsta);
@@ -41,7 +43,7 @@ export class TiposEstablComponent implements OnInit {
       error: (error) => {this.loading.hide();
         
     this.tiposEsta = [];
-        alert( error.error.error);
+        alert(this.serviceCaja.getErrorMessage(error));
       }}
       );
   }
@@ -71,14 +73,14 @@ export class TiposEstablComponent implements OnInit {
    
    this.loading.show(); 
    this.serviceCaja.setTipoEstablecimiento(this.newTipEstabl).subscribe(
-    (respuesta:any)=>{CustomConsole.log(respuesta)
+    (respuesta: ApiResponse<GenericMutationPayload>)=>{CustomConsole.log(respuesta)
      
-    if (respuesta.error === 'ok'){
+    if (respuesta.ok){
       alert('datos ingresados con exito');  
       this.newTipEstabl =  new TiposEstablecimientosModel(undefined);
       this.getTiposEstablecimiento();
     }else{
-      alert(respuesta.error);
+      alert(respuesta.error?.message || 'No fue posible guardar el tipo de establecimiento');
       this.loading.hide();
     }
     }

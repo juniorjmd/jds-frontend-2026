@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { cajaRequest, categoriaRequest, cntClaseRequest, cntCuentaMayorRequest, cntGrupoRequest, cntSubCuentaRequest, empleadoRequest, establecimientosRequest, marcaRequest } from 'src/app/interfaces/producto-request';
 import { Usuario } from 'src/app/interfaces/usuario.interface';
 import { cajasServices } from 'src/app/services/Cajas.services';
 import { CntContablesService } from 'src/app/services/cntContables.service';
@@ -9,6 +8,16 @@ import { LoginService } from 'src/app/services/login.services';
 import { ProductoService } from 'src/app/services/producto.service';
 import { usuarioService } from 'src/app/services/usuario.services';
 import Swal from 'sweetalert2';
+import { ApiResponse } from 'src/app/interfaces/api-response.interface';
+import { cajaModel } from 'src/app/models/ventas/cajas.model';
+import { InventarioCategoriesResponse } from 'src/app/interfaces/inventario-response.interface';
+import { GenericRecordsPayload } from 'src/app/interfaces/generic-response.interface';
+import { establecimientoModel } from 'src/app/models/ventas/establecimientos.model';
+import { EmpleadoModel } from 'src/app/models/empleados/empleados.module';
+import { CntCuentaMModel } from 'src/app/models/cnt-cuenta-m/cnt-cuenta-m.module';
+import { CntGruposModel } from 'src/app/models/cnt-grupos/cnt-grupos.module';
+import { vwCntSubCuentaModel } from 'src/app/models/cnt-sub-cuenta/cnt-sub-cuenta.module';
+import { CntClasesModel } from 'src/app/models/cnt-clases/cnt-clases.module';
 
 @Component({
   selector: 'app-home',
@@ -44,8 +53,8 @@ export class HomeComponent implements OnInit {
     WindowPrt.print();
   }
   ngOnInit(): void {
-    this.inicioService.getVendedores().subscribe({next: (datos:empleadoRequest) =>{
-      this.inicioService.setArrayVendedores(datos.data)
+    this.inicioService.getVendedores().subscribe({next: (datos:ApiResponse<GenericRecordsPayload<EmpleadoModel>>) =>{
+      this.inicioService.setArrayVendedores(datos.data.records)
     },error:error=>Swal.fire(JSON.stringify(error))
     })
     this.inicioService.getDatosIniSucursal().subscribe({next :  (data:any)=>{
@@ -60,10 +69,10 @@ export class HomeComponent implements OnInit {
       ); 
     
      
-      this.serviceCaja.getCuentasContablesEstablecimientoUsuario().subscribe({next:(value:cajaRequest)=>{
+      this.serviceCaja.getCuentasContablesEstablecimientoUsuario().subscribe({next:(value:ApiResponse<{ records: cajaModel[]; count: number }>)=>{
         //console.log('getCuentasContablesEstablecimientoUsuario' , value) 
 
-          this.inicioService.validarCuentasContablesEstablecimiento(value.data[0] )  
+          this.inicioService.validarCuentasContablesEstablecimiento(value.data.records[0] )  
           
       }, error: error => {
         Swal.fire('getCuentasContablesEstablecimientoUsuario', JSON.stringify(error))
@@ -75,52 +84,52 @@ export class HomeComponent implements OnInit {
 
 
 
-    this._servProducto.getCategorias().subscribe({next:(datos:categoriaRequest)=>{ 
-      this._servProducto.asignarCategorias(datos.data.map((x:any)=>x.obj) ) 
+    this._servProducto.getCategorias().subscribe({next:(datos:InventarioCategoriesResponse)=>{ 
+      this._servProducto.asignarCategorias(datos.data.categories) 
    }, error : (e)=>Swal.fire(JSON.stringify(e))})
 
-    this._servProducto.getMarcas().subscribe({next:(datos:marcaRequest)=>{ 
-      this._servProducto.asignarMarcas(datos.data ) 
+    this._servProducto.getMarcas().subscribe({next:(datos:ApiResponse<GenericRecordsPayload<any>>)=>{ 
+      this._servProducto.asignarMarcas(datos.data.records) 
    }, error : (e)=>Swal.fire(JSON.stringify(e))})
     
-    this.cntService.getCntCuentasMayores().subscribe({next:(value:cntCuentaMayorRequest)=>{  
+    this.cntService.getCntCuentasMayores().subscribe({next:(value:ApiResponse<GenericRecordsPayload<CntCuentaMModel>>)=>{  
       //console.log("getCntCuentasMayores",value )
-      this.cntService.changeCuentasM(value.data); 
+      this.cntService.changeCuentasM(value.data.records); 
     },error : (e)=>Swal.fire(JSON.stringify(e))})
     
     this.cntService.getCntGrupos().subscribe({
-      next:(value:cntGrupoRequest)=>{ 
-      this.cntService.changeGrupo(value.data); 
+      next:(value:ApiResponse<GenericRecordsPayload<CntGruposModel>>)=>{ 
+      this.cntService.changeGrupo(value.data.records); 
       //console.log("getCntGrupos",value.data )
 
     },error : (e)=>Swal.fire(JSON.stringify(e))})
 
     this.cntService.getCntCuentas().subscribe({
-      next:(value:cntSubCuentaRequest)=>{ 
-      this.cntService.changeSubCuenta(value.data); 
+      next:(value:ApiResponse<GenericRecordsPayload<vwCntSubCuentaModel>>)=>{ 
+      this.cntService.changeSubCuenta(value.data.records); 
       //console.log("getCntCuentas",value.data )
 
     },error : (e)=>Swal.fire(JSON.stringify(e))})
 
 
-    this.cntService.getCntClases().subscribe({next:(value:cntClaseRequest)=>{ 
-      this.cntService.changeClase(value.data); 
+    this.cntService.getCntClases().subscribe({next:(value:ApiResponse<GenericRecordsPayload<CntClasesModel>>)=>{ 
+      this.cntService.changeClase(value.data.records); 
       //console.log("getCntClases",value.data )
 
     },error : (e)=>Swal.fire(JSON.stringify(e))})
 
 
-    this.cntService.getCntClases().subscribe({next:(value:cntClaseRequest)=>{ 
-      this.cntService.changeClase(value.data); 
+    this.cntService.getCntClases().subscribe({next:(value:ApiResponse<GenericRecordsPayload<CntClasesModel>>)=>{ 
+      this.cntService.changeClase(value.data.records); 
       //console.log("getCntClases",value.data )
 
     },error : (e)=>Swal.fire(JSON.stringify(e))})
 
     this.serviceCaja.getEstablecimientos()
-    .subscribe({next: (datos:establecimientosRequest)=>{
+    .subscribe({next: (datos:ApiResponse<GenericRecordsPayload<establecimientoModel>>)=>{
         //console.log('datos establecimientosRequest',datos); 
-       if (datos.numdata > 0 ){ 
-        this.serviceCaja.asignarEstablecimientos( datos.data??null);  
+       if (datos.ok && datos.data.count > 0 ){ 
+        this.serviceCaja.asignarEstablecimientos(datos.data.records);  
        } 
      } , error:   error => {  Swal.fire(JSON.stringify(error))  
      }}

@@ -12,6 +12,7 @@ import { cajaModel } from 'src/app/models/ventas/cajas.model';
 import { cajasServices } from 'src/app/services/Cajas.services';
 import Swal from 'sweetalert2';
 import { establecimientoModel } from 'src/app/models/ventas/establecimientos.model';
+import { AdminOperationResponse } from 'src/app/interfaces/admin-response.interface';
 
 @Component({
   selector: 'app-ejecutar-asignacion-saldos',
@@ -126,8 +127,8 @@ export class EjecutarAsignacionSaldosComponent  {
          Swal.fire('error','Debe ingresar el valor del traslado')
        }
        this.dataProceso?.cuentas.forEach(x=> x.valor = this.valorTraslado) 
-       this.cntService.ejecutarTrasladosCuentas(this.dataProceso!).subscribe({next:(val:ejecucionTrasladosRequest)=>{
-         this.printer_soporte_final(val.objeto);
+       this.cntService.ejecutarTrasladosCuentas(this.dataProceso!).subscribe({next:(val:AdminOperationResponse)=>{
+         this.printer_soporte_final(val.data.objeto as SoporteOperacion);
        },error:e=>Swal.fire('error' , this.cntService.getErrorMessage(e))
        })
        

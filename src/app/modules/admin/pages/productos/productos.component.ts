@@ -13,11 +13,13 @@ import { MatDialog } from '@angular/material/dialog';
 import { BuscarProdDirectoComponent } from 'src/app/modules/pos/modals/buscar-prod-directo/buscar-prod-directo.component';
 import { responsePrd } from 'src/app/interfaces/odoo-prd';
 import Swal from 'sweetalert2';
-import { categoriaRequest, marcaRequest, presentacionPrdRequest, ProductoExitenciasRequest, ProductoRequest } from 'src/app/interfaces/producto-request';
 import { ModalUpdateProductoComponent } from '../../modals/modalUpdateProducto/modalUpdateProducto.component';
 import { PresentacionPrdModel } from 'src/app/models/presentacionPrdModel';
 import { PrdPreciosModule } from 'src/app/models/prd-precios/prd-precios.module';
 import { CustomConsole } from 'src/app/models/CustomConsole';
+import { InventarioPrechartResponse, InventarioProductMutationResponse, InventarioProductResponse, InventarioProductsResponse, InventarioWarehousesResponse } from 'src/app/interfaces/inventario-response.interface';
+import { ApiResponse } from 'src/app/interfaces/api-response.interface';
+import { GenericMultiRecordsPayload, GenericMutationPayload, GenericRecordsPayload } from 'src/app/interfaces/generic-response.interface';
 @Component({
   selector: 'app-productos',
   templateUrl: './productos.component.html',
@@ -83,14 +85,14 @@ export class ProductosComponent implements OnInit {
       }
      }
   getPresentacion(){
-    this.productoService.getPresentacioProducto().subscribe({next:(value:presentacionPrdRequest)=>{
+    this.productoService.getPresentacioProducto().subscribe({next:(value:ApiResponse<GenericRecordsPayload<PresentacionPrdModel>>)=>{
       let pre:PresentacionPrdModel = {
         id: 0,
         nombre: 'Ninguna',
         descripcion: '',
         sigla: ''
       };
-      this.presentacion = [pre, ...value.data];  
+      this.presentacion = [pre, ...value.data.records];  
     }});
   }
    getProductosPorFiltro(){
@@ -99,17 +101,17 @@ export class ProductosComponent implements OnInit {
      this.productoService.getProductosPorNombre( this.textFindProductos ,[0,30] ).subscribe(
 
       {next :
-       (respuesta:any)=>{
-         if (respuesta.error === 'ok'){
-            if (respuesta.numdata > 0 ){
-              const productos = respuesta.productos; 
+       (respuesta:InventarioProductsResponse)=>{
+         if (respuesta.ok){
+            if (respuesta.data.count > 0 ){
+              const productos = respuesta.data.products; 
               CustomConsole.log('producto general' , productos)
               this.Productos = productos   
             }else{ 
               Swal.fire(  "error",  'la busqueda no genero ningun resultado', "error" );
                } 
           }else{ 
-            Swal.fire(  "error", respuesta.error , "error"); 
+            Swal.fire(  "error", respuesta.error?.message ?? 'error en el servidor' , "error"); 
           } 
           CustomConsole.log('getProductosNombre',JSON.stringify(respuesta));
          
@@ -143,13 +145,13 @@ export class ProductosComponent implements OnInit {
     
       // Llamar al servicio para buscar el producto
       this.productoService.getProductoByIdOrCodBarra(this.codProducto).subscribe({
-        next: (val: ProductoRequest) => {
-          CustomConsole.log('dato retornado busqueda directa', val.data);
+        next: (val: InventarioProductResponse) => {
+          CustomConsole.log('dato retornado busqueda directa', val.data.products);
     
-          if (val.numdata > 1) {
-            this.auxPrd = val.data;
+          if (val.data.count > 1) {
+            this.auxPrd = val.data.products;
             // Crear el contenido HTML del modal
-            const items = val.data.map(producto => 
+            const items = val.data.products.map(producto => 
               `<li style="cursor: pointer; margin: 5px 0;" data-producto-id="${producto.id}">${producto.nombre}</li>`).join('');
             const listHTML = `<ul id="productList">${items}</ul>`;
     
@@ -175,9 +177,9 @@ export class ProductosComponent implements OnInit {
                 });
               }
             });
-          } else if (val.numdata === 1 && val.data[0]) {
+          } else if (val.data.count === 1 && val.data.products[0]) {
             // Agregar la cantidad si se encontró un solo producto
-            this.agregarCantidad(val.data[0]);
+            this.agregarCantidad(val.data.products[0]);
           } else {
             // Manejar el caso donde no se encontró ningún producto
             Swal.fire('No se encontró el producto', '', 'warning');
@@ -240,19 +242,19 @@ export class ProductosComponent implements OnInit {
           }
           let ingreso =    new AuxIngresoInventarioModule(prd.id! , result.value ,  this.inventario.bodega ) ; 
           this.productoService.guardarNuevoProductoPrecargue( ingreso  ).subscribe(
-            (respuesta:any)=>{CustomConsole.log(respuesta)
+            (respuesta:InventarioPrechartResponse)=>{CustomConsole.log(respuesta)
              
-            if (respuesta.error === 'ok'){  
+            if (respuesta.ok){  
                 CustomConsole.log(respuesta);
-           if (respuesta.numdata > 0 ){ 
-             this.AuxIngresoInventarioModule = respuesta.datos;  
+           if (respuesta.data.count > 0 ){ 
+             this.AuxIngresoInventarioModule = respuesta.data.items;  
            }else{
              this.AuxIngresoInventarioModule = [];     
              } 
              
            }else{ 
              try {
-              Swal.fire(respuesta.error, '', 'error');
+              Swal.fire(respuesta.error?.message ?? 'error en el servidor', '', 'error');
              } catch (error : any) {
               Swal.fire('error en el servidor', '', 'error');
              }
@@ -266,10 +268,10 @@ export class ProductosComponent implements OnInit {
      getBodegas(){ 
       this.bodegas   = [this.auxBodega];
       this.productoService.getbodegas( ).subscribe({next : 
-        (datos:any)=>{
+        (datos:InventarioWarehousesResponse)=>{
            CustomConsole.log('producto component - get bodegas' , datos);
-          if (datos.numdata > 0 ){ 
-            this.bodegas = datos.data!.map((x:any)=>x.obj) 
+          if (datos.data.count > 0 ){ 
+            this.bodegas = datos.data.warehouses
             this.bodegas.unshift(this.auxBodega);
           }else{
             this.bodegas   = [this.auxBodega];   }
@@ -324,18 +326,18 @@ export class ProductosComponent implements OnInit {
           
       this.productoService.CERRAR_INVENTARIO(this.inventario.bodega.id, this.inventario.nombre ,this.inventario.descripcion
         ,this.inventario.tipoInventario ).subscribe(
-          {next :       (respuesta:any)=>{CustomConsole.log(respuesta)        
-          if (respuesta.error === 'ok'){ 
+          {next :       (respuesta:ApiResponse<GenericMutationPayload>)=>{CustomConsole.log(respuesta)        
+          if (respuesta.ok){ 
             this.AuxIngresoInventarioModule = [];   
             this.inventario ={
               nombre : '' , 
               bodega : 0 , 
               descripcion : ''
             }
-            Swal.fire('inventario Cerrado con exito', '', 'error');
+            Swal.fire('inventario Cerrado con exito', '', 'success');
          }else{ 
            try {
-            Swal.fire(respuesta.error, '', 'error');
+            Swal.fire(respuesta.error?.message ?? 'error en el servidor', '', 'error');
            } catch (error : any) {
             Swal.fire('error en el servidor', '', 'error');
            }
@@ -362,13 +364,13 @@ export class ProductosComponent implements OnInit {
       return;}
       
       this.productoService.borrarPrecarguePorBodega(this.inventario.bodega.id).subscribe(
-        (respuesta:any)=>{CustomConsole.log(respuesta)
+        (respuesta:InventarioPrechartResponse)=>{CustomConsole.log(respuesta)
         
-          if (respuesta.error === 'ok'){ 
+          if (respuesta.ok){ 
             this.AuxIngresoInventarioModule = [];   
          }else{ 
            try {
-            Swal.fire(respuesta.error, '', 'error');
+            Swal.fire(respuesta.error?.message ?? 'error en el servidor', '', 'error');
            } catch (error : any) {
             Swal.fire('error en el servidor', '', 'error');
            }
@@ -381,8 +383,11 @@ export class ProductosComponent implements OnInit {
      borrarIngreso(obj:AuxIngresoInventarioModule){
 
        this.productoService.eliminaritemIngresoInventario(obj.id)
-       .subscribe({next:(data)=> { Swal.fire( "Elemento eliminado con exito" , '', 'error');
-         this.cargarPrecargue()
+       .subscribe({next:(data:ApiResponse<GenericMutationPayload>)=> { 
+         if (data.ok) {
+           Swal.fire( "Elemento eliminado con exito" , '', 'success');
+           this.cargarPrecargue()
+         }
                     },
                     error:error=>Swal.fire( error.error.error, '', 'error')
                   }
@@ -393,10 +398,10 @@ export class ProductosComponent implements OnInit {
       {this.AuxIngresoInventarioModule=[];
       return;}
       this.productoService.getPrecarguePorBodega(this.inventario.bodega.id).subscribe({next:
-        (datos:any)=>{
+        (datos:ApiResponse<GenericRecordsPayload<AuxIngresoInventarioModule>>)=>{
            CustomConsole.log(datos);
-      if (datos.numdata > 0 ){ 
-        this.AuxIngresoInventarioModule = datos.data;  
+      if (datos.ok && datos.data.count > 0 ){ 
+        this.AuxIngresoInventarioModule = datos.data.records;  
       }else{
         this.AuxIngresoInventarioModule = [];      }
         } ,
@@ -432,11 +437,11 @@ export class ProductosComponent implements OnInit {
 
      existencias(prd:ProductoModel){
       this.productoService.getProductosExistencia(prd).subscribe({
-        next:(value:ProductoExitenciasRequest )=>{
+        next:(value:ApiResponse<GenericRecordsPayload<PrdExistenciasModule>> )=>{
            CustomConsole.log('producto existencia' , value)
-           if(value.error == 'ok'){
-            if(value.numdata> 0 ){
-              prd.existencias = value.data;
+           if(value.ok){
+            if(value.data.count > 0 ){
+              prd.existencias = value.data.records;
               if (prd.existencias.length > 0 ){ 
                 this.existenciasPrd = prd.existencias; 
                 CustomConsole.log(this.existenciasPrd);
@@ -492,7 +497,7 @@ export class ProductosComponent implements OnInit {
               Swal.fire( 'el producto ' + prd.nombre+ ' no posee existencias en ninguna bodega!!', '', 'error');
             }
            }else{
-            Swal.fire(value.error)
+            Swal.fire(value.error?.message ?? 'error en el servidor')
            }
         },
         error:(e)=> Swal.fire(JSON.stringify(e))
@@ -505,11 +510,11 @@ export class ProductosComponent implements OnInit {
       this.productoService.getProductosExistencia(prd).subscribe(
         {
           next:
-        (datos:any)=>{
+        (datos:ApiResponse<GenericRecordsPayload<PrdExistenciasModule>>)=>{
            CustomConsole.log(datos);
            
-      if (datos.numdata > 0 ){ 
-        this.existenciasPrd = datos.data; 
+      if (datos.ok && datos.data.count > 0 ){ 
+        this.existenciasPrd = datos.data.records; 
         CustomConsole.log(this.existenciasPrd);
         let pagosHtml:string =  `<h1>Producto : <br>${this.existenciasPrd[0].nombre_producto}</h1>
         <table class='table' style='font-size:12px'> 
@@ -577,21 +582,18 @@ export class ProductosComponent implements OnInit {
 
     this.loading.show()
     this.productoService.getCategorias_marcas().subscribe({
-      next: (datos:[categoriaRequest,marcaRequest])=>{
+      next: (datos:ApiResponse<GenericMultiRecordsPayload<any>>)=>{
          CustomConsole.log('getCategorias_marcas',datos);
-     let cont:number;    
-    if (datos[0].numdata > 0 ){ 
-      this.categorias = 
-      datos[0].data ;
+    if (datos.ok && (datos.data.records[0]?.length ?? 0) > 0 ){ 
+      this.categorias = datos.data.records[0] ;
       CustomConsole.log(this.categorias);
       this.categorias1 = this.categorias.filter(x=>x.idPadreCategoria == 0)
       this.categorias1.unshift(this.categoriaAux[0]);
     }else{
       this.categorias = [...this.categoriaAux ];
     }
-    if (datos[1].numdata > 0 ){ 
-      cont = 1 ; 
-      this.marcas = datos[1].data ;
+    if ((datos.data.records[1]?.length ?? 0) > 0 ){ 
+      this.marcas = datos.data.records[1] ;
       CustomConsole.log(this.marcas);
     }else{
       this.marcas = [this.marcasAux];
@@ -680,15 +682,15 @@ export class ProductosComponent implements OnInit {
       this.loading.show(); 
       this.productoService.guardarNuevoProducto(this.newProducto).subscribe(
         {next:
-       (respuesta:any)=>{CustomConsole.log(respuesta)
+       (respuesta:InventarioProductMutationResponse)=>{CustomConsole.log(respuesta)
         
-       if (respuesta.error === 'ok'){
+       if (respuesta.ok){
         this.buscar = true;
         Swal.fire('datos ingresados con exito'); 
          this.limpiarFormulario();
       }else{ 
         try {
-         Swal.fire(respuesta.error, '', 'error');
+         Swal.fire(respuesta.error?.message ?? 'error en el servidor', '', 'error');
         } catch (error : any) {
          Swal.fire('error en el servidor', '', 'error');
         }
@@ -709,12 +711,12 @@ export class ProductosComponent implements OnInit {
     this.loading.show()
     this.productoService.getProductosGeneral([0,100]).subscribe({
       next: 
-      (datos:any)=>{
+      (datos:InventarioProductsResponse)=>{
          CustomConsole.log(datos);
          
-    if (datos.numdata > 0 ){ 
+    if (datos.data.count > 0 ){ 
       this.buscar =  false;
-      this.Productos = datos.productos 
+      this.Productos = datos.data.products 
       CustomConsole.log('getProductos',this.Productos);
     }else{
       this.Productos = [];

@@ -1,13 +1,14 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog'; 
 import { MediosDePago } from 'src/app/interfaces/medios-de-pago.interface';
-import { DocumentoCierreRequest } from 'src/app/interfaces/producto-request';
 import { loading } from 'src/app/models/app.loading'; 
 import { CustomConsole } from 'src/app/models/CustomConsole';
 import { arrRetorno, documentoDev, } from 'src/app/models/ventas/documento.model';
 import { DocpagosModel  } from 'src/app/models/ventas/pagos.model';
 import { cajasServices } from 'src/app/services/Cajas.services'; 
-import { DocumentoService } from 'src/app/services/documento.service';
+import { DocumentoActionPayload, DocumentoService } from 'src/app/services/documento.service';
+import { ApiResponse } from 'src/app/interfaces/api-response.interface';
+import { GenericRecordsPayload } from 'src/app/interfaces/generic-response.interface';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -50,8 +51,12 @@ export class pagosSaldoNotasDebitoComponent implements OnInit {
     } ; 
     return prd;}).filter(x=> x.cnt > 0 ) ;  
 
-      this.documentoService.crearNotaDebito(this.Documento).subscribe({next:(value:DocumentoCierreRequest)=>{
+      this.documentoService.crearNotaDebito(this.Documento).subscribe({next:(value:ApiResponse<DocumentoActionPayload>)=>{
         CustomConsole.log('crearNotaDebito',value);   
+        if (!value.ok || !value.data.documentoFinal) {
+          Swal.fire('error', value.error?.message ?? 'Error interno del servidor', 'error');
+          return;
+        }
        this.dialogo.close({rep:true,documento:value.data.documentoFinal });
   
        },error:error=>Swal.fire(error.error.error)})
@@ -91,14 +96,14 @@ getMediosP(){
   this.listo = false;
   this.loading.show()
   this.serviceCaja.getMediosByEstablecimiento(this.Documento.idEsta)
-     .subscribe( {next:(datos:any)=>{
+     .subscribe( {next:(datos:ApiResponse<GenericRecordsPayload<MediosDePago>>)=>{
          CustomConsole.log('getMediosCajaActiva',datos);
-      if (datos.numdata > 0 ){ 
+      if (datos.ok && datos.data.count > 0 ){ 
         this.pagos = []; 
          
       CustomConsole.log('pagos recibidos' , this.pagos);
       
-        datos.data!.forEach((dato:MediosDePago )=>{  
+        datos.data.records.forEach((dato:MediosDePago )=>{  
          let pago = new DocpagosModel();  
          pago.idMedioDePago = dato.id;
           pago.nombreMedio =dato.nombre;

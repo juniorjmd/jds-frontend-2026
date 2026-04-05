@@ -11,6 +11,7 @@ import { DatosInicialesService } from 'src/app/services/DatosIniciales.services'
 import { ProductoRequest } from 'src/app/interfaces/producto-request';
 import Swal from 'sweetalert2';
 import { CustomConsole } from 'src/app/models/CustomConsole';
+import { InventarioProductResponse } from 'src/app/interfaces/inventario-response.interface';
 
 @Component({
   selector: 'pos-ingresar-producto-venta',
@@ -49,11 +50,11 @@ export class IngresarProductoVentaComponent implements OnInit {
   }
   getProducto(){
     this.loading.show()
-    this.prdService.getProductoById(this.arrayDocPrd.producto?.id!).subscribe({next:(value:ProductoRequest)=>{
+    this.prdService.getProductoById(this.arrayDocPrd.producto?.id!).subscribe({next:(value:InventarioProductResponse)=>{
       CustomConsole.log('producto completo', value); 
       this.loading.hide()
-      this.arrayDocPrd.producto= value.producto  
-      if (value.producto.tipo_producto == 2){
+      this.arrayDocPrd.producto= value.data.product  
+      if (value.data.product.tipo_producto == 2){
         this.validarExistencia = false;
         this.ingresaPrecio = true;
         this.enabledBtnIngreso();

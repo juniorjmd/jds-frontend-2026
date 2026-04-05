@@ -14,8 +14,9 @@ import { Establecimientos } from '../interfaces/establecimientos.interface';
 import { Contador } from '../interfaces/contador';
 import { MediosDePagoModel } from '../models/ventas/medios-de-pago.model';
 import { DocpagosModel } from '../models/ventas/pagos.model';
+import { BodegasModule } from '../models/bodegas/bodegas.module';
 import { BehaviorSubject, map, Observable } from 'rxjs';
-import { cajaRequest, DocumentoCierreRequest, establecimientosRequest } from '../interfaces/producto-request';
+import { DocumentoCierreRequest } from '../interfaces/producto-request';
 import { DocumentosModel } from '../models/ventas/documento.model';
 import { ConfigService } from './config.service';
 import { ApiResponse } from '../interfaces/api-response.interface';
@@ -24,6 +25,7 @@ import {
     CarwashCloseBoxData,
     CarwashOpenBoxData,
 } from '../interfaces/carwash-response.interface';
+import { GenericMultiRecordsPayload, GenericMutationPayload, GenericRecordsPayload } from '../interfaces/generic-response.interface';
 
 
 @Injectable({
@@ -54,8 +56,7 @@ constructor(private http: HttpClient ,private configService :ConfigService,
                      "_valorIngresar" : valorIngresar
                     };
         return this.http
-          .post<ApiResponse<CarwashOpenBoxData>>(this.configService.url.action , datos, httpOptions())
-          .pipe(map((response) => response.data));
+          .post<ApiResponse<CarwashOpenBoxData>>(this.configService.url.action , datos, httpOptions());
     }
 
     
@@ -64,33 +65,31 @@ constructor(private http: HttpClient ,private configService :ConfigService,
                      "_parametro" : {"idCaja" : caja.id }  
                     };
         return this.http
-          .post<ApiResponse<CarwashBoxSummaryData>>(this.configService.url.action , datos, httpOptions())
-          .pipe(map((response) => response.data));
+          .post<ApiResponse<CarwashBoxSummaryData>>(this.configService.url.action , datos, httpOptions());
     }
     cerrarCaja(caja : cajaModel){
         let datos = {"action": actions.actionCerarCaja ,
                      "_parametro" : {"idCaja" : caja.id } 
                     };
         return this.http
-          .post<ApiResponse<CarwashCloseBoxData>>(this.configService.url.actionVentas , datos, httpOptions())
-          .pipe(map((response) => response.data));
+          .post<ApiResponse<CarwashCloseBoxData>>(this.configService.url.actionVentas , datos, httpOptions());
     }
 
-    getCuentasContablesEstablecimientoUsuario():Observable<cajaRequest>{
+    getCuentasContablesEstablecimientoUsuario():Observable<ApiResponse<{ records: cajaModel[]; count: number }>>{
        
         let datos = {"action": actions.actionSelectPorUsuario ,
             "_tabla" : vistas.cajasActivas,
             "_columnaUsuario": 'usuarioEstadoCaja'  
            };
-return this.http.post<cajaRequest>(this.configService.url.action , datos, httpOptions()) ;
+return this.http
+  .post<ApiResponse<{ records: cajaModel[]; count: number }>>(this.configService.url.action , datos, httpOptions()) ;
     }
  cerrarCajaParcial(caja : cajaModel){
         let datos = {"action": actions.actionCerarCajaParcial ,
                      "_parametro" : {"idCaja" : caja.id } 
                     };
         return this.http
-          .post<ApiResponse<CarwashCloseBoxData>>(this.configService.url.actionVentas , datos, httpOptions())
-          .pipe(map((response) => response.data));
+          .post<ApiResponse<CarwashCloseBoxData>>(this.configService.url.actionVentas , datos, httpOptions());
     }
 
     getErrorMessage(error: any): string {
@@ -109,18 +108,18 @@ return this.http.post<cajaRequest>(this.configService.url.action , datos, httpOp
                      "_tabla" : vistas.tipos_documentos_con_cont,
                      "_where" : [{columna : 'estado' , tipocomp : '=' , dato : 1}]
                     };
-        return this.http.post(this.configService.url.action , datos, httpOptions()) ;
+        return this.http.post<ApiResponse<GenericRecordsPayload<unknown>>>(this.configService.url.action , datos, httpOptions()) ;
     }
 
-    getEstablecimientos():Observable<establecimientosRequest>{
+    getEstablecimientos():Observable<ApiResponse<GenericRecordsPayload<establecimientoModel>>>{
         let datos = {"action": actions.actionSelect ,
                      "_tabla" : vistas.establecimiento,
                      "_where" : [{columna : 'estado' , tipocomp : '=' , dato : 1}]
                     };
-        return this.http.post<establecimientosRequest>(this.configService.url.action , datos, httpOptions()) ;
+        return this.http.post<ApiResponse<GenericRecordsPayload<establecimientoModel>>>(this.configService.url.action , datos, httpOptions()) ;
     }
 
-     getEstablecimientosCompras():Observable<establecimientosRequest>{
+     getEstablecimientosCompras():Observable<ApiResponse<GenericRecordsPayload<establecimientoModel>>>{
         let datos = {"action": actions.actionSelect ,
                      "_tabla" : vistas.establecimiento,
                      "_where" : [{columna : 'estado' , tipocomp : '=' , dato : 1},
@@ -130,21 +129,21 @@ return this.http.post<cajaRequest>(this.configService.url.action , datos, httpOp
 {columna : 'idRetefuenteCompra ' , tipocomp : '>' , dato : 0} ,
 {columna : 'idBodegaStock' , tipocomp : '>' , dato : 0} ]
                     };
-        return this.http.post<establecimientosRequest>(this.configService.url.action , datos, httpOptions()) ;
+        return this.http.post<ApiResponse<GenericRecordsPayload<establecimientoModel>>>(this.configService.url.action , datos, httpOptions()) ;
     }
 
-    getAllEstablecimientos():Observable<establecimientosRequest>{
+    getAllEstablecimientos():Observable<ApiResponse<GenericRecordsPayload<establecimientoModel>>>{
         let datos = {"action": actions.actionSelect ,
                      "_tabla" : vistas.establecimiento
                     };
-        return this.http.post<establecimientosRequest>(this.configService.url.action , datos, httpOptions()) ;
+        return this.http.post<ApiResponse<GenericRecordsPayload<establecimientoModel>>>(this.configService.url.action , datos, httpOptions()) ;
     }
     
     getAllTiposEstablecimientos(){
         let datos = {"action": actions.actionSelect ,
                      "_tabla" : vistas.tipo_establecimiento 
                     };
-        return this.http.post(this.configService.url.action , datos, httpOptions()) ;
+        return this.http.post<ApiResponse<GenericRecordsPayload<TiposEstablecimientosModel>>>(this.configService.url.action , datos, httpOptions()) ;
     }
 
     getLocacionesExternas(){
@@ -172,7 +171,7 @@ return this.http.post<cajaRequest>(this.configService.url.action , datos, httpOp
                         "_obj": ['obj'],
                         "_where" : [{columna : 'estado' , tipocomp : '=' , dato : 1}]
                        };
-           return this.http.post(this.configService.url.action , datos, httpOptions()) ;
+           return this.http.post<ApiResponse<GenericRecordsPayload<{ obj: BodegasModule }>>>(this.configService.url.action , datos, httpOptions()) ;
     }
     getLocacionesFisicas(){
         let datos = {"action": actions.actionBuscarLocacionesExternas  ,
@@ -200,27 +199,27 @@ return this.http.post<cajaRequest>(this.configService.url.action , datos, httpOp
                      "_where" : [{columna : 'estado' , tipocomp : '=' , dato : 1}]
                     };
                     
-        return this.http.post(this.configService.url.action , datos, httpOptions()) ;
+        return this.http.post<ApiResponse<GenericRecordsPayload<TiposEstablecimientosModel>>>(this.configService.url.action , datos, httpOptions()) ;
     }
-    getCaja(id:number):Observable<cajaRequest>{
+    getCaja(id:number):Observable<ApiResponse<GenericRecordsPayload<cajaModel>>>{
         let datos = {"action": actions.actionSelect ,
                      "_tabla" : vistas.cajas , 
                      "_where" : [{columna : 'id' , tipocomp : '=' , dato : id}]
                     }; 
-                    return this.http.post<cajaRequest>(this.configService.url.action , datos, httpOptions()) ;
+                    return this.http.post<ApiResponse<GenericRecordsPayload<cajaModel>>>(this.configService.url.action , datos, httpOptions()) ;
     }
-    getCajas():Observable<cajaRequest>{
+    getCajas():Observable<ApiResponse<GenericRecordsPayload<cajaModel>>>{
         let datos = {"action": actions.actionSelect ,
                      "_tabla" : vistas.cajas
                     }; 
-        return this.http.post<cajaRequest>(this.configService.url.action , datos, httpOptions()) ;
+        return this.http.post<ApiResponse<GenericRecordsPayload<cajaModel>>>(this.configService.url.action , datos, httpOptions()) ;
     } 
-    getCajasTraslados():Observable<cajaRequest>{
+    getCajasTraslados():Observable<ApiResponse<GenericRecordsPayload<cajaModel>>>{
         let datos = {"action": actions.actionSelect ,
                      "_tabla" : vistas.cajas,
                      "_where" : [{columna : 'cuentaContableEfectivo' , tipocomp : '>' , dato : 0}]
                     }; 
-        return this.http.post<cajaRequest>(this.configService.url.action , datos, httpOptions()) ;
+        return this.http.post<ApiResponse<GenericRecordsPayload<cajaModel>>>(this.configService.url.action , datos, httpOptions()) ;
     } 
     getMediosCajaActiva(){
         let datos = {"action": actions.actionSelectPorUsuario ,
@@ -228,13 +227,13 @@ return this.http.post<cajaRequest>(this.configService.url.action , datos, httpOp
                      "_columnaUsuario": 'usuarioCaja' , 
                      "_orderBy" : [['nombre', 'DESC']]
                     }; 
-        return this.http.post(this.configService.url.action , datos, httpOptions()) ;
+        return this.http.post<ApiResponse<GenericRecordsPayload<unknown>>>(this.configService.url.action , datos, httpOptions()) ;
     } 
     getMedios(){
         let datos = {"action": actions.actionSelect ,
                      "_tabla" : vistas.medios
                     }; 
-        return this.http.post(this.configService.url.action , datos, httpOptions()) ;
+        return this.http.post<ApiResponse<GenericRecordsPayload<MediosDePagoModel>>>(this.configService.url.action , datos, httpOptions()) ;
     } 
 
     getMediosByEstablecimiento( idEsta : number){
@@ -246,74 +245,70 @@ return this.http.post<cajaRequest>(this.configService.url.action , datos, httpOp
 
                       ]
                     }; 
-        return this.http.post(this.configService.url.action , datos, httpOptions()) ;
+        return this.http.post<ApiResponse<GenericRecordsPayload<MediosDePagoModel>>>(this.configService.url.action , datos, httpOptions()) ;
     } 
     getContadores(){
         let datos = {"action": actions.actionSelect ,
                      "_tabla" : vistas.contadores
                     }; 
-        return this.http.post(this.configService.url.action , datos, httpOptions()) ;
+        return this.http.post<ApiResponse<GenericRecordsPayload<Contador>>>(this.configService.url.action , datos, httpOptions()) ;
     } 
 
 
 
   
-    getCajasActivasUsuarioActivo():Observable<cajaRequest>{ 
+    getCajasActivasUsuarioActivo():Observable<ApiResponse<{ records: cajaModel[]; count: number }>>{ 
         let datos = {"action": actions.actionSelectPorUsuario ,
             "_tabla" : vistas.cajasActivas,
             "_columnaUsuario": 'usuarioEstadoCaja' 
            }; 
-     return this.http.post<cajaRequest>(this.configService.url.action , datos, httpOptions()) ;
+     return this.http
+       .post<ApiResponse<{ records: cajaModel[]; count: number }>>(this.configService.url.action , datos, httpOptions()) ;
     } 
     
-    getCajasActivas():Observable<cajaRequest>{
+    getCajasActivas():Observable<ApiResponse<{ records: cajaModel[]; count: number }>>{
         let datos = {"action": actions.actionSelect ,
                      "_tabla" : vistas.cajasActivas                    
                     }; 
-        return this.http.post<cajaRequest>(this.configService.url.action , datos, httpOptions()) ;
+        return this.http
+          .post<ApiResponse<{ records: cajaModel[]; count: number }>>(this.configService.url.action , datos, httpOptions());
     } 
     
  
-    getCajasActivasYparametros(){
+    getCajasActivasYparametros():Observable<ApiResponse<GenericMultiRecordsPayload<unknown>>>{
         let datos = {"action": actions.actionSelects  ,
                     // "_tabla" : vistas.cajasActivas       
                      "_tablas" : [vistas.cajasActivas , TABLA.PARAMETROS]             
                     }; 
         return this.http
-          .post<ApiResponse<{ records: unknown[][]; count: number }>>(this.configService.url.action , datos, httpOptions())
-          .pipe(
-            map((response) => response.data.records.map((rows) => ({
-              data: rows,
-              numdata: rows.length,
-              error: 'ok',
-            })))
-          );
+          .post<ApiResponse<GenericMultiRecordsPayload<unknown>>>(this.configService.url.action , datos, httpOptions());
     } 
     
-    getCajasUsuario():Observable<cajaRequest>{
+    getCajasUsuario():Observable<ApiResponse<{ records: cajaModel[]; count: number }>>{
         let datos = {"action": actions.actionSelectPorUsuario ,
                      "_tabla" : vistas.cajas_por_usuario,
                      "_columnaUsuario": 'idUsuario',
                      "_where" : [{columna : 'estadoGeneral' , tipocomp : '=' , dato : 1}]
                     }; 
-        return this.http.post<cajaRequest>(this.configService.url.action , datos, httpOptions()) ;
+        return this.http
+          .post<ApiResponse<{ records: cajaModel[]; count: number }>>(this.configService.url.action , datos, httpOptions());
     } 
     
-    getCajasUsuarioActivas():Observable<cajaRequest>{
+    getCajasUsuarioActivas():Observable<ApiResponse<{ records: cajaModel[]; count: number }>>{
         let datos = {"action": actions.actionSelect ,
                      "_tabla" : vistas.cajas_por_usuario, 
                      "_where" : [{columna : 'estadoGeneral' , tipocomp : '=' , dato : 1}]
                     }; 
-        return this.http.post<cajaRequest>(this.configService.url.action , datos, httpOptions()) ;
+        return this.http
+          .post<ApiResponse<{ records: cajaModel[]; count: number }>>(this.configService.url.action , datos, httpOptions());
     } 
 
-    getCajasPorUsuario(usuario:number){
+    getCajasPorUsuario(usuario:number):Observable<ApiResponse<{ boxes: cajaModel[]; count: number }>>{
         let datos = {"action": actions.actionSelCajaXuser ,
                      "_usuario" :usuario
                     }; 
         return this.http
-          .post<ApiResponse<{ boxes: cajaModel[]; count: number }>>(this.configService.url.action , datos, httpOptions())
-          .pipe(map((response) => response.data));
+          .post<ApiResponse<{ boxes: cajaModel[]; count: number }>>(this.configService.url.action , datos, httpOptions());
     } 
 
     setPagoDocumento(idDocumento:number , pagos:DocpagosModel[] ){
@@ -350,14 +345,13 @@ return this.http.post<cajaRequest>(this.configService.url.action , datos, httpOp
        }; 
         return this.http.post<DocumentoCierreRequest>(this.urlVentas  , datos, httpOptions()) ;
     }
-    setCajasAUsuarios(idUsuario:number , cajas:number[] ){
+    setCajasAUsuarios(idUsuario:number , cajas:number[] ):Observable<ApiResponse<{ message: string; assignedBoxIds: number[]; inserted: number; deleted: number }>>{
         let datos = {"action": actions.actionAsignarCajas ,
         "_idUsuario" : idUsuario, 
          "_cajas" : cajas
        }; 
         return this.http
-          .post<ApiResponse<{ message: string; assignedBoxIds: number[]; inserted: number; deleted: number }>>(this.configService.url.action , datos, httpOptions())
-          .pipe(map((response) => response.data));
+          .post<ApiResponse<{ message: string; assignedBoxIds: number[]; inserted: number; deleted: number }>>(this.configService.url.action , datos, httpOptions());
     }
     setCaja(caja:cajaModel){
         let datos ;
@@ -398,7 +392,7 @@ return this.http.post<cajaRequest>(this.configService.url.action , datos, httpOp
             "_arraydatos" : arraydatos
            };
         }  
-        return this.http.post(this.configService.url.action , datos, httpOptions()) ;
+        return this.http.post<ApiResponse<GenericMutationPayload>>(this.configService.url.action , datos, httpOptions()) ;
         
 
         
@@ -428,7 +422,7 @@ return this.http.post<cajaRequest>(this.configService.url.action , datos, httpOp
             "_procedure" : PROCEDURE.insertaContador,
             "_arraydatos" : arraydatos
            }; 
-        return this.http.post(this.configService.url.action , datos, httpOptions()) ;
+        return this.http.post<ApiResponse<GenericMutationPayload>>(this.configService.url.action , datos, httpOptions()) ;
         
 
         
@@ -463,7 +457,7 @@ return this.http.post<cajaRequest>(this.configService.url.action , datos, httpOp
             "_arraydatos" : arraydatos
            };
         }  
-        return this.http.post(this.configService.url.action , datos, httpOptions()) ;
+        return this.http.post<ApiResponse<GenericMutationPayload>>(this.configService.url.action , datos, httpOptions()) ;
         
 
         
@@ -548,7 +542,7 @@ return this.http.post<cajaRequest>(this.configService.url.action , datos, httpOp
         
        // (datos);
        
-        return this.http.post(this.configService.url.action , datos, httpOptions()) ;
+        return this.http.post<ApiResponse<GenericMutationPayload>>(this.configService.url.action , datos, httpOptions()) ;
         
 
         
@@ -578,7 +572,7 @@ setMedioDePago(newMedio:MediosDePagoModel){
     "_tabla" : TABLA.medios, "_where" : where,
     "_arraydatos" : arraydatos
    };
-   return this.http.post(this.configService.url.action , datos, httpOptions()) ;
+   return this.http.post<ApiResponse<GenericMutationPayload>>(this.configService.url.action , datos, httpOptions()) ;
     
 
     

@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { categoriaRequest, marcaRequest, presentacionPrdRequest, ProductoRequest } from 'src/app/interfaces/producto-request';
 import { loading } from 'src/app/models/app.loading';
 import { CategoriasModel } from 'src/app/models/categorias.model';
 import { MarcasModel } from 'src/app/models/marcas/marcas.module';
@@ -10,6 +9,9 @@ import { PresentacionPrdModel } from 'src/app/models/presentacionPrdModel';
 import { ProductoModel } from 'src/app/models/producto/producto.module'; 
 import { ProductoService } from 'src/app/services/producto.service';
 import Swal from 'sweetalert2';
+import { InventarioProductMutationResponse } from 'src/app/interfaces/inventario-response.interface';
+import { ApiResponse } from 'src/app/interfaces/api-response.interface';
+import { GenericMultiRecordsPayload, GenericRecordsPayload } from 'src/app/interfaces/generic-response.interface';
 
 @Component({
   selector: 'app-modal-update-producto',
@@ -45,8 +47,8 @@ private dialogo= inject(MatDialogRef<ModalUpdateProductoComponent>);
  
     
   getPresentacion(){
-    this.productoService.getPresentacioProducto().subscribe({next:(value:presentacionPrdRequest)=>{
-      this.presentacion = value.data;  
+    this.productoService.getPresentacioProducto().subscribe({next:(value:ApiResponse<GenericRecordsPayload<PresentacionPrdModel>>)=>{
+      this.presentacion = value.data.records;  
     }});
   }
   getCategorias_marcas(){ 
@@ -55,21 +57,12 @@ private dialogo= inject(MatDialogRef<ModalUpdateProductoComponent>);
   
       this.loading.show()
       this.productoService.getCategorias_marcas().subscribe({
-        next: (datos:[categoriaRequest,marcaRequest])=>{
-           //CustomConsole.log('getCategorias_marcas',datos);
-       let cont:number;    
-      if (datos[0].numdata > 0 ){ 
-        this.categorias = 
-        datos[0].data ;
-        //CustomConsole.log(this.categorias); 
+        next: (datos:ApiResponse<GenericMultiRecordsPayload<any>>)=>{
+      if (datos.ok){
+        this.categorias = datos.data.records[0] ?? [];
+        this.marcas = datos.data.records[1] ?? [];
       }else{
         this.categorias = [];
-      }
-      if (datos[1].numdata > 0 ){ 
-        cont = 1 ; 
-        this.marcas = datos[1].data ;
-        //CustomConsole.log(this.marcas);
-      }else{
         this.marcas = [];
       }
           this.loading.hide()
@@ -146,14 +139,14 @@ private dialogo= inject(MatDialogRef<ModalUpdateProductoComponent>);
         this.loading.show(); 
         this.productoService.updateProducto(this.newProducto).subscribe(
           {next:
-         (respuesta:any)=>{//CustomConsole.log(respuesta)
+         (respuesta:InventarioProductMutationResponse)=>{//CustomConsole.log(respuesta)
           
-         if (respuesta.error === 'ok'){ 
+         if (respuesta.ok){ 
           Swal.fire('datos ingresados con exito'); 
            this.limpiarFormulario();
         }else{ 
           try {
-           Swal.fire(respuesta.error, '', 'error');
+           Swal.fire(respuesta.error?.message ?? 'error en el servidor', '', 'error');
           } catch (error : any) {
            Swal.fire('error en el servidor', '', 'error');
           }

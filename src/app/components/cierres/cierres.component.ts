@@ -5,6 +5,8 @@ import { loading } from 'src/app/models/app.loading';
 import { CortesDeCajaPagosModule } from 'src/app/models/cortes-de-caja-pagos/cortes-de-caja-pagos.module';
 import Swal from 'sweetalert2';
 import { CortesDeCajaProductosVendidosModule } from 'src/app/models/cortes-de-caja-productos-vendidos/cortes-de-caja-productos-vendidos.module';
+import { ApiResponse } from 'src/app/interfaces/api-response.interface';
+import { GenericMultiRecordsPayload, GenericRecordsPayload } from 'src/app/interfaces/generic-response.interface';
 
 @Component({
   selector: 'app-cierres',
@@ -24,32 +26,15 @@ export class CierresComponent implements OnInit {
   getCierresTotalesYparciales(){
     this.loading.show();
   this._serviceCierre.getCierresTotalesYparciales().subscribe({next:
-    (respuesta:any)=>{
-      let cont = 0;
-       //console.log('getCierresTotalesYparciales',respuesta); 
-       if (respuesta.error !== undefined){
-        Swal.fire(respuesta.error)
+    (respuesta:ApiResponse<GenericMultiRecordsPayload<any>>)=>{
+       if (!respuesta.ok){
+        Swal.fire(respuesta.error?.message || 'No fue posible consultar los cierres')
         this.loading.hide();
         return;
        }
-       respuesta.forEach((resp:any , index:number )=>{
-        if(resp.error=='ok'){
-          switch(index)
-          {
-            case 0 :
-              this.cierres = resp.data??[];
-              break;
-              case 1: 
-              this.cierresP = resp.data??[]; 
-              break;
-              case 2 : 
-              this.cierresPagos = resp.data??[]; 
-                break; 
-          }
-        }else{
-          Swal.fire(resp.error)
-        }
-       })
+       this.cierres = (respuesta.data.records[0] as CortesDeCajaModule[]) ?? [];
+       this.cierresP = (respuesta.data.records[1] as CortesDeCajaModule[]) ?? [];
+       this.cierresPagos = (respuesta.data.records[2] as CortesDeCajaPagosModule[]) ?? [];
         
 
         
@@ -64,11 +49,9 @@ mostrarProductosVendidosPorCierre(cierreActual:CortesDeCajaModule){
   
   this.loading.show();
   this._serviceCierre.getProductosPorCierres(cierreActual.id).subscribe(
-    (respuesta:any)=>{
-      let cont = 0;
-       ////console.log('getCierresTotalesYparciales',respuesta); 
-       if (respuesta.error === 'ok' ){ 
-         if (respuesta.numdata > 0)
+    (respuesta:ApiResponse<GenericRecordsPayload<CortesDeCajaProductosVendidosModule>>)=>{
+       if (respuesta.ok ){ 
+         if (respuesta.data.count > 0)
          {//respuesta.data[0]; 
         ////console.log('datos cierres',respuesta.data);
 
@@ -86,7 +69,7 @@ mostrarProductosVendidosPorCierre(cierreActual:CortesDeCajaModule){
         <td>Total</td> 
         </tr>`;
           ;
-        respuesta.data!.forEach((item:CortesDeCajaProductosVendidosModule)=>{
+        respuesta.data.records.forEach((item:CortesDeCajaProductosVendidosModule)=>{
           pagosHtml +=`<tr> `;
          pagosHtml +=` <td style="text-align: left;">${item.nombreProducto}</td> `;
          pagosHtml +=` <td>${item.idProducto}</td> `;
@@ -103,7 +86,7 @@ mostrarProductosVendidosPorCierre(cierreActual:CortesDeCajaModule){
       }
 
        }else{
-        Swal.fire(respuesta.error , "error");
+        Swal.fire(respuesta.error?.message || 'No fue posible consultar los productos del cierre' , "error");
        }
        this.loading.hide();
   }) 

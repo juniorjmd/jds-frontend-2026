@@ -10,6 +10,8 @@ import { TipoDocumento } from 'src/app/interfaces/tipo-documento';
 import { Contador } from 'src/app/interfaces/contador';
 import { establecimientosRequest } from 'src/app/interfaces/producto-request';
 import { CustomConsole } from 'src/app/models/CustomConsole';
+import { ApiResponse } from 'src/app/interfaces/api-response.interface';
+import { GenericMutationPayload, GenericRecordsPayload } from 'src/app/interfaces/generic-response.interface';
 
 @Component({
   selector: 'app-contadores',
@@ -56,8 +58,8 @@ export class ContadoresComponent implements OnInit {
         this.serviceCaja.getTiposDocumentosConContadores()
          .subscribe({next:     (datos:any)=>{
              CustomConsole.log(datos); 
-        if (datos.numdata > 0 ){  
-          datos.data!.forEach((dato:TipoDocumento , index:number )=>{
+        if (datos.ok && datos.data.count > 0 ){  
+          datos.data.records.forEach((dato:TipoDocumento , index:number )=>{
             this.tipContadores[index] = dato;
           })  
         }
@@ -84,8 +86,8 @@ export class ContadoresComponent implements OnInit {
           (datos:any)=>{
              CustomConsole.log(datos);
              
-        if (datos.numdata > 0 ){ 
-          datos.data!.forEach((dato:Contador  , index:number )=>{ 
+        if (datos.ok && datos.data.count > 0 ){ 
+          datos.data.records.forEach((dato:Contador  , index:number )=>{ 
             this.contadores[index] = dato ;
           }) 
           CustomConsole.log(this.contadores);
@@ -154,12 +156,12 @@ export class ContadoresComponent implements OnInit {
        this.serviceCaja.setConsecutivo(this.newContador).subscribe(
        {next: (respuesta:any)=>{CustomConsole.log(respuesta)
          
-        if (respuesta.error === 'ok'){
+        if (respuesta.ok){
           alert('datos ingresados con exito');  
           this.Cancelar();
           this.getContadores();
         }else{
-          alert(respuesta.error);
+          alert(respuesta.error?.message ?? 'Error interno del servidor');
           this.loading.hide();
         }
         }, error:   error => {this.loading.hide();

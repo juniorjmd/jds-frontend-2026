@@ -1,0 +1,32 @@
+# Implementacion
+
+- Se agrego `generic-response.interface.ts` para tipar payloads estandar compartidos (`records`, `count`, mutaciones y `selectMany`).
+- `usuarioService` ya devuelve respuestas estandar para:
+  - recursos
+  - perfiles
+  - usuarios
+  - creacion de usuario
+  - asignacion de perfil
+- `cajasServices` ya devuelve respuestas estandar completas para:
+  - abrir/resumir/cerrar caja
+  - cajas por usuario
+  - asignacion de cajas
+  - `getCajasActivasYparametros`
+- Las UIs de permisos/cajas consumen ahora `response.ok`, `response.data.records`, `response.data.message` y `response.data.count`.
+- `ingreso.component` ya interpreta `selectMany` desde `data.records` sin volver al wrapper legacy.
+- `CntContablesService` ya devuelve la respuesta estandar completa para:
+  - `setNewOperacion`
+  - `setTraslado`
+  - `ejecutarTrasladosCuentas`
+- Los modales y pantallas de traslados/operaciones manuales ya leen `response.ok` y `response.data`.
+- `ProductoService.getCategorias()` y `ProductoService.getbodegas()` ya dejaron de reconstruir `numdata/error/query`.
+- `home.component`, `categorias.component`, `bodegas.component` y `admin-categorias.component` ya consumen `data.categories`, `data.warehouses` y `data.count`.
+- `DocumentoService` quedo alineado para el frente generico embebido en documentos/compras/ventas:
+  - `getDocumentos*`, `getCompras`, `getPagosCPP`, `getCxPProveedores`, `getDevoluciones`, `getCajasActivas`
+  - mutaciones como `cerrarDocumento`, `cerrarDocumentoRemision`, `cancelarDocumento`, `generarDomicilioDocumento`, `crearDocumentoGasto`, `crearDocumentoAbono`, `crearDocumentoAbonoCredito`, `crearDocumentoDevolucion`, `crearNotaDebito`
+- Los modales y pantallas de compras/ventas/notas credito dejaron de leer `numdata` y `error == 'ok'`:
+  - `pagos-venta`, `pagos-CPP`, `abonos-cuentas-xcobrar`, `mover-documentos`
+  - `ModalUpdateProductoVenta`, `ModalUpdateProductoCompra`, `new-gasto`
+  - `ventas`, `crearCompra`, `editarCompra`, `abonos-cuentas-por-pagar`
+  - listados y flujos de devoluciones / notas debito / anular compra
+- `contadores.component` tambien quedó alineado a respuestas estandar para selects y procedimientos genéricos.

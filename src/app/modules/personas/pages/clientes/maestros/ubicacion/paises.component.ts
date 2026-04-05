@@ -9,6 +9,8 @@ import { DialogoConfirmacionComponent } from "src/app/modules/shared/components/
 import { NewPaisComponent } from './new-pais.component';
 import { loading } from 'src/app/models/app.loading';
 import { CustomConsole } from 'src/app/models/CustomConsole';
+import { ApiResponse } from 'src/app/interfaces/api-response.interface';
+import { GenericMutationPayload, GenericRecordsPayload } from 'src/app/interfaces/generic-response.interface';
 @Component({
   selector: 'app-paises',
   templateUrl: './paises.component.html',
@@ -36,8 +38,8 @@ export class PaisesComponent implements OnInit {
     .subscribe((confirmado: Boolean)=>{
       if (confirmado){
         this.maestroCliente.eliminarPaises(pais).subscribe(
-          (respuesta:any)=>{CustomConsole.log(respuesta)
-            if (respuesta.error === 'ok'){
+          (respuesta: ApiResponse<GenericMutationPayload>)=>{CustomConsole.log(respuesta)
+            if (respuesta.ok){
               alert('datos eliminados con exito');     
               this.listarPaises();
             } 
@@ -49,10 +51,10 @@ export class PaisesComponent implements OnInit {
    listarPaises(){
     this.loading.show() 
     this.maestroCliente.getPaises().subscribe(
-      (datos:any)=>{ 
-    this.numpaises = datos.numdata;
-    if (datos.numdata > 0 ){
-      this.paises = datos.data;
+      (datos: ApiResponse<GenericRecordsPayload<pais>>)=>{ 
+    this.numpaises = datos.data.count;
+    if (datos.ok && datos.data.count > 0 ){
+      this.paises = datos.data.records;
     }else{
       this.paises = [];
     }
@@ -61,7 +63,7 @@ export class PaisesComponent implements OnInit {
         this.loading.hide() 
       } ,
       error => {this.loading.hide();
-        alert( error.error.error);});
+        alert(this.maestroCliente.getErrorMessage(error));});
    }
    
    editarPais( id:number , codPais:string , nombre:string){

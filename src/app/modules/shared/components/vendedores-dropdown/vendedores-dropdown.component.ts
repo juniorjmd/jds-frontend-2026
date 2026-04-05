@@ -2,6 +2,8 @@ import { Component, EventEmitter, inject, Input, OnInit, Output } from '@angular
 import { CustomConsole } from 'src/app/models/CustomConsole';
 import { VendedorModel } from 'src/app/models/empleados/empleados.module';
 import { DatosInicialesService } from 'src/app/services/DatosIniciales.services';
+import { ApiResponse } from 'src/app/interfaces/api-response.interface';
+import { GenericRecordsPayload } from 'src/app/interfaces/generic-response.interface';
 
 @Component({
   selector: 'elemt-empVendDropdown',
@@ -32,10 +34,10 @@ export class vendedoresDropdownComponent implements OnInit{
 
       
       this.inicioService.getVendedoresConVentas().subscribe(vendedores => {
-        if (vendedores.numdata > 0) {
+        if (vendedores.ok && vendedores.data.count > 0) {
           // Aquí puedes trabajar con el array de vendedores
           CustomConsole.log('Vendedores actualizados:', vendedores);
-          this.options = vendedores.data;
+          this.options = vendedores.data.records;
         }
       });
     }

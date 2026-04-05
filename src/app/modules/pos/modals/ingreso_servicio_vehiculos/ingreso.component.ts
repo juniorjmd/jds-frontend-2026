@@ -15,6 +15,9 @@ import { FndClienteComponent } from 'src/app/modules/shared/modals/fnd-cliente/f
 import { ClientesModel } from 'src/app/models/clientes/clientes.module';
 import { tap } from 'rxjs';
 import { CustomConsole } from 'src/app/models/CustomConsole';
+import { ApiResponse } from 'src/app/interfaces/api-response.interface';
+import { GenericRecordsPayload } from 'src/app/interfaces/generic-response.interface';
+import { VehiculoIngresoResponse, VehiculoPropietarioResponse, VehiculoServiciosCostosResponse, VehiculoTiposResponse, VehiculoTiposServiciosResponse } from 'src/app/interfaces/vehiculos-response.interface';
 
 @Component({
   selector: 'app-IngresoServicioVehiculo',
@@ -44,11 +47,11 @@ export class IngresoServicioVehiculoComponent implements OnInit {
   public dialogo: MatDialogRef<IngresoServicioVehiculoComponent>,) { 
     this.serviceCaja.getCaja(this.idcajaEStablecida).subscribe({
       next:(value)=>{
-        if(value.error == 'ok'){
-          if(value.numdata>0){
-               this.cajaEStablecida = value.data[0];
+        if(value.ok){
+          if(value.data.count > 0){
+               this.cajaEStablecida = value.data.records[0];
           }else{Swal.fire('La caja que intenta establecer no existe');}
-        }else{Swal.fire(value.error);}
+        }else{Swal.fire(value.error?.message || 'No fue posible consultar la caja');}
       },error:e=> Swal.fire(JSON.stringify(e))
     })
     this.getTiposServicios();
@@ -131,20 +134,20 @@ export class IngresoServicioVehiculoComponent implements OnInit {
           this.loading.show();
           this.VehiculosService.guardarNuevoIngresoServicio(
             this.ingreso
-          ).subscribe((respuesta: any) => {
+          ).subscribe((respuesta: VehiculoIngresoResponse) => {
             CustomConsole.log(respuesta);
 
-            if (respuesta.error === 'ok') {
+            if (respuesta.ok) {
               Swal.fire('datos ingresados con exito');
 
-              this.ingreso.idDocumento = respuesta.idDocumento;
+              this.ingreso.idDocumento = respuesta.data.idDocumento;
               this.ingreso.valor = 0;
               this.ingreso.cod_servicio = 0;
               this.tipo_servicio = 0;
               this.cerrarOk();
             } else {
               try {
-                Swal.fire(respuesta.error, '', 'error');
+                Swal.fire(respuesta.error?.message ?? 'error en el servidor', '', 'error');
               } catch (error: any) {
                 Swal.fire('error en el servidor', '', 'error');
               }
@@ -160,12 +163,12 @@ export class IngresoServicioVehiculoComponent implements OnInit {
     }
     this.loading.show();
     this.VehiculosService.guardarNuevoIngresoServicio(this.ingreso).subscribe(
-      (respuesta: any) => {
+      (respuesta: VehiculoIngresoResponse) => {
         CustomConsole.log(respuesta);
 
-        if (respuesta.error === 'ok') {
+        if (respuesta.ok) {
           Swal.fire('datos ingresados con exito');
-          this.ingreso.idDocumento = respuesta.idDocumento;
+          this.ingreso.idDocumento = respuesta.data.idDocumento;
           this.ingreso.valor = 0;
           this.ingreso.cod_servicio = 0;
           this.tipo_servicio = 0;
@@ -173,7 +176,7 @@ export class IngresoServicioVehiculoComponent implements OnInit {
           //this.getServiciosVehiculos();
         } else {
           try {
-            Swal.fire(respuesta.error, '', 'error');
+            Swal.fire(respuesta.error?.message ?? 'error en el servidor', '', 'error');
           } catch (error: any) {
             Swal.fire('error en el servidor', '', 'error');
           }
@@ -196,13 +199,11 @@ export class IngresoServicioVehiculoComponent implements OnInit {
     this.empleados = [];
     this.loading.show();
     this.empleadosServices.getEmpleadosLavador()
-    .subscribe({next:     (datos: any) => {
+    .subscribe({next:     (datos: ApiResponse<GenericRecordsPayload<EmpleadoModel>>) => {
         CustomConsole.log(datos);
 
-        if (datos.numdata > 0) {
-          datos.data!.forEach((dato: any, index: number) => {
-            this.empleados.push(dato.objeto);
-          });
+        if (datos.data.count > 0) {
+          this.empleados = datos.data.records;
           CustomConsole.log('getEmpleadosLavador - empleados', this.empleados);
         } else {
           this.empleados = [];
@@ -227,7 +228,7 @@ export class IngresoServicioVehiculoComponent implements OnInit {
     this.VehiculosService.getVehiculos_propietario(
       this.ingreso.placaVehiculo!
     ).subscribe({next:
-      (datos: any) => {
+      (datos: VehiculoPropietarioResponse) => {
         CustomConsole.log('getVehiculos_propietario',datos);
         let dato: any = {
           placaVehiculo: '',
@@ -242,8 +243,8 @@ export class IngresoServicioVehiculoComponent implements OnInit {
 		     nombreTipoDoc:'' 
         };
 
-        if (datos.numdata > 0) {
-          dato = datos.data[0]; 
+        if (datos.data.count > 0) {
+          dato = datos.data.records[0]; 
         } 
         CustomConsole.log(dato);
         this.ingreso.propietario = dato.propietario; 
@@ -271,10 +272,10 @@ export class IngresoServicioVehiculoComponent implements OnInit {
     this.tiposServicio[0] = new TiposServiciosModule('', '');
     this.loading.show();
     this.VehiculosService.getTiposServicios().subscribe({next:
-      (datos: any) => {
+      (datos: VehiculoTiposServiciosResponse) => {
         CustomConsole.log(datos); 
-        if (datos.numdata > 0) {
-          this.tiposServicio = datos.data!.map((x:any) => x.obj );
+        if (datos.data.count > 0) {
+          this.tiposServicio = datos.data.records;
           CustomConsole.log('tiposervicio' , this.tiposServicio);
         } else {
           this.tiposServicio = [];
@@ -319,11 +320,11 @@ export class IngresoServicioVehiculoComponent implements OnInit {
     this.VehiculosService.getServiciosPorTipoVehiculo(
       this.ingreso.cod_tipo_vehiculo
     ).subscribe({next:
-      (datos: any) => {
+      (datos: VehiculoServiciosCostosResponse) => {
         CustomConsole.log(datos);
 
-        if (datos.numdata > 0) {
-          this.serviciosAVehiculos = datos.data.map( (x:any)=>x.obj!);
+        if (datos.data.count > 0) {
+          this.serviciosAVehiculos = datos.data.records;
           CustomConsole.log(this.serviciosAVehiculos);
           this.mostrarServicioPorTipo();
         } else {
@@ -345,11 +346,11 @@ export class IngresoServicioVehiculoComponent implements OnInit {
     this.tiposVehiculo[0] = new TipoVehiculoModule('', '');
     this.loading.show();
     this.VehiculosService.geTiposVehiculos().subscribe({next:
-      (datos: any) => {
+      (datos: VehiculoTiposResponse) => {
         CustomConsole.log('geTiposVehiculos', datos);
 
-        if (datos.numdata > 0) {
-          this.tiposVehiculo = datos.data  
+        if (datos.data.count > 0) {
+          this.tiposVehiculo = datos.data.records  
           CustomConsole.log(this.tiposVehiculo);
         } else {
           this.tiposVehiculo = [];
