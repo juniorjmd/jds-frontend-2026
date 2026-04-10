@@ -1,0 +1,52 @@
+<div class="catalogo-dialog">
+    <div class="catalogo-dialog__header">
+        <div class="catalogo-dialog__copy">
+            <span class="app-badge">Vehiculos</span>
+            <h2 class="catalogo-dialog__title">{{ esEdicion ? 'Editar tipo de vehiculo' : 'Crear tipo de vehiculo' }}</h2>
+            <p class="catalogo-dialog__subtitle">Usa este mismo formulario para crear y editar tipos de vehiculo.</p>
+        </div>
+        <button type="button" class="catalogo-dialog__close" (click)="cerrar()" aria-label="Cerrar formulario">
+            <i class="bi bi-x-lg"></i>
+        </button>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-md-8">
+            <label class="catalogo-dialog__label" for="tipoVehiculoNombre">Nombre</label>
+            <input
+                id="tipoVehiculoNombre"
+                type="text"
+                [(ngModel)]="tipoVehiculo.nombre"
+                class="form-control app-input"
+                placeholder="Ej. campero, camion, automovil">
+        </div>
+
+        <div class="col-md-4">
+            <label class="catalogo-dialog__label" for="tipoVehiculoEstado">Estado</label>
+            <select
+                id="tipoVehiculoEstado"
+                [(ngModel)]="tipoVehiculo.estado"
+                class="form-control app-select">
+                <option [ngValue]="0">Escoger estado</option>
+                <option [ngValue]="1">Activo</option>
+                <option [ngValue]="2">Inactivo</option>
+            </select>
+        </div>
+
+        <div class="col-12">
+            <label class="catalogo-dialog__label" for="tipoVehiculoDescripcion">Descripcion</label>
+            <textarea
+                id="tipoVehiculoDescripcion"
+                [(ngModel)]="tipoVehiculo.descripcion"
+                class="form-control app-input catalogo-dialog__textarea"
+                placeholder="Descripcion breve del tipo de vehiculo"></textarea>
+        </div>
+    </div>
+
+    <div class="app-toolbar catalogo-dialog__actions">
+        <button type="button" class="app-chip-button" (click)="cerrar()">Cancelar</button>
+        <button type="button" class="app-chip-button app-chip-button--primary" (click)="guardar()">
+            {{ esEdicion ? 'Guardar cambios' : 'Crear tipo' }}
+        </button>
+    </div>
+</div>

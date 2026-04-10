@@ -48,7 +48,7 @@ export class ServiciosComponent implements OnInit, OnDestroy {
         CustomConsole.log(datos);
 
         if (datos.data.count > 0) {
-          this.tiposServicio = this.normalizarRecords<TiposServiciosModule>(datos.data.records);
+          this.tiposServicio = datos.data.records;
           CustomConsole.log(this.tiposServicio);
         } else {
           this.tiposServicio = [];
@@ -108,7 +108,7 @@ export class ServiciosComponent implements OnInit, OnDestroy {
       (datos: VehiculoServiciosResponse) => {
         CustomConsole.log(datos);
         if (datos.data.count > 0) {
-          this.serviciosAVehiculos = this.normalizarRecords<ServiciosModule>(datos.data.records);
+          this.serviciosAVehiculos = datos.data.records;
           CustomConsole.log(this.serviciosAVehiculos);
         } else {
           this.serviciosAVehiculos = [];
@@ -168,7 +168,4 @@ export class ServiciosComponent implements OnInit, OnDestroy {
     });
   }
 
-  private normalizarRecords<T>(records: unknown[]): T[] {
-    return (records ?? []).map((record: any) => record?.obj ?? record) as T[];
-  }
 }

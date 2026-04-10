@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { map } from 'rxjs';
 import { loading } from 'src/app/models/app.loading';
 import { TipoVehiculoModule } from '../models/tipo-vehiculo/tipo-vehiculo.module';
 import { actions } from '../models/app.db.actions';
@@ -40,9 +41,13 @@ export class VehiculosService {
       action: actions.actionSelect,
       _tabla: vistas.vehiculos_servicios_costos,
       _where: where,
+      _columnas: ['obj'],
+      _obj: ['obj'],
     };
     CustomConsole.log('vehiculo service  - getCostosServicios', this.configService.url.action, datos, httpOptions());
-    return this.http.post<VehiculoServiciosCostosResponse>(this.configService.url.action, datos, httpOptions());
+    return this.http
+      .post<VehiculoServiciosCostosResponse>(this.configService.url.action, datos, httpOptions())
+      .pipe(map((response) => this.normalizeRecordsResponse(response)));
   }
 
   eliminarCostosServicios(oldTipoVh: ServiciosCostosModule) {
@@ -150,7 +155,9 @@ export class VehiculosService {
       _obj: ['obj'],
     };
     CustomConsole.log('servicios de usuarios activo - getUsuarios', this.configService.url.action, datos, httpOptions());
-    return this.http.post<VehiculoServiciosResponse>(this.configService.url.action, datos, httpOptions());
+    return this.http
+      .post<VehiculoServiciosResponse>(this.configService.url.action, datos, httpOptions())
+      .pipe(map((response) => this.normalizeRecordsResponse(response)));
   }
 
   getVehiculoNoAsignadoAServicios(codServicio: number) {
@@ -174,7 +181,9 @@ export class VehiculosService {
       _obj: ['obj'],
     };
     CustomConsole.log('vehiculoService - getServiciosPorTipo', this.configService.url.action, datos, httpOptions());
-    return this.http.post<VehiculoServiciosResponse>(this.configService.url.action, datos, httpOptions());
+    return this.http
+      .post<VehiculoServiciosResponse>(this.configService.url.action, datos, httpOptions())
+      .pipe(map((response) => this.normalizeRecordsResponse(response)));
   }
 
   getServiciosPorTipoVehiculo(tipo: number) {
@@ -187,7 +196,9 @@ export class VehiculosService {
       _obj: ['obj'],
     };
     CustomConsole.log('servicios de usuarios activo - getUsuarios', this.configService.url.action, datos, httpOptions());
-    return this.http.post<VehiculoServiciosCostosResponse>(this.configService.url.action, datos, httpOptions());
+    return this.http
+      .post<VehiculoServiciosCostosResponse>(this.configService.url.action, datos, httpOptions())
+      .pipe(map((response) => this.normalizeRecordsResponse(response)));
   }
 
   getVehiculos_propietario(tipo: string) {
@@ -198,7 +209,9 @@ export class VehiculosService {
       _where: where,
     };
     CustomConsole.log('servicios de VEHICULOS activo - getVehiculos_propietario', this.configService.url.action, datos, httpOptions());
-    return this.http.post<VehiculoPropietarioResponse>(this.configService.url.action, datos, httpOptions());
+    return this.http
+      .post<VehiculoPropietarioResponse>(this.configService.url.action, datos, httpOptions())
+      .pipe(map((response) => this.normalizeRecordsResponse(response)));
   }
 
   eliminarServicios(oldTipoVh: ServiciosModule) {
@@ -245,7 +258,9 @@ export class VehiculosService {
       _obj: ['obj'],
     };
     CustomConsole.log('servicios de usuarios activo - getUsuarios', this.configService.url.action, datos, httpOptions());
-    return this.http.post<VehiculoTiposServiciosResponse>(this.configService.url.action, datos, httpOptions());
+    return this.http
+      .post<VehiculoTiposServiciosResponse>(this.configService.url.action, datos, httpOptions())
+      .pipe(map((response) => this.normalizeRecordsResponse(response)));
   }
 
   eliminarTiposServicios(oldTipoVh: TiposServiciosModule) {
@@ -288,7 +303,9 @@ export class VehiculosService {
       _tabla: vistas.vehiculos_tipos,
     };
     CustomConsole.log('servicios de servicios vehiculos activo - geTiposVehiculos', this.configService.url.action, datos, httpOptions());
-    return this.http.post<VehiculoTiposResponse>(this.configService.url.action, datos, httpOptions());
+    return this.http
+      .post<VehiculoTiposResponse>(this.configService.url.action, datos, httpOptions())
+      .pipe(map((response) => this.normalizeRecordsResponse(response)));
   }
 
   eliminarTipoDeVehiculo(oldTipoVh: TipoVehiculoModule) {
@@ -331,5 +348,19 @@ export class VehiculosService {
       ?? error?.error?.message
       ?? error?.message
       ?? 'Error inesperado';
+  }
+
+  private normalizeRecordsResponse<T extends { data?: { records?: any[] } }>(response: T): T {
+    if (!response?.data || !Array.isArray(response.data.records)) {
+      return response;
+    }
+
+    return {
+      ...response,
+      data: {
+        ...response.data,
+        records: response.data.records.map((record: any) => record?.objeto ?? record?.obj ?? record),
+      },
+    };
   }
 }

@@ -12,7 +12,7 @@ import { AuxIngresoInventarioModule } from '../models/aux-ingreso-inventario/aux
 import { DocumentosModel } from '../models/ventas/documento.model';
 import { ProductoModel } from '../models/producto/producto.module';
 import { UsuarioModel } from '../models/usuario.model';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, map } from 'rxjs';
 import { DocumentoCierreRequest, DocumentoRequest, ProductoExitenciaRequest, ProductoRequest } from '../interfaces/producto-request';
 import { PrdPreciosModule } from '../models/prd-precios/prd-precios.module';
 import { CategoriasModel } from '../models/categorias.model';
@@ -56,6 +56,17 @@ getErrorMessage(error: any): string {
   const textMessage = error?.message;
 
   return apiMessage || fallbackMessage || textMessage || 'Error inesperado';
+}
+
+private normalizeWrappedRecords<T>(response: ApiResponse<GenericRecordsPayload<T>>): ApiResponse<GenericRecordsPayload<T>> {
+  return {
+    ...response,
+    data: {
+      ...response.data,
+      records: (response.data.records ?? []).map((item: any) => item?.obj ?? item),
+      count: response.data.count ?? 0
+    }
+  };
 }
 
 
@@ -225,7 +236,9 @@ getCategoriasVendidas():Observable<ApiResponse<GenericRecordsPayload<CategoriasV
               "_obj": ['obj'],
               };
   CustomConsole.log('servicios de usuarios activo - getCategorias' ,this.baseUrl, datos, httpOptions());
-  return this.http.post<ApiResponse<GenericRecordsPayload<CategoriasVendidasModel>>>(this.baseUrl, datos, httpOptions()) ;
+  return this.http
+    .post<ApiResponse<GenericRecordsPayload<CategoriasVendidasModel>>>(this.baseUrl, datos, httpOptions())
+    .pipe(map((response) => this.normalizeWrappedRecords(response))) ;
 } 
 getMarcas():Observable<ApiResponse<GenericRecordsPayload<MarcasModel>>>{
   let datos = {"action": actions.actionSelect ,
@@ -253,7 +266,9 @@ getProductosById(codPrd:any):Observable<ApiResponse<GenericRecordsPayload<Produc
     "_obj": ['obj'],
      };
   CustomConsole.log('servicios getProductosById' ,this.baseUrl, datos, httpOptions());
-  return this.http.post<ApiResponse<GenericRecordsPayload<ProductoModel>>>(this.baseUrl, datos, httpOptions()) ;
+  return this.http
+    .post<ApiResponse<GenericRecordsPayload<ProductoModel>>>(this.baseUrl, datos, httpOptions())
+    .pipe(map((response) => this.normalizeWrappedRecords(response))) ;
 } 
 
 
@@ -308,7 +323,9 @@ getProductosCodBarrasVCnt(codPrd:string , caja:number):Observable<ApiResponse<Ge
    };
 
   CustomConsole.log('servicios getProductosCodBarrasVCnt' ,this.baseUrl, datos, httpOptions());
-  return this.http.post<ApiResponse<GenericRecordsPayload<ProductoModel>>>(this.baseUrl, datos, httpOptions()) ;
+  return this.http
+    .post<ApiResponse<GenericRecordsPayload<ProductoModel>>>(this.baseUrl, datos, httpOptions())
+    .pipe(map((response) => this.normalizeWrappedRecords(response))) ;
 } 
  
 // #endregion

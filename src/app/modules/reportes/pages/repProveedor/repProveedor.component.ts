@@ -87,7 +87,7 @@ export class repProveedorComponent {
      CustomConsole.log('getDocumentos_recuest', datos );
      
 if (datos.numdata > 0 ){  
-  this.documentos =  datos.data.map((x:any)=> x.objeto)
+  this.documentos = datos.data
 } else{
 Swal.fire('No existen datos relacionados con la busqueda')
 } 
@@ -97,8 +97,8 @@ Swal.fire('No existen datos relacionados con la busqueda')
 
   buscarDocumento(orden:number){
     this.srvDocumentos.getDocumentosByOrden(orden).subscribe({next:(val:any)=>{
-      if (val.numdata > 0 ){ 
-        let doc:DocumentosModel =  val.data.map((x:any)=> x.objeto)[0]||undefined; 
+      if ((val.data?.records?.length || 0) > 0 ){ 
+        let doc:DocumentosModel =  val.data.records[0] || undefined; 
         if (doc != undefined){
           this.VerFactura(doc)
         }

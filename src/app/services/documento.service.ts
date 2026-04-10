@@ -37,6 +37,12 @@ export interface CarteraRecordsPayload {
   count: number;
 }
 
+export interface LegacyObjectArrayResponse<T> {
+  data: T[];
+  numdata: number;
+  [key: string]: any;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -62,6 +68,21 @@ constructor(private http: HttpClient, private loading: loading , private configS
 
   private postGenericRecords<T>(datos: any): Observable<ApiResponse<GenericRecordsPayload<T>>> {
     return this.http.post<ApiResponse<GenericRecordsPayload<T>>>(this.configService.url.action, datos, httpOptions());
+  }
+
+  private postLegacyObjectArray<T>(datos: any): Observable<LegacyObjectArrayResponse<T>> {
+    return this.http
+      .post<any>(this.configService.url.action, datos, httpOptions())
+      .pipe(
+        map((response) => {
+          const records = (response?.data ?? []).map((item: any) => item?.objeto ?? item?.obj ?? item);
+          return {
+            ...response,
+            data: records,
+            numdata: response?.numdata ?? records.length,
+          };
+        })
+      );
   }
 
   
@@ -386,7 +407,7 @@ getCuentasXPagarByfecha(_fechaInicio:string, _fechaFin:string): Observable<Credi
       "_where": where
     };
     CustomConsole.log('servicios de documentos - getVentasFinalizadas', this.configService.url.action, datos, httpOptions());
-    return this.http.post(this.configService.url.action, datos, httpOptions());
+    return this.postLegacyObjectArray<DocumentosModel>(datos);
   }
 
   getVentasFinalizadasPorCliente(codVenta: string): Observable<any> {
@@ -402,7 +423,7 @@ getCuentasXPagarByfecha(_fechaInicio:string, _fechaFin:string): Observable<Credi
       "_where": where
     };
     CustomConsole.log('servicios de documentos - getVentasFinalizadasPorCliente', this.configService.url.action, datos, httpOptions());
-    return this.http.post(this.configService.url.action, datos, httpOptions());
+    return this.postLegacyObjectArray<DocumentosModel>(datos);
   }
   getVentasFinalizadasPorClienteFecha(codVenta: string, fecha1: string, fecha2: string): Observable<any> {
     let where = [
@@ -419,7 +440,7 @@ getCuentasXPagarByfecha(_fechaInicio:string, _fechaFin:string): Observable<Credi
       "_where": where
     };
     CustomConsole.log('servicios de documentos - getVentasFinalizadasPorCliente', this.configService.url.action, datos, httpOptions());
-    return this.http.post(this.configService.url.action, datos, httpOptions());
+    return this.postLegacyObjectArray<DocumentosModel>(datos);
   }
   getVentasFinalizadasPorFecha(fecha1: string, fecha2: string): Observable<any> {
     let where = [
@@ -434,7 +455,7 @@ getCuentasXPagarByfecha(_fechaInicio:string, _fechaFin:string): Observable<Credi
       "_where": where
     };
     CustomConsole.log('servicios de documentos - getVentasFinalizadasPorFecha', this.configService.url.action, datos, httpOptions());
-    return this.http.post(this.configService.url.action, datos, httpOptions());
+    return this.postLegacyObjectArray<DocumentosModel>(datos);
   }
 
   
@@ -451,7 +472,7 @@ getCuentasXPagarByfecha(_fechaInicio:string, _fechaFin:string): Observable<Credi
       "_where": where
     };
     CustomConsole.log('servicios de documentos - getDevolucionesPorFecha', this.configService.url.action, datos, httpOptions());
-    return this.http.post(this.configService.url.action, datos, httpOptions());
+    return this.postLegacyObjectArray<DocumentosModel>(datos);
   }
 
   getVentasFinalizadasPorFechaHora(fecha1: string, fecha2: string , 
@@ -470,7 +491,7 @@ getCuentasXPagarByfecha(_fechaInicio:string, _fechaFin:string): Observable<Credi
       "_where": where
     };
     CustomConsole.log('servicios de documentos - getVentasFinalizadasPorFecha', this.configService.url.action, datos, httpOptions());
-    return this.http.post(this.configService.url.action, datos, httpOptions());
+    return this.postLegacyObjectArray<DocumentosModel>(datos);
   }
 
   getVentasFinalizadasPorProductoFecha(idProducto:string , fecha1: string, fecha2: string): Observable<any> {
@@ -494,7 +515,7 @@ getCuentasXPagarByfecha(_fechaInicio:string, _fechaFin:string): Observable<Credi
       "_where": where
     };
     CustomConsole.log('servicios de documentos - getVentasFinalizadasPorProductoFecha', this.configService.url.action, datos, httpOptions());
-    return this.http.post(this.configService.url.action, datos, httpOptions());
+    return this.postLegacyObjectArray<DocumentosModel>(datos);
   }
 
   getVentasFinalizadasPorCarteraFecha( fecha1: string, fecha2: string): Observable<any> {
@@ -512,7 +533,7 @@ getCuentasXPagarByfecha(_fechaInicio:string, _fechaFin:string): Observable<Credi
       "_where": where
     };
     CustomConsole.log('servicios de documentos - getVentasFinalizadasPorProductoFecha', this.configService.url.action, datos, httpOptions());
-    return this.http.post(this.configService.url.action, datos, httpOptions());
+    return this.postLegacyObjectArray<DocumentosModel>(datos);
   }
 
   
@@ -532,7 +553,7 @@ getCuentasXPagarByfecha(_fechaInicio:string, _fechaFin:string): Observable<Credi
       "_where": where
     };
     CustomConsole.log('servicios de documentos - getVentasFinalizadasPorProductoFecha', this.configService.url.action, datos, httpOptions());
-    return this.http.post(this.configService.url.action, datos, httpOptions());
+    return this.postLegacyObjectArray<DocumentosModel>(datos);
   }
 
   getComprasFinalizadasPorCreditoFechaPorProveedor( id:number ,  fecha1: string, fecha2: string): Observable<any> {
@@ -551,7 +572,7 @@ getCuentasXPagarByfecha(_fechaInicio:string, _fechaFin:string): Observable<Credi
       "_where": where
     };
     CustomConsole.log('servicios de documentos - getComprasFinalizadasPorCreditoFecha', this.configService.url.action, datos, httpOptions());
-    return this.http.post(this.configService.url.action, datos, httpOptions());
+    return this.postLegacyObjectArray<DocumentosModel>(datos);
   }
   
   getComprasFinalizadasPorCreditoFecha( fecha1: string, fecha2: string): Observable<any> {
@@ -569,7 +590,7 @@ getCuentasXPagarByfecha(_fechaInicio:string, _fechaFin:string): Observable<Credi
       "_where": where
     };
     CustomConsole.log('servicios de documentos - getComprasFinalizadasPorCreditoFecha', this.configService.url.action, datos, httpOptions());
-    return this.http.post(this.configService.url.action, datos, httpOptions());
+    return this.postLegacyObjectArray<DocumentosModel>(datos);
   }
   getResumenCategoriaVentas(_idPrd:any , _fechaInicio: string, _fechaFin: string): Observable<any> { 
     let datos = {
@@ -656,7 +677,7 @@ getCuentasXPagarByfecha(_fechaInicio:string, _fechaFin:string): Observable<Credi
       "_where": where
     };
     CustomConsole.log('servicios de documentos - getVentasFinalizadasPorFecha', this.configService.url.action, datos, httpOptions());
-    return this.http.post(this.configService.url.action, datos, httpOptions());
+    return this.postLegacyObjectArray<DocumentosModel>(datos);
   }
 
 
@@ -676,7 +697,7 @@ getCuentasXPagarByfecha(_fechaInicio:string, _fechaFin:string): Observable<Credi
       "_where": where
     };
     CustomConsole.log('servicios de documentos - getVentasFinalizadasPorFecha', this.configService.url.action, datos, httpOptions());
-    return this.http.post(this.configService.url.action, datos, httpOptions());
+    return this.postLegacyObjectArray<DocumentosModel>(datos);
   }
 
   getVentasFinalizadasPorUsuarioFecha(id:any , fecha1: string, fecha2: string): Observable<any> {
@@ -695,7 +716,7 @@ getCuentasXPagarByfecha(_fechaInicio:string, _fechaFin:string): Observable<Credi
       "_where": where
     };
     CustomConsole.log('servicios de documentos - getVentasFinalizadasPorFecha', this.configService.url.action, datos, httpOptions());
-    return this.http.post(this.configService.url.action, datos, httpOptions());
+    return this.postLegacyObjectArray<DocumentosModel>(datos);
   }
   cambiarDocumento(documento: number): Observable<ApiResponse<{ message: string; documentId: number }>> {
     let datos = {"action": actions.actionChangeDocumentos, "_docActual": documento};

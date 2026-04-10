@@ -115,13 +115,13 @@ this.empleadosServices.guardarPagoEmpleado(Empleado , fechas).subscribe(
       {
         next :
       
-       (datos:ApiResponse<GenericRecordsPayload<{ objeto: EmpleadoModel }>>)=>{
+       (datos:ApiResponse<GenericRecordsPayload<EmpleadoModel>>)=>{
           CustomConsole.log('getEmpleados' , datos);
           
      if (datos.ok && datos.data.count > 0 ){ 
-       datos.data.records.forEach((dato:any , index:number )=>{ 
-        this.empleados.push(dato.objeto);
-        empleadosAux = dato.objeto;
+       datos.data.records.forEach((dato:EmpleadoModel )=>{ 
+        this.empleados.push(dato);
+        empleadosAux = dato;
         if(empleadosAux.numeroAcumuladosPendientes! > 0 ){
           empleadosAux.valorADescontarEnPago =  empleadosAux.maximoDescuento  
             this.empleadosConAcumulados.push(empleadosAux);

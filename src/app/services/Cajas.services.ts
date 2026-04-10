@@ -171,7 +171,9 @@ return this.http
                         "_obj": ['obj'],
                         "_where" : [{columna : 'estado' , tipocomp : '=' , dato : 1}]
                        };
-           return this.http.post<ApiResponse<GenericRecordsPayload<{ obj: BodegasModule }>>>(this.configService.url.action , datos, httpOptions()) ;
+           return this.http
+             .post<ApiResponse<GenericRecordsPayload<BodegasModule>>>(this.configService.url.action , datos, httpOptions())
+             .pipe(map((response) => this.normalizeWrappedRecords(response))) ;
     }
     getLocacionesFisicas(){
         let datos = {"action": actions.actionBuscarLocacionesExternas  ,
@@ -344,6 +346,17 @@ return this.http
          "_pagos" : pagos , _numCuotas , _numDiasCuotas , _remision : (origen == 'remision')?true:undefined 
        }; 
         return this.http.post<DocumentoCierreRequest>(this.urlVentas  , datos, httpOptions()) ;
+    } 
+
+    private normalizeWrappedRecords<T>(response: ApiResponse<GenericRecordsPayload<T>>): ApiResponse<GenericRecordsPayload<T>> {
+        return {
+            ...response,
+            data: {
+                ...response.data,
+                records: (response.data.records ?? []).map((item: any) => item?.obj ?? item),
+                count: response.data.count ?? 0,
+            },
+        };
     }
     setCajasAUsuarios(idUsuario:number , cajas:number[] ):Observable<ApiResponse<{ message: string; assignedBoxIds: number[]; inserted: number; deleted: number }>>{
         let datos = {"action": actions.actionAsignarCajas ,

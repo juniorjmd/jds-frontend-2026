@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { map } from 'rxjs';
 import { fechaBusqueda } from '../interfaces/generales.interface';
 import { actions } from '../models/app.db.actions';
 import { TABLA } from '../models/app.db.tables';
@@ -35,7 +36,9 @@ getEmpleados(){
                "_obj" : ['objeto'],             
               };
   CustomConsole.log('servicios de empleados - getEmpleados' ,this.configService.url.action , datos, httpOptions());
-  return this.http.post<ApiResponse<GenericRecordsPayload<{ objeto: EmpleadoModel }>>>(this.configService.url.action , datos, httpOptions()) ;
+  return this.http
+    .post<ApiResponse<GenericRecordsPayload<EmpleadoModel>>>(this.configService.url.action , datos, httpOptions())
+    .pipe(map((response) => this.normalizeWrappedRecords(response)));
 }
 
 
@@ -51,7 +54,9 @@ getEmpleados(){
                "_obj" : ['objeto'],             
               };
   CustomConsole.log('servicios de empleados - getEmpleados' ,this.configService.url.action , datos, httpOptions());
-  return this.http.post<ApiResponse<GenericRecordsPayload<EmpleadoModel>>>(this.configService.url.action , datos, httpOptions()) ;
+  return this.http
+    .post<ApiResponse<GenericRecordsPayload<EmpleadoModel>>>(this.configService.url.action , datos, httpOptions())
+    .pipe(map((response) => this.normalizeWrappedRecords(response)));
 } 
 
 
@@ -156,7 +161,18 @@ guardarPagoEmpleado(empleado:EmpleadoModel , fechas:fechaBusqueda){
  getErrorMessage(error: any): string {
   const rawApiError = error?.error?.error;
   const apiMessage = typeof rawApiError === 'string' ? rawApiError : rawApiError?.message;
-  return apiMessage || error?.error?.message || error?.message || 'Error inesperado';
+ return apiMessage || error?.error?.message || error?.message || 'Error inesperado';
+ }
+
+ private normalizeWrappedRecords<T>(response: ApiResponse<GenericRecordsPayload<T>>): ApiResponse<GenericRecordsPayload<T>> {
+  return {
+    ...response,
+    data: {
+      ...response.data,
+      records: (response.data.records ?? []).map((item: any) => item?.objeto ?? item),
+      count: response.data.count ?? 0
+    }
+  };
  }
 
 

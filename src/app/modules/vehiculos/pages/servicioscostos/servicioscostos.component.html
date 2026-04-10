@@ -10,8 +10,8 @@
             <div class="form-group">
                 <label for="exampleInputEmail1">Tipo de Servicio</label>
                 <select [(ngModel)]="tipo_servicio" class="form-control" (change)="getServiciosVehiculos()">
-                    <option value="0">Escoger tipoServicio</option>
-                    <option *ngFor="let tpServicio of tiposServicio" value="{{tpServicio.id}}">{{tpServicio.nombre}}</option>
+                    <option [ngValue]="0">Escoger tipoServicio</option>
+                    <option *ngFor="let tpServicio of tiposServicio" [ngValue]="tpServicio.id">{{tpServicio.nombre}}</option>
                 </select>
             </div>
         </div>
@@ -19,8 +19,8 @@
             <div class="form-group">
                 <label for="exampleInputEmail1">Servicio</label>
                 <select [(ngModel)]="servicioSelecionado" (change)="getTiposVehiculos()" class="form-control">
-                    <option value="0">Escoger Servicio</option>
-                    <option *ngFor="let Servicio of serviciosAVehiculos" value="{{Servicio.id}}">{{Servicio.nombre}}</option>
+                    <option [ngValue]="0">Escoger Servicio</option>
+                    <option *ngFor="let Servicio of serviciosAVehiculos" [ngValue]="Servicio.id">{{Servicio.nombre}}</option>
                 </select>
             </div>
         </div>
@@ -28,9 +28,9 @@
             <div class="form-group">
                 <label for="exampleInputEmail1">Tipo de Vehiculo</label>
                 <select class="form-control" [(ngModel)]="tipoVehiculo">
-                    <option value="0">Escoger Tipo Vehiculo</option>
-                    <option value="999999999">Todos los vehiculos</option>
-                    <option *ngFor="let vehiculo of tiposVehiculo" value="{{vehiculo.id}}">{{vehiculo.nombre}}</option>
+                    <option [ngValue]="0">Escoger Tipo Vehiculo</option>
+                    <option [ngValue]="999999999">Todos los vehiculos</option>
+                    <option *ngFor="let vehiculo of tiposVehiculo" [ngValue]="vehiculo.id">{{vehiculo.nombre}}</option>
                 </select>
             </div>
         </div>

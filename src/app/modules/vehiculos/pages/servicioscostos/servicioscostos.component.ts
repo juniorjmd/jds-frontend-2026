@@ -32,6 +32,34 @@ export class ServicioscostosComponent implements OnInit {
                  this.precio = 0;
                  this.getTiposServicios();
                 }
+  private actualizarPrecioServicioSeleccionado(){
+    const servicio = this.serviciosAVehiculos.find((item) => Number(item.id) === Number(this.servicioSelecionado));
+    this.precio = Number(servicio?.precio_general || 0);
+  }
+
+  private resetServicioDependientes(){
+    this.arrServiciosCostos = [];
+    this.tiposVehiculo = [];
+    this.tipoVehiculo = 0;
+    this.servicioSelecionado = 0;
+    this.precio = 0;
+  }
+
+  private recargarServicioSeleccionado(){
+    if (Number(this.servicioSelecionado) <= 0) {
+      this.arrServiciosCostos = [];
+      this.tiposVehiculo = [];
+      this.tipoVehiculo = 0;
+      this.precio = 0;
+      return;
+    }
+
+    this.actualizarPrecioServicioSeleccionado();
+    this.tipoVehiculo = 0;
+    this.getCostosServiciosVehiculos();
+    this.getVehiculosNoAsignados();
+  }
+
   setActualiza_costoServicioVehiculo(costo : ServiciosCostosModule){
 Swal.fire({
   title: 'Ingrese el nuevo valor a editar',
@@ -49,10 +77,7 @@ Swal.fire({
       (respuesta:VehiculoMutationResponse)=>{CustomConsole.log(respuesta)
        
       Swal.fire(respuesta.data.message ?? 'datos ingresados con exito');  
-      //-------------------
-      this.limpiar();
-    //----------------------------------
-      //this.getServiciosVehiculos();
+      this.recargarServicioSeleccionado();
       this.loading.hide(); 
       }, error => {
         this.loading.hide();
@@ -81,8 +106,7 @@ Swal.fire({
         this.VehiculosService.eliminarCostosServicios(costo).subscribe(
           (respuesta:VehiculoMutationResponse)=>{CustomConsole.log(respuesta)
             if (respuesta.ok){
-              this.getTiposVehiculos();
-              this.getCostosServiciosVehiculos();
+              this.recargarServicioSeleccionado();
               Swal.fire('Elemento eliminado con exito!', '', 'success');
               
             } 
@@ -93,19 +117,18 @@ Swal.fire({
     })
   }
   lipiarSelect(){
-    this.arrServiciosCostos  = []; 
-    this.serviciosAVehiculos  = [];
-    this.tiposVehiculo  = [];
-  this.tipoVehiculo=0;
-  this.servicioSelecionado=0;
-  this.precio =0 ;
-    this.limpiar();
+    this.serviciosAVehiculos = [];
+    this.resetServicioDependientes();
   }
   getTiposServicios(){ 
     this.arrServiciosCostos  = [];
   this.tiposServicio = [];
   this.serviciosAVehiculos  = [];
   this.tiposVehiculo  = [];
+  this.tipo_servicio = 0;
+  this.servicioSelecionado = 0;
+  this.tipoVehiculo = 0;
+  this.precio = 0;
 
 
     this.tiposServicio[0] =  new TiposServiciosModule('','' );
@@ -128,11 +151,10 @@ Swal.fire({
       );
   }  
   getServiciosVehiculos( ){ 
-    this.serviciosAVehiculos = [];
     this.lipiarSelect();
     //this.serviciosAVehiculos[0] =   new ServiciosModule('',0,'',0,0); 
    // alert(this.tipo_servicio )
-    if (this.tipo_servicio <=  0  ) { return;  }
+    if (Number(this.tipo_servicio) <=  0  ) { return;  }
     this.loading.show()
     this.VehiculosService.getServiciosPorTipo(this.tipo_servicio).subscribe(
       (datos:VehiculoServiciosResponse)=>{
@@ -154,23 +176,15 @@ Swal.fire({
   } 
 
   getTiposVehiculos(){ 
+    this.recargarServicioSeleccionado();
+  }  
+
+  getVehiculosNoAsignados(){
     this.tiposVehiculo = [];
-    this.arrServiciosCostos = [] ;
-    
-    if ( this.servicioSelecionado<= 0) {
-      return
+    if (Number(this.servicioSelecionado) <= 0) {
+      return;
     }
-    this.getCostosServiciosVehiculos();
-    for (const servicio of this.serviciosAVehiculos)   { 
-     if(servicio.id == this.servicioSelecionado){
-        this.precio =  servicio.precio_general!;
-        break;
-       }
-}
 
-
-
-    this.tiposVehiculo[0] =  new TipoVehiculoModule('','');
     this.loading.show()
     this.VehiculosService.getVehiculoNoAsignadoAServicios(this.servicioSelecionado).subscribe(
       (datos:VehiculoNoAsignadosResponse)=>{
@@ -190,18 +204,18 @@ Swal.fire({
         Swal.fire( error.error.error, '', 'error');
       }
       );
-  }  
+  }
 
   enviarRelacionServicioVehiculo(){
-  if(  this.tipo_servicio === 0 ) {
+  if(  Number(this.tipo_servicio) === 0 ) {
     Swal.fire( 'debe seleccionar el tipo de servicio', '', 'error');
     return
   }
-  if( this.servicioSelecionado === 0 ) {
+  if( Number(this.servicioSelecionado) === 0 ) {
   Swal.fire( 'debe seleccionar el servicio', '', 'error');
   return
 }
-if( this.tipoVehiculo === 0 ) {
+if( Number(this.tipoVehiculo) === 0 ) {
   Swal.fire( 'debe seleccionar el tipo de vehiculo', '', 'error');
   return
 }
@@ -211,15 +225,12 @@ if( this.precio <= 0  ) {
 }
 this.loading.show(); 
 // newServiciosCostos:ServiciosCostosModule = new ServiciosCostosModule(0,0,0,0);
-this.newServiciosCostos = new ServiciosCostosModule(this.servicioSelecionado, this.tipoVehiculo ,this.precio );
+this.newServiciosCostos = new ServiciosCostosModule(Number(this.servicioSelecionado), Number(this.tipoVehiculo) ,Number(this.precio) );
 this.VehiculosService.guardarCostoServicio(this.newServiciosCostos).subscribe(
  (respuesta:VehiculoMutationResponse)=>{CustomConsole.log(respuesta)
   
  Swal.fire(respuesta.data.message ?? 'datos ingresados con exito');  
-  //-------------------
- this.limpiar();
-//----------------------------------
-  //this.getServiciosVehiculos();
+ this.recargarServicioSeleccionado();
  this.loading.hide(); 
  }, error => {
   this.loading.hide();
@@ -228,10 +239,8 @@ this.VehiculosService.guardarCostoServicio(this.newServiciosCostos).subscribe(
  }
 
  getCostosServiciosVehiculos(){ 
-  this.tiposVehiculo = [];
-  this.precio = 0;
-  if ( this.servicioSelecionado <= 0){return;}
-  this.tiposVehiculo[0] =  new TipoVehiculoModule('','');
+  this.arrServiciosCostos = [];
+  if ( Number(this.servicioSelecionado) <= 0){return;}
   this.loading.show()
   this.VehiculosService.getCostosServicios(this.servicioSelecionado).subscribe(
     (datos:VehiculoServiciosCostosResponse)=>{
@@ -257,19 +266,9 @@ this.VehiculosService.guardarCostoServicio(this.newServiciosCostos).subscribe(
 
 
 limpiar(){
-
-  // this.tipo_servicio = 0 
-  // this.servicioSelecionado = 0
-    this.tipoVehiculo = 0 
-    this.precio = 0  
+    this.tipoVehiculo = 0;
     this.newServiciosCostos = new ServiciosCostosModule(0,0,0 );
-    this.getCostosServiciosVehiculos();  
-for (const servicio of this.serviciosAVehiculos) { 
-  if(servicio.id == this.servicioSelecionado){
-    this.precio =  servicio.precio_general!;
-    break;
-  }
-}
+    this.recargarServicioSeleccionado();
  
 }
   ngOnInit(): void {

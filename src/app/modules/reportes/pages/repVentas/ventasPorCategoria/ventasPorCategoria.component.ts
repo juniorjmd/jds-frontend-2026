@@ -78,10 +78,7 @@ export class ventasPorCategoriaComponent implements OnInit {
              CustomConsole.log('getDocumentos_recuest', datos );
              
         if (datos.numdata > 0 ){ 
-          datos.data!.forEach((dato:any , index : number  )=>{  
-           this.documentos.push(dato.objeto);
-           
-          }) 
+          this.documentos = datos.data;
        } else{
         Swal.fire('No existen datos relacionados con la busqueda')
        } this.hideF=true; 
@@ -244,10 +241,7 @@ async ExportarResumen()
          CustomConsole.log('getDocumentos_recuest', datos );
          
     if (datos.numdata > 0 ){ 
-      datos.data!.forEach((dato:any , index : number  )=>{  
-       this.documentos.push(dato.objeto);
-       
-      }) 
+      this.documentos = datos.data;
    } else{
     Swal.fire('No existen datos relacionados con la busqueda')
    }  this.hideF=true; 

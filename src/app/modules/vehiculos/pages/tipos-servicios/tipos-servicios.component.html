@@ -1,60 +1,79 @@
 <div class="container">
-    <br>
-    <div class="row">
-        <div class="col-sm-12">
-            <h2 class="centrado">Tipos de servicios a vehiculos</h2>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-sm-3"></div>
-        <div class="col-sm-3">
-            <div class="form-group">
-                <label for="exampleInputEmail1">Nombre</label>
-                <input type="text" [(ngModel)]="newTipoServicio.nombre" class="form-control" aria-describedby="nombreHelp" placeholder="Nombre">
-                <small id="nombreHelp" class="form-text text-muted">(ej: servicio sencillo, servicio especial)</small>
+    <section class="tipos-servicio-shell app-page">
+        <header class="app-panel tipos-servicio-shell__header">
+            <div class="tipos-servicio-shell__copy">
+                <span class="app-badge">Tipos de servicio</span>
+                <h2 class="app-title tipos-servicio-shell__title">Tipos de servicios a vehiculos</h2>
+                <p class="tipos-servicio-shell__description">Consulta el listado y abre el mismo formulario emergente para crear o editar.</p>
             </div>
-            <div class="form-group">
-                <label for="exampleInputEmail1">Descripcion</label>
-                <textarea [(ngModel)]="newTipoServicio.descripcion" class="form-control"></textarea>
+
+            <button type="button" class="app-chip-button app-chip-button--primary" (click)="abrirModalTipoServicio()">
+                <i class="bi bi-plus-circle"></i>
+                Crear nuevo
+            </button>
+        </header>
+
+        <section class="app-panel tipos-servicio-shell__table-panel" *ngIf="tiposServicio.length > 0; else tiposServicioVacios">
+            <div class="app-toolbar app-toolbar--between tipos-servicio-shell__table-toolbar">
+                <span class="app-badge">{{ tiposServicio.length }} registros</span>
             </div>
-        </div>
-        <div class="col-sm-3">
-            <div class="form-group">
-                <label for="exampleInputEmail1">Estado</label>
-                <select [(ngModel)]="newTipoServicio.estado" class="form-control">
-                    <option value="0">Estado</option>
-                    <option value="1">Activo</option>
-                    <option value="2">Inactivo</option>
-                </select>
-                <small id="nombreHelp" class="form-text text-muted">(ej: Activo, Inactivo)</small>
+
+            <div class="tipos-servicio-shell__table-wrap">
+                <table class="table tipos-servicio-table">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Descripcion</th>
+                            <th>Estado</th>
+                            <th class="tipos-servicio-table__actions-head">Opciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let tipoServicio of tiposServicio; trackBy: trackByTipoServicio">
+                            <td>{{ tipoServicio.nombre }}</td>
+                            <td>{{ tipoServicio.descripcion || 'Sin descripcion' }}</td>
+                            <td>
+                                <span
+                                    class="tipos-servicio-table__state"
+                                    [class.is-active]="tipoServicio.estado === 1"
+                                    [class.is-inactive]="tipoServicio.estado === 2">
+                                    {{ obtenerEstado(tipoServicio) }}
+                                </span>
+                            </td>
+                            <td class="tipos-servicio-table__actions">
+                                <button
+                                    type="button"
+                                    class="tipos-servicio-table__action"
+                                    title="Editar tipo de servicio"
+                                    aria-label="Editar tipo de servicio"
+                                    (click)="abrirModalTipoServicio(tipoServicio)">
+                                    <i class="bi bi-pencil-square"></i>
+                                </button>
+                                <button
+                                    type="button"
+                                    class="tipos-servicio-table__action is-danger"
+                                    title="Eliminar tipo de servicio"
+                                    aria-label="Eliminar tipo de servicio"
+                                    (click)="borrarTipoVehiculo(tipoServicio)">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
-            <div class="form-group">
-                <br> <br>
-                <div class="btn-group btn-group-toggle" data-toggle="buttons">
-                    <button type="button" (click)="manageTipoVehiculo()" class="btn btn-success">Enviar</button>
-                    <button type="button" (click)="cancelar()" class="btn btn-danger">Cancelar</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    <hr>
-    <div class="row" *ngIf="tiposServicio.length > 0">
-        <div class="col-sm-12">
-            <table class="table">
-                <tr>
-                    <th>Nombre</th>
-                    <th>Descripcion</th>
-                    <th>Estado</th>
-                    <th colspan="2">Opción</th>
-                </tr>
-                <tr *ngFor="let tipo_servicio of tiposServicio">
-                    <td>{{tipo_servicio.nombre}}</td>
-                    <td>{{tipo_servicio.descripcion}}</td>
-                    <td>{{tipo_servicio.nombre_estado}}</td>
-                    <td title="editar"><i class="bi bi-pencil-fill boton_activo" (click)="setActualizatipo_servicio(tipo_servicio)"></i></td>
-                    <td title="eliminar"><i class="bi bi-trash boton_activo" (click)="borrarTipoVehiculo(tipo_servicio)"></i></td>
-                </tr>
-            </table>
-        </div>
-    </div>
+        </section>
+
+        <ng-template #tiposServicioVacios>
+            <section class="app-panel tipos-servicio-shell__empty">
+                <i class="bi bi-list-task tipos-servicio-shell__empty-icon"></i>
+                <h3>No hay tipos de servicio para mostrar</h3>
+                <p>Todavia no has creado registros en este catalogo.</p>
+                <button type="button" class="app-chip-button app-chip-button--primary" (click)="abrirModalTipoServicio()">
+                    <i class="bi bi-plus-circle"></i>
+                    Crear primer tipo
+                </button>
+            </section>
+        </ng-template>
+    </section>
 </div>

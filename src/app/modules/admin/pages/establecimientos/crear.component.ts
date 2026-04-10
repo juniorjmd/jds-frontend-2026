@@ -126,13 +126,13 @@ export class CrearComponent implements OnInit {
   getLocacionPrincipales(){
 this.locationStore = [this.auxBodega];
     this.serviceCaja.getBodegasDisponibles()
-    .subscribe({next:     (datos: ApiResponse<GenericRecordsPayload<{ obj: BodegasModule }>>)=>{
+    .subscribe({next:     (datos: ApiResponse<GenericRecordsPayload<BodegasModule>>)=>{
         CustomConsole.log(datos);
         this.locationStore = [];   
         this.locationPOS   = [];
       this.locationVirtual  = [];
    if (datos.ok && datos.data.count > 0 ){  
-            this.locationStore = datos.data.records.map((x)=>x.obj) 
+            this.locationStore = datos.data.records 
             this.locationStore.unshift(this.auxBodega);  
      CustomConsole.log("this.locationStore" , this.locationStore) 
      this.newEsta.tipo = 0;

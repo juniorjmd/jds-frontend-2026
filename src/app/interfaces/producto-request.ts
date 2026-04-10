@@ -193,11 +193,11 @@ export interface cntTrasladosRequest {
 
 //data: {objeto: DocumentosModel}[];
 export interface soporteMovimientoCntRequest { 
-  data: {obj:SoporteOperacion}[];
-  query: string;
-  numdata: number;
-  error: string;
-}
+   data: SoporteOperacion[];
+   query: string;
+   numdata: number;
+   error: string;
+ }
 
 export interface ejecucionTrasladosRequest { 
    

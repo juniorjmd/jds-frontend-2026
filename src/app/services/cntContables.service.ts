@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core'; 
 
 import { httpOptions, url } from '../models/app.db.url';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, map } from 'rxjs';
 import {  cntClaseRequest, cntCuentaMayorRequest, cntDocOperacionesRequest, cntGrupoRequest, cntMovCuentasRequest, cntOperacionesRequest,  cntSubCuentaRequest, cntSubCuentaVwRequest, cntTipDocOperacionesRequest, cntTransaccionesRequest, cntTrasladosRequest, ejecucionTrasladosRequest, soporteMovimientoCntRequest, trasladosCntRequest } from '../interfaces/producto-request';
 import { actions } from '../models/app.db.actions';
 import { vistas } from '../models/app.db.view';
@@ -206,9 +206,11 @@ CustomConsole.log('setCntTransaccionesTmp',this.configService.url.actionAdmin , 
       "_where" : where , 
       "_obj" : ['obj'],  
       "_columnas": ['obj'],           
-     };
+    };
     CustomConsole.log('bucarSoporteMovimiento' , this.configService.url.action , datos, httpOptions())
-    return this.http.post<soporteMovimientoCntRequest>(this.configService.url.action , datos, httpOptions()) ;
+    return this.http
+      .post<soporteMovimientoCntRequest>(this.configService.url.action , datos, httpOptions())
+      .pipe(map((response) => this.normalizeSoporteResponse(response))) ;
  }
 /**
  * 
@@ -443,5 +445,12 @@ getEmpleadosAcumulados( id:number|string , fechas:fechaBusqueda){
       ?? error?.error?.error
       ?? error?.message
       ?? 'Error inesperado';
+  }
+
+  private normalizeSoporteResponse(response: soporteMovimientoCntRequest): soporteMovimientoCntRequest {
+    return {
+      ...response,
+      data: (response.data ?? []).map((item: any) => item?.obj ?? item),
+    };
   }
 }

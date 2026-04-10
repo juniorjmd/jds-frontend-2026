@@ -119,10 +119,7 @@ export class ReimpimirFacturasComponent implements OnInit {
          CustomConsole.log('getDocumentos_recuest', datos );
          
     if (datos.numdata > 0 ){ 
-      datos.data!.forEach((dato:any , index :number )=>{  
-       this.documentos.push(dato.objeto);
-       
-      }) 
+      this.documentos = datos.data;
    } 
   } ,
   (error: any) =>{

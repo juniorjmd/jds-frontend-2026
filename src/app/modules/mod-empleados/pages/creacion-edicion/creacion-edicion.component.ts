@@ -173,12 +173,12 @@ export class CreacionEdicionComponent implements OnInit {
     this.empleados = []; 
      this.loading.show()
      this.empleadosServices.getEmpleados()
-     .subscribe({next: (datos:ApiResponse<GenericRecordsPayload<{ objeto: EmpleadoModel }>>)=>{
+     .subscribe({next: (datos:ApiResponse<GenericRecordsPayload<EmpleadoModel>>)=>{
           CustomConsole.log(datos);
           
      if (datos.ok && datos.data.count > 0 ){ 
-       datos.data.records.forEach((dato:any )=>{ 
-        this.empleados.push(dato.objeto);
+       datos.data.records.forEach((dato:EmpleadoModel )=>{ 
+        this.empleados.push(dato);
        }) 
        CustomConsole.log('empleados',this.empleados);
      }else{

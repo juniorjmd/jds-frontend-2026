@@ -1,65 +1,79 @@
 <div class="container">
-    <br>
-    <div class="row">
-        <div class="col-sm-12">
-            <h2 class="centrado">Tipos de vehiculos</h2>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-sm-3"></div>
-        <div class="col-sm-3">
-            <div class="form-group">
-                <label for="exampleInputEmail1">Nombre</label>
-                <input type="text" [(ngModel)]="newTipoVehiculo.nombre" class="form-control" aria-describedby="nombreHelp" placeholder="Nombre">
-                <small id="nombreHelp" class="form-text text-muted">(ej: campero, camión, automovil)</small>
+    <section class="tipos-shell app-page">
+        <header class="app-panel tipos-shell__header">
+            <div class="tipos-shell__copy">
+                <span class="app-badge">Tipos</span>
+                <h2 class="app-title tipos-shell__title">Tipos de vehiculos</h2>
+                <p class="tipos-shell__description">Consulta el listado y abre el mismo formulario emergente para crear o editar.</p>
             </div>
-            <div class="form-group">
-                <label for="exampleInputEmail1">Descripcion</label>
-                <textarea [(ngModel)]="newTipoVehiculo.descripcion" class="form-control"></textarea>
-            </div>
-        </div>
-        <div class="col-sm-3">
-            <div class="form-group">
-                <label for="exampleInputEmail1">Estado</label>
-                <select [(ngModel)]="newTipoVehiculo.estado" class="form-control">
-                    <option value=0>Estado</option>
-                    <option value=1>Activo</option>
-                    <option value=2>Inactivo</option>
-                </select>
-                <small id="nombreHelp" class="form-text text-muted">(ej: Activo, Inactivo)</small>
-            </div>
-            <div class="form-group">
-                <br><br>
-                <div class="btn-group btn-group-toggle" data-toggle="buttons">
-                    <button type="button" (click)="manageTipoVehiculo()" class="btn btn-success">Enviar</button>
-                    <button type="button" (click)="cancelar()" class="btn btn-danger">Cancelar</button>
-                </div>
-            </div>
-        </div>
-    </div>
 
-    <hr>
-    <div class="row" *ngIf="tiposVehiculo.length > 0">
-        <div class="col-sm-12">
-            <table class="table">
-                <tr>
-                    <th>Nombre</th>
-                    <th>Descripcion</th>
-                    <th>Estado</th>
-                    <th colspan="2">Opcion</th>
-                </tr>
-                <tr *ngFor="let tipo_vehiculo of tiposVehiculo">
-                    <td>{{tipo_vehiculo.nombre}}</td>
-                    <td>{{tipo_vehiculo.descripcion}}</td>
-                      <td>{{tipo_vehiculo.nombre_estado}}</td> 
-                    <td title="editar">
-                        <i class="bi bi-pencil-square boton_activo" (click)="setActualizatipo_vehiculo(tipo_vehiculo)"></i>
-                    </td>
-                    <td title="eliminar">
-                        <i class="bi bi-trash boton_activo" (click)="borrarTipoVehiculo(tipo_vehiculo)"></i>
-                    </td>
-                </tr>
-            </table>
-        </div>
-    </div>
+            <button type="button" class="app-chip-button app-chip-button--primary" (click)="abrirModalTipoVehiculo()">
+                <i class="bi bi-plus-circle"></i>
+                Crear nuevo
+            </button>
+        </header>
+
+        <section class="app-panel tipos-shell__table-panel" *ngIf="tiposVehiculo.length > 0; else tiposVacios">
+            <div class="app-toolbar app-toolbar--between tipos-shell__table-toolbar">
+                <span class="app-badge">{{ tiposVehiculo.length }} registros</span>
+            </div>
+
+            <div class="tipos-shell__table-wrap">
+                <table class="table tipos-table">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Descripcion</th>
+                            <th>Estado</th>
+                            <th class="tipos-table__actions-head">Opciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let tipoVehiculo of tiposVehiculo; trackBy: trackByTipoVehiculo">
+                            <td>{{ tipoVehiculo.nombre }}</td>
+                            <td>{{ tipoVehiculo.descripcion || 'Sin descripcion' }}</td>
+                            <td>
+                                <span
+                                    class="tipos-table__state"
+                                    [class.is-active]="tipoVehiculo.estado === 1"
+                                    [class.is-inactive]="tipoVehiculo.estado === 2">
+                                    {{ obtenerEstado(tipoVehiculo) }}
+                                </span>
+                            </td>
+                            <td class="tipos-table__actions">
+                                <button
+                                    type="button"
+                                    class="tipos-table__action"
+                                    title="Editar tipo de vehiculo"
+                                    aria-label="Editar tipo de vehiculo"
+                                    (click)="abrirModalTipoVehiculo(tipoVehiculo)">
+                                    <i class="bi bi-pencil-square"></i>
+                                </button>
+                                <button
+                                    type="button"
+                                    class="tipos-table__action is-danger"
+                                    title="Eliminar tipo de vehiculo"
+                                    aria-label="Eliminar tipo de vehiculo"
+                                    (click)="borrarTipoVehiculo(tipoVehiculo)">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <ng-template #tiposVacios>
+            <section class="app-panel tipos-shell__empty">
+                <i class="bi bi-truck-front tipos-shell__empty-icon"></i>
+                <h3>No hay tipos de vehiculos para mostrar</h3>
+                <p>Todavia no has creado registros en este catalogo.</p>
+                <button type="button" class="app-chip-button app-chip-button--primary" (click)="abrirModalTipoVehiculo()">
+                    <i class="bi bi-plus-circle"></i>
+                    Crear primer tipo
+                </button>
+            </section>
+        </ng-template>
+    </section>
 </div>

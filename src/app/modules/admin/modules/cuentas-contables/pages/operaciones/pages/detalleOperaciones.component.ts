@@ -32,7 +32,7 @@ export class DetalleOperacionesComponent implements OnInit {
       
         //CustomConsole.log('printer_soporte_final',value); 
        let printM =  new PrinterManager(this.cajasService);  
-      await printM.printSoporteMovimiento(false,value.data[0].obj); 
+      await printM.printSoporteMovimiento(false,value.data[0]); 
     },
     error:
   e=> Swal.fire(this.cntService.getErrorMessage(e))

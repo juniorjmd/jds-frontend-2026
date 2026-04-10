@@ -10,6 +10,8 @@ import { ServicioscostosComponent } from './pages/servicioscostos/servicioscosto
 import { TiposServiciosComponent } from './pages/tipos-servicios/tipos-servicios.component';
 import { TiposComponent } from './pages/tipos/tipos.component';
 import { ServicioVehiculoDialogComponent } from './modals/servicio-vehiculo-dialog/servicio-vehiculo-dialog.component';
+import { TipoVehiculoDialogComponent } from './modals/tipo-vehiculo-dialog/tipo-vehiculo-dialog.component';
+import { TipoServicioDialogComponent } from './modals/tipo-servicio-dialog/tipo-servicio-dialog.component';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 
@@ -19,7 +21,8 @@ import { RouterModule } from '@angular/router';
   declarations: [
     HomeVhComponent,EstablecerCajaComponent,HomeVhComponent,
     IngresoComponent,ServiciosComponent,ServicioscostosComponent,
-    TiposComponent,TiposServiciosComponent,ServicioVehiculoDialogComponent
+    TiposComponent,TiposServiciosComponent,ServicioVehiculoDialogComponent,
+    TipoVehiculoDialogComponent,TipoServicioDialogComponent
   ],
   imports: [
     CommonModule,FormsModule,RouterModule, 
