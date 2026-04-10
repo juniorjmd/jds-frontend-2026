@@ -1,0 +1,19 @@
+{
+    "baseURL": "https://carwash.sofdla.net/bk.services/services/view/action/",
+    "endpoints": {
+      "action": "",
+      "inventario": "inventario/",
+      "actionDocumentos": "documentos/",
+      "actionVentas": "ventas/",
+      "admin": "admin/",
+      "login": "login/",
+      "datosIniciales": "datosiniciales/",
+      "brand": "brand/",
+      "csv_manager": "csv_manager/"
+    },
+    "printer": {
+      "namePrinterGenerico": "impresora_punto_de_venta"
+    },
+    "enviroment":   "dev"
+  }
+

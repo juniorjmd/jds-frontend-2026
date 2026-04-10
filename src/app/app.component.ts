@@ -8,25 +8,25 @@ import { ConfigService } from './services/config.service';
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css'],
-  providers: [ Globals ] 
+  providers: [ Globals ]
 })
 export class AppComponent  implements OnInit {
-  
 
-  llaveIncio:string; 
+
+  llaveIncio:string;
   constructor(
     private globals: Globals,
     private titleService: Title,
     private configService: ConfigService
-  ){ 
-   // CustomConsole.setEnvironment('dev');  
+  ){
+   // CustomConsole.setEnvironment('dev');
     this.llaveIncio = '';
-    this.titleService.setTitle('JDS - sofdla.com.co');  
+    this.titleService.setTitle('JDS - sofdla.net');
   }
-  ngOnInit() { 
-    CustomConsole.setEnvironment(this.configService.enviroment);  
-    CustomConsole.log(this.configService.enviroment); 
-    CustomConsole.log(this.configService.url);  
+  ngOnInit() {
+    CustomConsole.setEnvironment(this.configService.enviroment);
+    CustomConsole.log(this.configService.enviroment);
+    CustomConsole.log(this.configService.url);
   }
- 
+
 }

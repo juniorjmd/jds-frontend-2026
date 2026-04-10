@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { loading } from 'src/app/models/app.loading'; 
 import { DocumentosModel } from 'src/app/models/ventas/documento.model';
 import { DocumentoService } from 'src/app/services/documento.service';
@@ -39,13 +39,14 @@ import { ApiResponse } from 'src/app/interfaces/api-response.interface';
 import { DocumentoActionPayload, DocumentoMutationPayload, DocumentoRecordsPayload } from 'src/app/services/documento.service';
 import { InventarioProductResponse, InventarioReturnResponse } from 'src/app/interfaces/inventario-response.interface';
 import { GenericRecordsPayload } from 'src/app/interfaces/generic-response.interface';
+import { ModuleBannerService } from 'src/app/services/module-banner.service';
 
 @Component({
   selector: 'app-ventas',
   templateUrl: './ventas.component.html',
   styleUrls: ['./ventas.component.css']
 })
-export class VentasComponent implements AfterViewInit, OnInit {
+export class VentasComponent implements AfterViewInit, OnInit, OnDestroy {
 
   cotiza = false; 
   libranza = false; 
@@ -54,6 +55,7 @@ export class VentasComponent implements AfterViewInit, OnInit {
   CrtGasto = false;
   domicilio = false;
   ingresoServicio = false;
+  showQuickActions = false;
   pagos: pagosModel[] = []; 
   indexEfectivo!: number;
   focus!: boolean;
@@ -81,7 +83,8 @@ export class VentasComponent implements AfterViewInit, OnInit {
     private productoService: ProductoService,
     private _ServLogin: LoginService, 
     private _Router : Router,
-    private dInicialServ: DatosInicialesService
+    private dInicialServ: DatosInicialesService,
+    private moduleBannerService: ModuleBannerService
   ) {    
           this.getUsuarioLogueado();
           this.continuar =  true;
@@ -132,6 +135,28 @@ export class VentasComponent implements AfterViewInit, OnInit {
 
     }})
   
+  }
+
+  ngOnDestroy(): void {
+    this.moduleBannerService.clear();
+  }
+
+  toggleQuickActions() {
+    this.showQuickActions = !this.showQuickActions;
+  }
+
+  closeQuickActions() {
+    this.showQuickActions = false;
+  }
+
+  private syncModuleBanner() {
+    this.moduleBannerService.setTitle('Punto de venta', {
+      helpText: 'Administra el documento activo, agrega productos y cierra la venta sin salir del flujo operativo.',
+      meta: [
+        { label: 'Establecimiento', value: this.documentoActivo?.nombreEsta || '-' },
+        { label: 'Caja activa', value: this.documentoActivo?.nombreCaja || '-' }
+      ]
+    });
   }
 
   getDatosContables(){
@@ -214,7 +239,7 @@ export class VentasComponent implements AfterViewInit, OnInit {
             documentoSeleccionado = this.documentos.filter((x: DocumentosModel) => x.estado == 1) ; 
           CustomConsole.log('documentoSeleccionado' , documentoSeleccionado);
             this.documentoActivo = (documentoSeleccionado.length > 0) ?  documentoSeleccionado[0] :  this.documentos[0]; 
-          }  
+          }
           this.empleadoActivo = (this.empleados.filter(x=> x.id == this.documentoActivo?.cod_vendedor )[0])??[] 
 
           if(this.empleadoActivo.id == undefined){
@@ -222,6 +247,7 @@ export class VentasComponent implements AfterViewInit, OnInit {
             this.empleadoActivo.idPersona = this.documentoActivo?.cod_vendedor!;
         }
           this.asignarMediosDePagoValoresIniciales();  
+          this.syncModuleBanner();
         } else {
           this.crearDocumento();
         }
@@ -259,6 +285,7 @@ export class VentasComponent implements AfterViewInit, OnInit {
             this.empleadoActivo.idPersona = this.documentoActivo?.cod_vendedor!;
         }
           this.asignarMediosDePagoValoresIniciales(); 
+          this.syncModuleBanner();
           
           this.irbuscarProducto();
         } else {
@@ -841,6 +868,7 @@ export class VentasComponent implements AfterViewInit, OnInit {
 
           try {
             this.asignarMediosDePagoValoresIniciales();
+            this.syncModuleBanner();
           } catch (error: any) {
             Swal.fire('Error setting pagos', JSON.stringify(error) ) ;
           }
@@ -880,7 +908,7 @@ export class VentasComponent implements AfterViewInit, OnInit {
       catchError((error: any) => {
         this.loading.hide();
         try {
-          Swal.fire(error, '', 'error');
+          Swal.fire(this.documentoService.getErrorMessage(error), '', 'error');
          } catch (error : any) {
           Swal.fire('error en el servidor', '', 'error');
          }

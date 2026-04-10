@@ -1,20 +1,13 @@
- <div class="container-fluid  fondoGeneral confondoBrillante pt-3">
-    <div class="row">
-        <!-- Menú lateral -->
-        <div class="col-md-3 col-lg-2 d-md-block sidebar collapse">
-            <div class="list-group">
-                 <a class="list-group-item list-group-item-action "  routerLinkActive="active" [routerLink]="[ 'operaciones'] ">Operaciones</a> 
-                <a class="list-group-item list-group-item-action "  routerLinkActive="active" [routerLink]="[ 'subCuentas'] ">Sub-Cuentas</a> 
-                 <a class="list-group-item list-group-item-action "  routerLinkActive="active" [routerLink]="[ 'cuentas'] ">Cuentas</a> 
-               <a class="list-group-item list-group-item-action "  routerLinkActive="active" [routerLink]="[ 'grupos'] ">Grupos</a> 
-                <a class="list-group-item list-group-item-action " routerLinkActive="active" [routerLink]="[ 'clases'] ">Clases</a>  
-           
-            </div>
-        </div>
-        <!-- Contenido principal -->
-        <div class="col-md-9 col-lg-10 ml-sm-auto px-md-4">
-            <h2>Contabilidad:</h2>
-            <router-outlet></router-outlet>
-        </div>
+<section class="module-shell">
+    <nav class="module-shell__tabs" aria-label="Secciones de cuentas contables">
+        <a [routerLink]="['operaciones']" routerLinkActive="is-active" class="module-shell__tab">Operaciones</a>
+        <a [routerLink]="['subCuentas']" routerLinkActive="is-active" class="module-shell__tab">Subcuentas</a>
+        <a [routerLink]="['cuentas']" routerLinkActive="is-active" class="module-shell__tab">Cuentas</a>
+        <a [routerLink]="['grupos']" routerLinkActive="is-active" class="module-shell__tab">Grupos</a>
+        <a [routerLink]="['clases']" routerLinkActive="is-active" class="module-shell__tab">Clases</a>
+    </nav>
+
+    <div class="module-shell__content">
+        <router-outlet></router-outlet>
     </div>
-</div>
+</section>

@@ -1,6 +1,6 @@
 -- MySQL dump 10.13  Distrib 8.0.38, for Win64 (x86_64)
 --
--- Host: sofdla.com.co    Database: jdpsoluc_l_monrroy
+-- Host: sofdla.net    Database: jdpsoluc_l_monrroy
 -- ------------------------------------------------------
 -- Server version	8.0.39-cll-lve
 
@@ -83,21 +83,21 @@ UNLOCK TABLES;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 DELIMITER ;;
 /*!50003 CREATE*/ /*!50017 DEFINER=`jdpsoluc_l_monrroy`@`%`*/ /*!50003 TRIGGER `auxiliar_Creacion_inicial_productos_AFTER_INSERT` AFTER INSERT ON `auxiliar_Creacion_inicial_productos` FOR EACH ROW BEGIN
-    declare _idMarca , _idCategoria, _idPresentacion , _cuentaCat , countLetra , pos , auxCont , idExistencia     int ; 
+    declare _idMarca , _idCategoria, _idPresentacion , _cuentaCat , countLetra , pos , auxCont , idExistencia     int ;
     declare _letra text;
     declare _antes_de_iva ,_iva decimal(10,2);
      select count(0) into _idCategoria from inv_categorias where upper(nombre) = upper( new.categoria );
     -- set _idCategoria = 0;
-   
+
     if _idCategoria = 0 then
-    SELECT par_id into _cuentaCat FROM parametros where cod_parametro = 'ID_CUENTA_INVENTARIO_CATEGORIA'; 
-		set countLetra = 1 ; 
+    SELECT par_id into _cuentaCat FROM parametros where cod_parametro = 'ID_CUENTA_INVENTARIO_CATEGORIA';
+		set countLetra = 1 ;
 		set auxCont = 0;
-		set pos = 0 ; 
-		while countLetra > 0  do  
-		   set pos = pos + 1 ; 
+		set pos = 0 ;
+		while countLetra > 0  do
+		   set pos = pos + 1 ;
 		   set _letra =  upper( substr( new.categoria , pos , 1  ));
-		  
+
 		   if auxCont > 0 then
 			set  _letra = concat( auxCont ,  _letra ) ;
 		   end if;
@@ -105,56 +105,56 @@ DELIMITER ;;
 			  set pos = 0;
 			  set auxCont = auxCont + 1;
 		   end if;
-		   select count(0) into countLetra from inv_categorias where upper(letra) = _letra; 
-		end while;  
-		  insert into inv_categorias (nombre , idCuentaContable , idPadreCategoria, letra , descripcion , usuario_creacion ) values (new.categoria , _cuentaCat , 0 , _letra 
+		   select count(0) into countLetra from inv_categorias where upper(letra) = _letra;
+		end while;
+		  insert into inv_categorias (nombre , idCuentaContable , idPadreCategoria, letra , descripcion , usuario_creacion ) values (new.categoria , _cuentaCat , 0 , _letra
       ,concat('Categoria ' , new.categoria ) , 1 );
     end if;
      select count(0) into _idMarca from inv_marcas where upper(nombre) = upper( new.marca );
-    
-    if _idMarca = 0 then 
+
+    if _idMarca = 0 then
       insert into inv_marcas (nombre,  descripcion , usuario_creacion ) values(new.marca , concat('Marca ', new.marca ) , 1 );
     end if;
-    
+
     select count(0) into _idPresentacion from inv_mst_producto_presentacion where upper(nombre) = upper( new.presentacion );
-   
-    if _idPresentacion = 0 then 
+
+    if _idPresentacion = 0 then
     -- id, nombre, descripcion, sigla
-      insert into inv_mst_producto_presentacion (nombre, descripcion, sigla) values(new.presentacion , concat('Presentacion ', new.presentacion ) , 
+      insert into inv_mst_producto_presentacion (nombre, descripcion, sigla) values(new.presentacion , concat('Presentacion ', new.presentacion ) ,
       substr(new.presentacion , 1 , 3)
       );
     end if;
-    
+
     select id into _idPresentacion from inv_mst_producto_presentacion where upper(nombre) = upper( new.presentacion );
-    select id into _idMarca from inv_marcas where upper(nombre) = upper( new.marca ); 
+    select id into _idMarca from inv_marcas where upper(nombre) = upper( new.marca );
     select id into   _idCategoria from inv_categorias where upper(nombre) = upper( new.categoria );
-    
-   
-    
+
+
+
     insert into inv_mst_producto (
-id, usuario_creacion, 
+id, usuario_creacion,
 idCategoria, idMarca, nombre,
   precioVenta, porcent_iva,
-  precioCompra, 
+  precioCompra,
   barcode, descripcion,
   infoTributaria, presentacion
   , cod_prd_externo ) values(  new.codigo, 1,_idCategoria, _idMarca , new.nombre , new.precioVenta , new.porcentajeIva , new.precioCompra ,
-   new.codigo, concat('producto ' ,  new.codigo) , case   when new.porcentajeIva > 0 then 'GRABADO' else 'EXENTO' end , _idPresentacion , 
-    NEW.referencia 
-  ); 
-  set _antes_de_iva = new.precioVenta  / (1 + new.porcentajeIva ); 
+   new.codigo, concat('producto ' ,  new.codigo) , case   when new.porcentajeIva > 0 then 'GRABADO' else 'EXENTO' end , _idPresentacion ,
+    NEW.referencia
+  );
+  set _antes_de_iva = new.precioVenta  / (1 + new.porcentajeIva );
   set  _iva =new.precioVenta - _antes_de_iva ;
   insert into inv_mst_producto_images (id_producto) values(new.codigo);
   insert into inv_mst_producto_precios (valor_iva,precio_antes_de_iva,precio_con_iva,usuario_creacion, id_producto ) values(
-  _iva , _antes_de_iva , new.precioVenta  , 1 , new.codigo  ) ;  
-  
+  _iva , _antes_de_iva , new.precioVenta  , 1 , new.codigo  ) ;
+
   select id into idExistencia from  inv_mst_producto_existencias where id_producto =  new.codigo limit 1 ;
 	update inv_mst_producto_existencias
 	 set cant_inicial = new.cantidad,
 	cant_actual =  new.cantidad
-	 where id = idExistencia ; 
-  
-  
+	 where id = idExistencia ;
+
+
 END */;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -203,7 +203,7 @@ UNLOCK TABLES;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 DELIMITER ;;
 /*!50003 CREATE*/ /*!50017 DEFINER=`jdpsoluc_l_monrroy`@`%`*/ /*!50003 TRIGGER `bancos_AFTER_INSERT` AFTER INSERT ON `bancos` FOR EACH ROW BEGIN
- 
+
 -- provieneDe, VALOR, VAUCHE, FECHA, HORA, DESCRIPCION, IMANGEN, estado, mod_origen
 IF new.VALOR > 0 THEN
     INSERT INTO `cnt_transacciones`
@@ -319,7 +319,7 @@ DELIMITER ;;
 /*!50003 CREATE*/ /*!50017 DEFINER=`jdpsoluc_l_monrroy`@`%`*/ /*!50003 TRIGGER `cajas_BEFORE_INSERT` BEFORE INSERT ON `cajas` FOR EACH ROW BEGIN
   set NEW.fechaEstadoCaja = now();
   set NEW.fechaEstadoGeneral = now();
-  
+
 END */;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -414,8 +414,8 @@ DELIMITER ;;
     ( cod_cuenta, nro_cuenta, modificar, nombre_cuenta)
     VALUES
     (NEW.cod_cuenta,NEW.cod_cuenta,
-    'N',NEW.nombre_cuenta    
-    ); 
+    'N',NEW.nombre_cuenta
+    );
 
 END */;;
 DELIMITER ;
@@ -432,10 +432,10 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`jdpsoluc_l_monrroy`@`%`*/ /*!50003 TRIGGER `cnt_cuenta_AFTER_UPDATE` AFTER UPDATE ON `cnt_cuenta` FOR EACH ROW BEGIN 
-    UPDATE cnt_cuentas SET 
-	nombre_cuenta = NEW.nombre_cuenta 
-	WHERE cod_cuenta = NEW.cod_cuenta 
+/*!50003 CREATE*/ /*!50017 DEFINER=`jdpsoluc_l_monrroy`@`%`*/ /*!50003 TRIGGER `cnt_cuenta_AFTER_UPDATE` AFTER UPDATE ON `cnt_cuenta` FOR EACH ROW BEGIN
+    UPDATE cnt_cuentas SET
+	nombre_cuenta = NEW.nombre_cuenta
+	WHERE cod_cuenta = NEW.cod_cuenta
 	AND nro_cuenta = NEW.cod_cuenta ;
 END */;;
 DELIMITER ;
@@ -560,10 +560,10 @@ UNLOCK TABLES;
 DELIMITER ;;
 /*!50003 CREATE*/ /*!50017 DEFINER=`jdpsoluc_l_monrroy`@`%`*/ /*!50003 TRIGGER `cnt_operaciones_BEFORE_INSERT` BEFORE INSERT ON `cnt_operaciones` FOR EACH ROW BEGIN
   set new.fechaCreacion = NOW();
-  if new.idPersona = 0 then 
+  if new.idPersona = 0 then
      set new.idPersona = coalesce((SELECT par_id FROM parametros where cod_parametro = 'ID_CLIENTE_GENERICO'),99999999);
   end if;
-  
+
 END */;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -896,10 +896,10 @@ new.valor_debito,
 new.valor_credito,
 'transaccion');
 
-update cnt_operaciones set 
-totalDebito = totalDebito + new.valor_debito,  
-totalCredito = totalCredito + new.valor_credito 
- where id = new.cod_comprobante ; 
+update cnt_operaciones set
+totalDebito = totalDebito + new.valor_debito,
+totalCredito = totalCredito + new.valor_credito
+ where id = new.cod_comprobante ;
 
 END */;;
 DELIMITER ;
@@ -922,10 +922,10 @@ old.fecha_transaccion,
 (-1 * old.valor_debito),
 (-1 * old.valor_credito),
 'dlt-transaccion');
-update cnt_operaciones set 
-totalDebito = totalDebito - old.valor_debito,  
-totalCredito = totalCredito - old.valor_credito 
- where id = old.cod_comprobante ; 
+update cnt_operaciones set
+totalDebito = totalDebito - old.valor_debito,
+totalCredito = totalCredito - old.valor_credito
+ where id = old.cod_comprobante ;
 END */;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -1043,19 +1043,19 @@ DELIMITER ;;
 /*!50003 CREATE*/ /*!50017 DEFINER=`jdpsoluc_l_monrroy`@`%`*/ /*!50003 TRIGGER `contadores_BEFORE_INSERT` BEFORE INSERT ON `contadores` FOR EACH ROW BEGIN
 declare cont int ;
 declare cont2 decimal(12,0) ;
-	-- id, codContador, establecimiento, contador, contador_real_establecimiento, 
+	-- id, codContador, establecimiento, contador, contador_real_establecimiento,
     -- fecha, hora, estado, tipoContador
-  select count(*) into cont from contadores where estado = getEstado('A') and 
-  establecimiento = new.establecimiento and 
+  select count(*) into cont from contadores where estado = getEstado('A') and
+  establecimiento = new.establecimiento and
   tipoContador = new.tipoContador
-  ; 
+  ;
   set new.contador_real_establecimiento = 1;
-  set new.fecha = now();  
-  set new.hora = now();  
+  set new.fecha = now();
+  set new.hora = now();
   if cont > 0 then
-    select contador_real_establecimiento into cont2 
-    from contadores where estado = getEstado('A') and 
-  establecimiento = new.establecimiento and 
+    select contador_real_establecimiento into cont2
+    from contadores where estado = getEstado('A') and
+  establecimiento = new.establecimiento and
   tipoContador = new.tipoContador
   ;
   set new.contador_real_establecimiento = cont2 ;
@@ -1115,11 +1115,11 @@ UNLOCK TABLES;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`jdpsoluc_l_monrroy`@`%`*/ /*!50003 TRIGGER `corte_de_caja_BEFORE_INSERT` BEFORE INSERT ON `corte_de_caja` FOR EACH ROW BEGIN 
-set new.efectivo = new.base  
+/*!50003 CREATE*/ /*!50017 DEFINER=`jdpsoluc_l_monrroy`@`%`*/ /*!50003 TRIGGER `corte_de_caja_BEFORE_INSERT` BEFORE INSERT ON `corte_de_caja` FOR EACH ROW BEGIN
+set new.efectivo = new.base
 + new.ingresoEfectivo
-- new.total_gastos  ; 
-  
+- new.total_gastos  ;
+
  set new.total_venta =   new.sub_total_venta
  + new.total_iva - new.total_descuento ;
 END */;;
@@ -1138,12 +1138,12 @@ DELIMITER ;
 /*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
 /*!50003 CREATE*/ /*!50017 DEFINER=`jdpsoluc_l_monrroy`@`%`*/ /*!50003 TRIGGER `corte_de_caja_BEFORE_UPDATE` BEFORE UPDATE ON `corte_de_caja` FOR EACH ROW BEGIN
-set new.efectivo = new.base  
+set new.efectivo = new.base
 + new.ingresoEfectivo
-- new.total_gastos  ; 
+- new.total_gastos  ;
  set new.total_venta =   new.sub_total_venta
  + new.total_iva - new.total_descuento ;
- 
+
 
 END */;;
 DELIMITER ;
@@ -1252,10 +1252,10 @@ UNLOCK TABLES;
 /*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
 /*!50003 CREATE*/ /*!50017 DEFINER=`jdpsoluc_l_monrroy`@`%`*/ /*!50003 TRIGGER `corte_de_caja_parcial_BEFORE_INSERT` BEFORE INSERT ON `corte_de_caja_parcial` FOR EACH ROW BEGIN
-set new.efectivo = new.base  
+set new.efectivo = new.base
 + new.ingresoEfectivo
-- new.total_gastos  ; 
-  
+- new.total_gastos  ;
+
  set new.total_venta =   new.sub_total_venta
  + new.total_iva - new.total_descuento ;
 END */;;
@@ -1274,10 +1274,10 @@ DELIMITER ;
 /*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
 /*!50003 CREATE*/ /*!50017 DEFINER=`jdpsoluc_l_monrroy`@`%`*/ /*!50003 TRIGGER `corte_de_caja_parcial_BEFORE_UPDATE` BEFORE UPDATE ON `corte_de_caja_parcial` FOR EACH ROW BEGIN
-set new.efectivo = new.base  
+set new.efectivo = new.base
 + new.ingresoEfectivo
-- new.total_gastos  ; 
-  
+- new.total_gastos  ;
+
  set new.total_venta =   new.sub_total_venta
  + new.total_iva - new.total_descuento ;
 END */;;
@@ -1456,67 +1456,67 @@ DELIMITER ;;
     DECLARE numContadores INT;
     DECLARE idEmpleado INT;
 
- IF getIdContadorByName('comprobante_cuentas_por_pagar') <> new.tipoDocumentoFinal  then  
+ IF getIdContadorByName('comprobante_cuentas_por_pagar') <> new.tipoDocumentoFinal  then
 	set new.fecha = curdate();
 end if;
 	set new.hora = curtime();
 select coalesce(
-(select id from vw_mst_per_empleados_vendedores where idPersona = ( 
+(select id from vw_mst_per_empleados_vendedores where idPersona = (
 SELECT idPersona FROM usuarios  where ID = new.usuario )), 0 ) into idEmpleado ;
 if idEmpleado = 0 then
 	insert into mst_per_empleados(tipo , idPersona , monto_dia , usuario_creacion )values(
 	(select id from mst_per_empleados_tipos where nombre = 'vendedor'),
-	(SELECT idPersona FROM usuarios  where ID = new.usuario ) , 1000 , new.usuario) ; 
+	(SELECT idPersona FROM usuarios  where ID = new.usuario ) , 1000 , new.usuario) ;
     -- ---------------------------------------------
 	select coalesce(
-	(select id from vw_mst_per_empleados_vendedores where idPersona = ( 
+	(select id from vw_mst_per_empleados_vendedores where idPersona = (
 	SELECT idPersona FROM usuarios  where ID = new.usuario )), 0 ) into idEmpleado ;
 end if;
 
-set new.vendedor = idEmpleado ; 
+set new.vendedor = idEmpleado ;
 set new.cod_vendedor  = idEmpleado ;
 set new.cliente = coalesce(new.cliente ,
  coalesce((SELECT par_id FROM parametros where cod_parametro = 'ID_CLIENTE_GENERICO'),0));
 
 set new.id_cliente = new.cliente ;
  SELECT COUNT(0) INTO numContadores
-        FROM contadores 
-        WHERE estado = getEstado('A') 
-          AND establecimiento = new.establecimiento 
+        FROM contadores
+        WHERE estado = getEstado('A')
+          AND establecimiento = new.establecimiento
           AND tipoContador = new.tipoDocumentoFinal;
 
         IF numContadores > 0 THEN
              SELECT id, contador + 1, codContador INTO idCont, cont2, prefijo
-                FROM contadores 
-                WHERE estado = getEstado('A') 
-                  AND establecimiento = new.establecimiento 
+                FROM contadores
+                WHERE estado = getEstado('A')
+                  AND establecimiento = new.establecimiento
                   AND tipoContador = new.tipoDocumentoFinal;
         ELSE
-            INSERT INTO contadores 
+            INSERT INTO contadores
             (codContador, establecimiento, contador, contador_real_establecimiento, estado, tipoContador, usuario)
             VALUES (
-                CONCAT(getPrefijoContadorByName(new.tipoDocumentoFinal ),new.establecimiento), 
-                new.establecimiento, 
-                1, 
-                1, 
-                getEstado('A'), 
-                new.tipoDocumentoFinal, 
+                CONCAT(getPrefijoContadorByName(new.tipoDocumentoFinal ),new.establecimiento),
+                new.establecimiento,
+                1,
+                1,
+                getEstado('A'),
+                new.tipoDocumentoFinal,
                 1
-            );        
-	    
+            );
+
             SELECT id, contador + 1, codContador INTO idCont, cont2, prefijo
-            FROM contadores 
-            WHERE estado = getEstado('A') 
-              AND establecimiento = new.establecimiento 
+            FROM contadores
+            WHERE estado = getEstado('A')
+              AND establecimiento = new.establecimiento
               AND tipoContador = new.tipoDocumentoFinal;
         END IF;
-        
+
           SET idFinalEstablecido = CONCAT(TRIM(prefijo), '-', cont2);
 
         -- Actualizo el contador para el próximo documento.
         SET SQL_SAFE_UPDATES = 0;
-        UPDATE contadores 
-        SET contador = contador + 1, 
+        UPDATE contadores
+        SET contador = contador + 1,
             contador_real_establecimiento = contador_real_establecimiento + 1
         WHERE id = idCont;
         SET SQL_SAFE_UPDATES = 1;
@@ -1541,7 +1541,7 @@ DELIMITER ;
 DELIMITER ;;
 /*!50003 CREATE*/ /*!50017 DEFINER=`jdpsoluc_l_monrroy`@`%`*/ /*!50003 TRIGGER `documentos_AFTER_INSERT` AFTER INSERT ON `documentos` FOR EACH ROW BEGIN
   declare _id int;
- IF getIdContadorByName('comprobante_cuentas_por_cobrar') = new.tipoDocumentoFinal  then  
+ IF getIdContadorByName('comprobante_cuentas_por_cobrar') = new.tipoDocumentoFinal  then
      set _id = 0;
       insert into mst_mov_cartera (
 			 usuario_creacion
@@ -1550,12 +1550,12 @@ DELIMITER ;;
 			 , totalActual
 			 , idTercero
 			 , idFacturaVenta
-			 , comprobante ,  cuotas , plazos ) values (  new.usuario,  new.valorParcial ,  new.descuento ,  new.valorTotal ,   new.cliente , 
-			  getIdDocumentoByIdFactura( new.campo_info_3) ,  new.orden , 
+			 , comprobante ,  cuotas , plazos ) values (  new.usuario,  new.valorParcial ,  new.descuento ,  new.valorTotal ,   new.cliente ,
+			  getIdDocumentoByIdFactura( new.campo_info_3) ,  new.orden ,
               new.campo_auxiliar_2 , new.campo_auxiliar_3
               );
  end if;
- IF getIdContadorByName('comprobante_cuentas_por_pagar') = new.tipoDocumentoFinal  then  
+ IF getIdContadorByName('comprobante_cuentas_por_pagar') = new.tipoDocumentoFinal  then
      set _id = 0;
       insert into mst_mov_credito (
 			 usuario_creacion
@@ -1565,11 +1565,11 @@ DELIMITER ;;
 			 , idTercero
 			 , idFacturaVenta
 			 , comprobante ,  cuotas , plazos, fecha_inicio ) values
-             (  new.usuario,  new.valorParcial ,  new.descuento ,  new.valorTotal ,   new.cliente , 
-			  getIdDocumentoByIdFactura( new.campo_info_3) ,  new.orden , 
+             (  new.usuario,  new.valorParcial ,  new.descuento ,  new.valorTotal ,   new.cliente ,
+			  getIdDocumentoByIdFactura( new.campo_info_3) ,  new.orden ,
               new.campo_auxiliar_2 , new.campo_auxiliar_3 ,  new.fecha  );
-              
-            
+
+
  end if;
 END */;;
 DELIMITER ;
@@ -1601,23 +1601,23 @@ DELIMITER ;;
     declare _salidaDeEfectivo ,
     UVT , BASERET , PORCRETCOMPRA , PORCRETVENTA
     decimal(16,2);
-    set _salidaDeEfectivo = 0; 
+    set _salidaDeEfectivo = 0;
     set _id_establecimiento = old.establecimiento;
-    
-    
+
+
    IF new.tipoDocumentoFinal = old.tipoDocumentoFinal THEN
    --  UVT , BASERET , PORCRETCOMPRA , PORCRETVENTA
-   select  ( getParametroNumerico('CANT_UVT_BASE_RETEFUENTE') * getParametroNumerico('VLR_UVT') )  INTO   BASERET ; 
+   select  ( getParametroNumerico('CANT_UVT_BASE_RETEFUENTE') * getParametroNumerico('VLR_UVT') )  INTO   BASERET ;
  --  IF getIdContadorByName('compra_activa') = new.tipoDocumentoFinal  AND
- --        (select count(0) from vw_mst_per_clientes where id = NEW.cliente and  retefuentesVentas =  true) > 0  AND 
+ --        (select count(0) from vw_mst_per_clientes where id = NEW.cliente and  retefuentesVentas =  true) > 0  AND
   --       BASERET <= NEW.valorTotal
-   -- then 
-   
+   -- then
+
         SET NEW.retefuente = 0 ;
-        SET NEW.porc_retefuente = 0; 
+        SET NEW.porc_retefuente = 0;
    IF getIdContadorByName('compra_activa') = new.tipoDocumentoFinal THEN
-	 IF  (select count(0) from vw_mst_per_clientes where id = NEW.cliente and  retefuenteCompras =  true) > 0  AND 
-         BASERET <= NEW.valorTotal then 
+	 IF  (select count(0) from vw_mst_per_clientes where id = NEW.cliente and  retefuenteCompras =  true) > 0  AND
+         BASERET <= NEW.valorTotal then
 		select getParametroNumerico('VLR_RETEFUENTE_COMPRA') INTO PORCRETCOMPRA;
         IF PORCRETCOMPRA = 0 THEN
           SET PORCRETCOMPRA = 2.5;
@@ -1625,21 +1625,21 @@ DELIMITER ;;
         SET NEW.retefuente = (NEW.valorParcial - NEW.descuento) * ( PORCRETCOMPRA / 100 );
         SET NEW.porc_retefuente = PORCRETCOMPRA;
       END IF;
-	else 
+	else
        IF getIdContadorByName('EnBlanco') = new.tipoDocumentoFinal    THEN
-           IF (select count(0) from vw_mst_per_clientes where id = NEW.cliente and  retefuentesVentas =  true) > 0  AND 
-               BASERET <= NEW.valorTotal then 
+           IF (select count(0) from vw_mst_per_clientes where id = NEW.cliente and  retefuentesVentas =  true) > 0  AND
+               BASERET <= NEW.valorTotal then
 				select getParametroNumerico('VLR_RETEFUENTE_VENTA') INTO PORCRETCOMPRA;
 				IF PORCRETCOMPRA = 0 THEN
 				  SET PORCRETCOMPRA = 2.5;
 				END IF;
 				SET NEW.retefuente = (NEW.valorParcial - NEW.descuento) * ( PORCRETCOMPRA / 100 );
-				SET NEW.porc_retefuente = PORCRETCOMPRA; 
+				SET NEW.porc_retefuente = PORCRETCOMPRA;
 			end if;
         end if;
-        
+
 	  if new.estadoFactura = 'E' and getIdContadorByName('comprobante_compras') = new.tipoDocumentoFinal THEN
-	      IF  (select count(0) from vw_mst_per_clientes where id = NEW.cliente and  retefuenteCompras =  true) > 0  AND  BASERET <= NEW.valorTotal then 
+	      IF  (select count(0) from vw_mst_per_clientes where id = NEW.cliente and  retefuenteCompras =  true) > 0  AND  BASERET <= NEW.valorTotal then
 	    	select getParametroNumerico('VLR_RETEFUENTE_COMPRA') INTO PORCRETCOMPRA;
             IF PORCRETCOMPRA = 0 THEN
                SET PORCRETCOMPRA = 2.5;
@@ -1650,168 +1650,168 @@ DELIMITER ;;
          set new.estadoFactura = 'A';
          set new.campo_info_5 = 'Editada';
       end if;
-    END IF; 
-    
-    
+    END IF;
+
+
         SET NEW.valorTotal =  NEW.valorParcial - NEW.descuento + NEW.valorIVA - NEW.retefuente ;
    end if;
-   
+
    -- cuando el documento pasa de blanco a otro tipo epecifico
 IF new.tipoDocumentoFinal != old.tipoDocumentoFinal THEN
-    if new.campo_info_5 = 'NO_FACTURABLE' and new.campo_info_6 <> ''  then    
-        set new.tipoDocumentoFinal = getIdContadorByName(new.campo_info_6);                 
+    if new.campo_info_5 = 'NO_FACTURABLE' and new.campo_info_6 <> ''  then
+        set new.tipoDocumentoFinal = getIdContadorByName(new.campo_info_6);
     end if;
-    
-    set auxIdTipDoc = new.tipoDocumentoFinal ; 
+
+    set auxIdTipDoc = new.tipoDocumentoFinal ;
         -- Valido que exista el tipo de contador que voy a utilizar en la tabla de contadores
-        -- Si no existe se crea un nuevo tipo de contador 
-	IF getIdContadorByName('venta_por_domicilio') = new.tipoDocumentoFinal  or 
+        -- Si no existe se crea un nuevo tipo de contador
+	IF getIdContadorByName('venta_por_domicilio') = new.tipoDocumentoFinal  or
        getIdContadorByName('cuentas_por_cobrar') = new.tipoDocumentoFinal  or
        getIdContadorByName('libranza') = new.tipoDocumentoFinal    THEN
             set auxIdTipDoc = getIdContadorByName('venta');
 	end if;
-    if   getIdContadorByName('remision_cuentas_por_cobrar') = new.tipoDocumentoFinal   then 
+    if   getIdContadorByName('remision_cuentas_por_cobrar') = new.tipoDocumentoFinal   then
          set auxIdTipDoc = getIdContadorByName('remision');
     end if;
-	
+
     SELECT COUNT(0) INTO numContadores
-        FROM contadores 
-        WHERE estado = getEstado('A') 
-          AND establecimiento = old.establecimiento 
+        FROM contadores
+        WHERE estado = getEstado('A')
+          AND establecimiento = old.establecimiento
           AND tipoContador = auxIdTipDoc;
-	
+
     IF numContadores > 0 THEN
-            IF getIdContadorByName('venta_por_domicilio') = new.tipoDocumentoFinal  or 
+            IF getIdContadorByName('venta_por_domicilio') = new.tipoDocumentoFinal  or
                getIdContadorByName('cuentas_por_cobrar') = new.tipoDocumentoFinal  or
-               getIdContadorByName('libranza') = new.tipoDocumentoFinal  
+               getIdContadorByName('libranza') = new.tipoDocumentoFinal
             THEN
                 -- Obtengo el consecutivo y el prefijo que pertenece al establecimiento
                 SELECT id, contador, codContador INTO idCont, cont2, prefijo
-                FROM contadores 
-                WHERE estado = getEstado('A') 
-                  AND establecimiento = old.establecimiento 
+                FROM contadores
+                WHERE estado = getEstado('A')
+                  AND establecimiento = old.establecimiento
                   AND tipoContador = getIdContadorByName('venta');
             ELSE
                 -- Obtengo el consecutivo y el prefijo que pertenece al establecimiento
-               if   getIdContadorByName('remision_cuentas_por_cobrar') = new.tipoDocumentoFinal   then 
+               if   getIdContadorByName('remision_cuentas_por_cobrar') = new.tipoDocumentoFinal   then
 					 SELECT id, contador, codContador INTO idCont, cont2, prefijo
-						FROM contadores 
-						WHERE estado = getEstado('A') 
-					  AND establecimiento = old.establecimiento 
-					  AND tipoContador =   getIdContadorByName('remision'); 
+						FROM contadores
+						WHERE estado = getEstado('A')
+					  AND establecimiento = old.establecimiento
+					  AND tipoContador =   getIdContadorByName('remision');
                else
-                
+
 					SELECT id, contador , codContador INTO idCont, cont2, prefijo
-					FROM contadores 
-					WHERE estado = getEstado('A') 
-					  AND establecimiento = old.establecimiento 
+					FROM contadores
+					WHERE estado = getEstado('A')
+					  AND establecimiento = old.establecimiento
 					  AND tipoContador = new.tipoDocumentoFinal;
               END IF;
            END IF;
         ELSE
-            INSERT INTO contadores 
+            INSERT INTO contadores
             (codContador, establecimiento, contador, contador_real_establecimiento, estado, tipoContador, usuario)
             VALUES (
-                CONCAT(getPrefijoContadorByName(new.tipoDocumentoFinal ), old.establecimiento), 
-                old.establecimiento, 
-                1, 
-                1, 
-                getEstado('A'), 
-                new.tipoDocumentoFinal, 
+                CONCAT(getPrefijoContadorByName(new.tipoDocumentoFinal ), old.establecimiento),
+                old.establecimiento,
+                1,
+                1,
+                getEstado('A'),
+                new.tipoDocumentoFinal,
                 new.usuario
             );
 
             SELECT id, contador , codContador INTO idCont, cont2, prefijo
-            FROM contadores 
-            WHERE estado = getEstado('A') 
-              AND establecimiento = old.establecimiento 
+            FROM contadores
+            WHERE estado = getEstado('A')
+              AND establecimiento = old.establecimiento
               AND tipoContador = new.tipoDocumentoFinal;
         END IF;
 
         SET idFinalEstablecido = CONCAT(TRIM(prefijo), '-', cont2);
         -- Actualizo el contador para el próximo documento.
         SET SQL_SAFE_UPDATES = 0;
-        UPDATE contadores 
-        SET contador = contador + 1, 
+        UPDATE contadores
+        SET contador = contador + 1,
             contador_real_establecimiento = contador_real_establecimiento + 1
         WHERE id = idCont;
         SET SQL_SAFE_UPDATES = 1;
         -- Actualizo el documento con los datos del consecutivo
         SET new.idConsecutivo = idCont;
         SET new.idDocumentoFinal = idFinalEstablecido;
-    -- inicio proceso de documentos desde caja    
-    if  new.caja > 0 then   
+    -- inicio proceso de documentos desde caja
+    if  new.caja > 0 then
            SET _id_cierre_activo = getIdCierreDeCajaActivo(new.caja);
 		   SET new.id_cierre_caja = _id_cierre_activo;
 		   SET _id_cierre_p_activo = getIdCierreDeCajaParcialActivo(new.usuario);
 		   IF _id_cierre_p_activo = 0 THEN
-				INSERT INTO corte_de_caja_parcial 
+				INSERT INTO corte_de_caja_parcial
 				(usuario_apertura, fecha_apertura, base, sub_total_venta, total_iva, total_descuento, total_venta, efectivo, id_cierre_total)
 				VALUES (new.usuario, NOW(), 0, 0, 0, 0, 0, 0, _id_cierre_activo);
 				SET _id_cierre_p_activo = getIdCierreDeCajaParcialActivo(new.usuario);
 			END IF;
 		   SET new.id_cierre_caja_p = _id_cierre_p_activo;
            --  set  new.campo_info_3 = new.tipoDocumentoFinal ;
-           -- set new.campo_info_4  = concat('cierre de caja activo ',_id_cierre_activo, 'cierre parcial activo' , _id_cierre_p_activo); 
- 
+           -- set new.campo_info_4  = concat('cierre de caja activo ',_id_cierre_activo, 'cierre parcial activo' , _id_cierre_p_activo);
 
-      IF getIdContadorByName('venta') = new.tipoDocumentoFinal OR 
-           getIdContadorByName('venta_por_domicilio') = new.tipoDocumentoFinal  
+
+      IF getIdContadorByName('venta') = new.tipoDocumentoFinal OR
+           getIdContadorByName('venta_por_domicilio') = new.tipoDocumentoFinal
         THEN
             SET SQL_SAFE_UPDATES = 0;
-            UPDATE corte_de_caja 
-            SET sub_total_venta = (sub_total_venta + new.valorParcial), 
-                total_iva = (total_iva + new.valorIVA), 
+            UPDATE corte_de_caja
+            SET sub_total_venta = (sub_total_venta + new.valorParcial),
+                total_iva = (total_iva + new.valorIVA),
                 total_descuento = (total_descuento + new.descuento),
                 ingresoEfectivo =  (ingresoEfectivo +  new.campo_auxiliar_1)
             WHERE id = _id_cierre_activo;
             SET SQL_SAFE_UPDATES = 1;
 
             SET SQL_SAFE_UPDATES = 0;
-            UPDATE corte_de_caja_parcial 
-            SET sub_total_venta = (sub_total_venta + new.valorParcial), 
-                total_iva = (total_iva + new.valorIVA), 
+            UPDATE corte_de_caja_parcial
+            SET sub_total_venta = (sub_total_venta + new.valorParcial),
+                total_iva = (total_iva + new.valorIVA),
                 total_descuento = (total_descuento + new.descuento) ,
                 ingresoEfectivo = (ingresoEfectivo +  new.campo_auxiliar_1)
             WHERE id = _id_cierre_p_activo;
             SET SQL_SAFE_UPDATES = 1;
         END IF;
-        
+
       IF getIdContadorByName('remision') = new.tipoDocumentoFinal     THEN
             SET SQL_SAFE_UPDATES = 0;
-            set  new.valorParcial = new.valorParcial + new.valorIVA ; 
+            set  new.valorParcial = new.valorParcial + new.valorIVA ;
             set   new.valorIVA = 0 ;
-            UPDATE corte_de_caja 
-            SET sub_total_venta = (sub_total_venta + new.valorParcial), 
-                total_iva = (total_iva + new.valorIVA), 
+            UPDATE corte_de_caja
+            SET sub_total_venta = (sub_total_venta + new.valorParcial),
+                total_iva = (total_iva + new.valorIVA),
                 total_descuento = (total_descuento + new.descuento),
                 ingresoEfectivo =  (ingresoEfectivo +  new.campo_auxiliar_1)
             WHERE id = _id_cierre_activo;
             SET SQL_SAFE_UPDATES = 1;
 
             SET SQL_SAFE_UPDATES = 0;
-            UPDATE corte_de_caja_parcial 
-            SET sub_total_venta = (sub_total_venta + new.valorParcial), 
-                total_iva = (total_iva + new.valorIVA), 
+            UPDATE corte_de_caja_parcial
+            SET sub_total_venta = (sub_total_venta + new.valorParcial),
+                total_iva = (total_iva + new.valorIVA),
                 total_descuento = (total_descuento + new.descuento) ,
                 ingresoEfectivo = (ingresoEfectivo +  new.campo_auxiliar_1)
             WHERE id = _id_cierre_p_activo;
             SET SQL_SAFE_UPDATES = 1;
         END IF;
-        
-      if   getIdContadorByName('remision_cuentas_por_cobrar') = new.tipoDocumentoFinal   then 
-            set  new.valorParcial = new.valorParcial + new.valorIVA ; 
+
+      if   getIdContadorByName('remision_cuentas_por_cobrar') = new.tipoDocumentoFinal   then
+            set  new.valorParcial = new.valorParcial + new.valorIVA ;
             set   new.valorIVA = 0 ;
       END IF;
-          
+
       if   getIdContadorByName('cuentas_por_cobrar') = new.tipoDocumentoFinal  or
-           getIdContadorByName('libranza') = new.tipoDocumentoFinal or 
+           getIdContadorByName('libranza') = new.tipoDocumentoFinal or
            getIdContadorByName('remision_cuentas_por_cobrar') = new.tipoDocumentoFinal  then
-          
+
             SET SQL_SAFE_UPDATES = 0;
-            UPDATE corte_de_caja 
-            SET sub_total_venta = (sub_total_venta + new.valorParcial), 
-                total_iva = (total_iva + new.valorIVA), 
+            UPDATE corte_de_caja
+            SET sub_total_venta = (sub_total_venta + new.valorParcial),
+                total_iva = (total_iva + new.valorIVA),
                 total_descuento = (total_descuento + new.descuento),
                 creditos = (creditos + new.valorParcial - new.campo_auxiliar_1) ,
                 corte_de_caja.ingresoEfectivo = (corte_de_caja.ingresoEfectivo +  new.campo_auxiliar_1)
@@ -1819,91 +1819,91 @@ IF new.tipoDocumentoFinal != old.tipoDocumentoFinal THEN
             SET SQL_SAFE_UPDATES = 1;
 
             SET SQL_SAFE_UPDATES = 0;
-            UPDATE corte_de_caja_parcial  
-            SET sub_total_venta = (sub_total_venta + new.valorParcial), 
-                total_iva = (total_iva + new.valorIVA), 
+            UPDATE corte_de_caja_parcial
+            SET sub_total_venta = (sub_total_venta + new.valorParcial),
+                total_iva = (total_iva + new.valorIVA),
                 total_descuento = (total_descuento + new.descuento),
                 creditos =( creditos + new.valorParcial -  new.campo_auxiliar_1 ),
-                corte_de_caja_parcial.ingresoEfectivo = (corte_de_caja_parcial.ingresoEfectivo +  new.campo_auxiliar_1 ) 
+                corte_de_caja_parcial.ingresoEfectivo = (corte_de_caja_parcial.ingresoEfectivo +  new.campo_auxiliar_1 )
             WHERE id = _id_cierre_p_activo;
-            SET SQL_SAFE_UPDATES = 1; 
-       end if;     
+            SET SQL_SAFE_UPDATES = 1;
+       end if;
        -- recaudos
        -- recaudos_externos
       if    getIdContadorByName('RecaudosLibranza') = new.tipoDocumentoFinal  or
           getIdContadorByName('RecaudosCuentaXCobrar') = new.tipoDocumentoFinal    then
             SET SQL_SAFE_UPDATES = 0;
-            UPDATE corte_de_caja 
+            UPDATE corte_de_caja
             SET  recaudos = (recaudos + new.valorParcial )  ,
                 ingresoEfectivo = (ingresoEfectivo +  new.campo_auxiliar_1)
             WHERE id = _id_cierre_activo;
             SET SQL_SAFE_UPDATES = 1;
 
             SET SQL_SAFE_UPDATES = 0;
-            UPDATE corte_de_caja_parcial  
+            UPDATE corte_de_caja_parcial
             SET recaudos = (recaudos + new.valorParcial) ,
                 ingresoEfectivo = (ingresoEfectivo +  new.campo_auxiliar_1)
             WHERE id = _id_cierre_p_activo;
-            SET SQL_SAFE_UPDATES = 1; 
-       end if;    
+            SET SQL_SAFE_UPDATES = 1;
+       end if;
       if    getIdContadorByName('Recaudos') = new.tipoDocumentoFinal   then
             SET SQL_SAFE_UPDATES = 0;
-            UPDATE corte_de_caja 
+            UPDATE corte_de_caja
             SET  recaudos_externos = (recaudos_externos + new.valorParcial )  ,
                 ingresoEfectivo = (ingresoEfectivo +  new.campo_auxiliar_1)
             WHERE id = _id_cierre_activo;
             SET SQL_SAFE_UPDATES = 1;
 
             SET SQL_SAFE_UPDATES = 0;
-            UPDATE corte_de_caja_parcial  
+            UPDATE corte_de_caja_parcial
             SET recaudos_externos = (recaudos_externos + new.valorParcial) ,
                 ingresoEfectivo =( ingresoEfectivo +  new.campo_auxiliar_1)
             WHERE id = _id_cierre_p_activo;
-            SET SQL_SAFE_UPDATES = 1; 
-       end if;    
+            SET SQL_SAFE_UPDATES = 1;
+       end if;
 	  if    getIdContadorByName('Pagos') = new.tipoDocumentoFinal      then
             SET SQL_SAFE_UPDATES = 0;
-            UPDATE corte_de_caja 
+            UPDATE corte_de_caja
             SET  pagos = (pagos + new.valorParcial)  ,
                 ingresoEfectivo = (ingresoEfectivo +  new.campo_auxiliar_1)
             WHERE id = _id_cierre_activo;
             SET SQL_SAFE_UPDATES = 1;
 
             SET SQL_SAFE_UPDATES = 0;
-            UPDATE corte_de_caja_parcial  
+            UPDATE corte_de_caja_parcial
             SET pagos = (pagos + new.valorParcial) ,
                 ingresoEfectivo = (ingresoEfectivo +  new.campo_auxiliar_1)
             WHERE id = _id_cierre_p_activo;
-            SET SQL_SAFE_UPDATES = 1; 
-       end if;  
+            SET SQL_SAFE_UPDATES = 1;
+       end if;
       IF    getIdContadorByName('gastos') = new.tipoDocumentoFinal     then
              SELECT id into _id_medio_pago_efectivo FROM establecimiento_medios_de_pago
-             where   nombre = 'Efectivo' 
+             where   nombre = 'Efectivo'
 			 and establecimiento = _id_establecimiento;
-             insert into documentos_pagos 
+             insert into documentos_pagos
 		      ( idDocumento, idMedioDePago, valorPagado, valorTotalAPagar, valorRecibido, movimiento)
 		      values ( old.orden ,_id_medio_pago_efectivo ,
-			new.valorParcial, new.valorParcial ,new.valorParcial , 'O'   );  
+			new.valorParcial, new.valorParcial ,new.valorParcial , 'O'   );
           SET SQL_SAFE_UPDATES = 0;
-            UPDATE corte_de_caja 
+            UPDATE corte_de_caja
             SET total_gastos = (total_gastos + new.valorParcial) ,
                 ingresoEfectivo = (ingresoEfectivo +  new.campo_auxiliar_1)
             WHERE id = _id_cierre_activo;
             SET SQL_SAFE_UPDATES = 1;
 
             SET SQL_SAFE_UPDATES = 0;
-            UPDATE corte_de_caja_parcial  
+            UPDATE corte_de_caja_parcial
             SET total_gastos = total_gastos + new.valorParcial,
                 ingresoEfectivo = (ingresoEfectivo +  new.campo_auxiliar_1)
             WHERE id = _id_cierre_p_activo;
             SET SQL_SAFE_UPDATES = 1;
         END IF;
-	END IF;	
-	
+	END IF;
+
 	-- fin proceso de documentos desde caja
-         set _salidaDeEfectivo = coalesce((select sum(valorPagado) from documentos_pagos 
-         where idDocumento = old.orden and movimiento =   'O' ) ,0 );  
-		 set new.campo_auxiliar_1 = new.campo_auxiliar_1 - _salidaDeEfectivo ;  
+         set _salidaDeEfectivo = coalesce((select sum(valorPagado) from documentos_pagos
+         where idDocumento = old.orden and movimiento =   'O' ) ,0 );
+		 set new.campo_auxiliar_1 = new.campo_auxiliar_1 - _salidaDeEfectivo ;
     END IF;
 END */;;
 DELIMITER ;
@@ -1920,106 +1920,106 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`jdpsoluc_l_monrroy`@`%`*/ /*!50003 TRIGGER `documentos_AFTER_UPDATE` AFTER UPDATE ON `documentos` FOR EACH ROW BEGIN 
+/*!50003 CREATE*/ /*!50017 DEFINER=`jdpsoluc_l_monrroy`@`%`*/ /*!50003 TRIGGER `documentos_AFTER_UPDATE` AFTER UPDATE ON `documentos` FOR EACH ROW BEGIN
     declare countPersona int;
-   IF new.tipoDocumentoFinal != old.tipoDocumentoFinal  then 
+   IF new.tipoDocumentoFinal != old.tipoDocumentoFinal  then
 
-	 set SQL_SAFE_UPDATES  = 0 ; 
-	   update documentos_pagos set 
-		refDoc = new.idDocumentoFinal  
+	 set SQL_SAFE_UPDATES  = 0 ;
+	   update documentos_pagos set
+		refDoc = new.idDocumentoFinal
         where idDocumento = new.orden ;
-	  set SQL_SAFE_UPDATES  = 1 ;  
-   
-     IF getIdContadorByName('venta') = new.tipoDocumentoFinal OR 
-        getIdContadorByName('venta_por_domicilio') = new.tipoDocumentoFinal  OR 
-        getIdContadorByName('cuentas_por_cobrar') = new.tipoDocumentoFinal  OR 
-        getIdContadorByName('libranza') = new.tipoDocumentoFinal OR 
-        getIdContadorByName('remision') = new.tipoDocumentoFinal or 
+	  set SQL_SAFE_UPDATES  = 1 ;
+
+     IF getIdContadorByName('venta') = new.tipoDocumentoFinal OR
+        getIdContadorByName('venta_por_domicilio') = new.tipoDocumentoFinal  OR
+        getIdContadorByName('cuentas_por_cobrar') = new.tipoDocumentoFinal  OR
+        getIdContadorByName('libranza') = new.tipoDocumentoFinal OR
+        getIdContadorByName('remision') = new.tipoDocumentoFinal or
         getIdContadorByName('remision_cuentas_por_cobrar') = new.tipoDocumentoFinal  THEN
-         call sp_generar_movimientos_cuenta_inventario( new.orden ); 
+         call sp_generar_movimientos_cuenta_inventario( new.orden );
      end if;
-     IF 
+     IF
      new.tipoDocumentoFinal <>  getIdContadorByName('cotizacion')  and
      new.tipoDocumentoFinal <>  getIdContadorByName('eliminado')  and
      new.tipoDocumentoFinal <>  getIdContadorByName('domicilio')  and
      new.tipoDocumentoFinal <>  getIdContadorByName('Borrador')  and
      new.tipoDocumentoFinal <>  getIdContadorByName('EnBlanco') and
-     getIdContadorByName('comprobante_cuentas_por_pagar') <>  new.tipoDocumentoFinal and 
-		 getIdContadorByName('cuentas_por_pagar') <>  new.tipoDocumentoFinal and 
-		  getIdContadorByName('comprobante_compras') <>  new.tipoDocumentoFinal and 
-		   getIdContadorByName('Pagos_cuenta_por_pagar') <>  new.tipoDocumentoFinal and 
+     getIdContadorByName('comprobante_cuentas_por_pagar') <>  new.tipoDocumentoFinal and
+		 getIdContadorByName('cuentas_por_pagar') <>  new.tipoDocumentoFinal and
+		  getIdContadorByName('comprobante_compras') <>  new.tipoDocumentoFinal and
+		   getIdContadorByName('Pagos_cuenta_por_pagar') <>  new.tipoDocumentoFinal and
 		    getIdContadorByName('compra_activa') <>  new.tipoDocumentoFinal   AND
 		    getIdContadorByName('comprovante_nota_debito') <>  new.tipoDocumentoFinal  and
-            getIdContadorByName('Pagos_cuenta_por_pagar') <>  new.tipoDocumentoFinal 
+            getIdContadorByName('Pagos_cuenta_por_pagar') <>  new.tipoDocumentoFinal
      THEN
-          call sp_generar_movimientos_cuenta_pagos( new.orden ); 
+          call sp_generar_movimientos_cuenta_pagos( new.orden );
      end if;
      -- RecaudosCuentaXCobrar
      if getIdContadorByName('RecaudosCuentaXCobrar') = new.tipoDocumentoFinal THEN
-         call sp_generar_abonos_cartera( new.orden ); 
+         call sp_generar_abonos_cartera( new.orden );
          insert into documentos_pagos (idDocumento , idMedioDePago , referencia , valorPagado,  valorTotalAPagar, valorRecibido, vueltos)
 			select idDocBase , -1 , concat('Abono #' , ' ', new.idDocumentoFinal ) , valorTotal, 0, 0, 0
 			from documentos_listado_productos where idDocumento = new.orden;
      end if;
       if getIdContadorByName('Pagos_cuenta_por_pagar') = new.tipoDocumentoFinal THEN
-         call sp_generar_abonos_credito( new.orden ); 
+         call sp_generar_abonos_credito( new.orden );
          insert into documentos_pagos (idDocumento , idMedioDePago , referencia , valorPagado,  valorTotalAPagar, valorRecibido, vueltos)
          select  idDocBase , -1 , concat('Abono #' , ' ', new.idDocumentoFinal  ) , valorTotal, 0, 0, 0
-         from documentos_listado_productos where idDocumento = new.orden; 
+         from documentos_listado_productos where idDocumento = new.orden;
      end if;
       if getIdContadorByName('comprobante_devolucion') = new.tipoDocumentoFinal THEN
-         call sp_generar_movimientos_devolucion( new.orden );  
+         call sp_generar_movimientos_devolucion( new.orden );
      end if;
-     
+
       if getIdContadorByName('comprobante_nota_debito') = new.tipoDocumentoFinal THEN
-         call sp_generar_movimientos_nota_debito( new.orden );  
+         call sp_generar_movimientos_nota_debito( new.orden );
      end if;
-     
+
       if getIdContadorByName('comprobante_compras') = new.tipoDocumentoFinal THEN
-         call sp_generar_movimientos_cuenta_inventario_compra( new.orden );  
-         select count(0) into countPersona from mst_per_proveedores  where idPersona 
+         call sp_generar_movimientos_cuenta_inventario_compra( new.orden );
+         select count(0) into countPersona from mst_per_proveedores  where idPersona
          =  old.cliente;
          if countPersona = 0   then
            insert into mst_per_proveedores (idPersona , usuario_creacion ) values (
             old.cliente , old.usuario
-           )  ; 
-         end if;  
+           )  ;
+         end if;
      end if;
- 
- end if;  
 
-	if  new.campo_info_5 = 'Editada' then 
-        if getIdContadorByName('comprobante_compras') = new.tipoDocumentoFinal THEN 
-        
+ end if;
+
+	if  new.campo_info_5 = 'Editada' then
+        if getIdContadorByName('comprobante_compras') = new.tipoDocumentoFinal THEN
+
         -- borramos las transacciones iniciales generadas
             CREATE TEMPORARY TABLE tmp_ids (    id INT);
 			INSERT INTO tmp_ids (id)
 			SELECT id
 			FROM cnt_operaciones
-			WHERE idDocumento = new.orden; 
+			WHERE idDocumento = new.orden;
 			DELETE FROM cnt_transacciones
 			WHERE cod_comprobante IN (SELECT id FROM tmp_ids);
 			DROP TEMPORARY TABLE IF EXISTS tmp_ids;
-           -- borramos las operaciones iniciales generadas 
+           -- borramos las operaciones iniciales generadas
            delete
            FROM cnt_operaciones
-			WHERE idDocumento = new.orden;  
+			WHERE idDocumento = new.orden;
          -- documentos_compra_datos_productos_aux tabla donde se guardan los valores iniciales antes de ingresar el producto
         -- para que si mas adelante estos se modifican el producto regresa a sus valores iniciales y se le agregan los nuevos
          -- reseteamos los valores iniciales del producto antes de ser modificado por la compra
-         
-         
-         
-         call sp_generar_movimientos_cuenta_inventario_compra( new.orden );  
-         select count(0) into countPersona from mst_per_proveedores  where idPersona 
+
+
+
+         call sp_generar_movimientos_cuenta_inventario_compra( new.orden );
+         select count(0) into countPersona from mst_per_proveedores  where idPersona
          =  old.cliente;
          if countPersona = 0   then
            insert into mst_per_proveedores (idPersona , usuario_creacion ) values (
             old.cliente , old.usuario
-           )  ; 
-         end if;  
+           )  ;
+         end if;
      end if;
- 
+
     end if;
 END */;;
 DELIMITER ;
@@ -2087,26 +2087,26 @@ DELIMITER ;;
   declare id_urs , estadoN ,numRepeto int;
   declare n1 , n2 , n3 , n4 ,nombreN varchar(100);
   select ID , estado into id_urs ,  estadoN from usuarios where  idPersona = new.id ;
-  
-  if id_urs > 0 then  
+
+  if id_urs > 0 then
   IF NEW.active <> 1 then
     set estadoN = getIdEstado('I') ;
   end if;
-  
+
   set nombreN = trim(new.display_name);
-  
+
  set  n1 = '';
  set  n2 = '';
  set  n3 = '';
  set  n4 = '';
-  
-  
-  
+
+
+
 SELECT (length(nombreN) - length(replace(nombreN, ' ', ''))) / length(' ') into numRepeto ;
 
 
 /*
-SELECT   
+SELECT
  (length(Name) - length(replace(Name, ' ', ''))) / length(' ')
 , Name, SUBSTRING_INDEX(Name, ' ', 1) AS fname,
 SUBSTRING_INDEX(SUBSTRING_INDEX(Name,' ', 2), ' ',-1) AS mname,
@@ -2115,23 +2115,23 @@ SUBSTRING_INDEX(Name, ' ', -1) as lname FROM documentos_clientes; */
 
 if numRepeto = 0 then
   set n1 = nombreN;
-else 
+else
     set n1 =  SUBSTRING_INDEX(nombreN, ' ', 1) ;
   if numRepeto = 2 then
    -- set n2 =  SUBSTRING_INDEX(nombreN, ' ', 1) ;
     set n3 =  SUBSTRING_INDEX(SUBSTRING_INDEX(nombreN,' ', 2), ' ',-1) ;
     set n4 =  SUBSTRING_INDEX(nombreN, ' ', -1) ;
-  else 
+  else
      if numRepeto = 3 then
 	    set n2 =  SUBSTRING_INDEX(SUBSTRING_INDEX(nombreN,' ', 2), ' ',-1) ;
 		set n3 =  SUBSTRING_INDEX(SUBSTRING_INDEX(nombreN,' ', 3), ' ',-1) ;
 		set n4 =  SUBSTRING_INDEX(nombreN, ' ', -1) ;
-	  else 
+	  else
         if numRepeto = 4 then
 			set n2 =  SUBSTRING_INDEX(SUBSTRING_INDEX(nombreN,' ', 3), ' ',-2)  ;
 			set n3 =  SUBSTRING_INDEX(SUBSTRING_INDEX(nombreN,' ', 4), ' ',-1) ;
 			set n4 =  SUBSTRING_INDEX(nombreN, ' ', -1) ;
-			
+
         end if;
 	  end if;
   end if;
@@ -2139,8 +2139,8 @@ end if;
   update usuarios set
   estado = estadoN  ,
   Nombre1 = n1 , Nombre2  = n2, Apellido1 = n3 , Apellido2 = n4
-  
-  where ID = id_urs ; 
+
+  where ID = id_urs ;
   end if;
 END */;;
 DELIMITER ;
@@ -2281,58 +2281,58 @@ DELIMITER ;;
 /*!50003 CREATE*/ /*!50017 DEFINER=`jdpsoluc_l_monrroy`@`%`*/ /*!50003 TRIGGER `documentos_listado_productos_BEFORE_INSERT` BEFORE INSERT ON `documentos_listado_productos` FOR EACH ROW BEGIN
     declare totalDescuentos int;
      declare _nombreActividad , _tipoDescuento , _nombreDescuento text ;
-     
+
      declare _valorActual,
              _totalDescuento,
              _precioConDescuento ,
 			 _valorIva,
 			 _precioTotal   decimal(16,2);
-     
+
     set new.total_IVA = 0;
     set new.hora= now();
    set new.tipoDocumento = ( select tipoDocumentoFinal from documentos where documentos.orden = new.orden);
-   
-   
+
+
    set totalDescuentos  = 0 ;
-   if   getIdContadorByName('comprobante_cuentas_por_pagar') <>  new.tipoDocumento and 
-		 getIdContadorByName('cuentas_por_pagar') <>  new.tipoDocumento and 
-		  getIdContadorByName('comprobante_compras') <>  new.tipoDocumento and 
-		   getIdContadorByName('Pagos_cuenta_por_pagar') <>  new.tipoDocumento and 
-		    getIdContadorByName('compra_activa') <>  new.tipoDocumento then  
+   if   getIdContadorByName('comprobante_cuentas_por_pagar') <>  new.tipoDocumento and
+		 getIdContadorByName('cuentas_por_pagar') <>  new.tipoDocumento and
+		  getIdContadorByName('comprobante_compras') <>  new.tipoDocumento and
+		   getIdContadorByName('Pagos_cuenta_por_pagar') <>  new.tipoDocumento and
+		    getIdContadorByName('compra_activa') <>  new.tipoDocumento then
             select count(0) into totalDescuentos  from vw_productos_en_descuentos_activos where idProducto = new.idProducto;
     end if;
-    
-    
+
+
    if totalDescuentos > 0 then
     set _valorActual = new.presioSinIVa ;
     SELECT  concat ( nombreActividad,' desde :' , fechaInicial ,' hasta :', fechaFinal )  ,
-		nombreDescuento 
+		nombreDescuento
 		 ,  (  case tipoDescuento when 'P' then 'porcentaje' else 'valor'  end ) as tipoDescuento ,
-         cast( case tipoDescuento when 'P' then _valorActual *  cantidadDescuento / 100 else  cantidadDescuento end as decimal(16,2)) as totalDescuento , 
-         
-		 cast( _valorActual - ( case tipoDescuento when 'P' then _valorActual *  cantidadDescuento / 100 else  cantidadDescuento end ) as decimal(16,2) ) precioConDescuento , 
-		 cast( (_valorActual - case tipoDescuento when 'P' then _valorActual *  cantidadDescuento / 100 else  cantidadDescuento end  ) * porcent_iva / 100 as decimal(16,2)) 
-         valorIva , 
+         cast( case tipoDescuento when 'P' then _valorActual *  cantidadDescuento / 100 else  cantidadDescuento end as decimal(16,2)) as totalDescuento ,
+
+		 cast( _valorActual - ( case tipoDescuento when 'P' then _valorActual *  cantidadDescuento / 100 else  cantidadDescuento end ) as decimal(16,2) ) precioConDescuento ,
+		 cast( (_valorActual - case tipoDescuento when 'P' then _valorActual *  cantidadDescuento / 100 else  cantidadDescuento end  ) * porcent_iva / 100 as decimal(16,2))
+         valorIva ,
 		  cast( (_valorActual - case tipoDescuento when 'P' then _valorActual *  cantidadDescuento / 100 else  cantidadDescuento end  ) * porcent_iva / 100 as decimal(16,2)) +
 		   cast( _valorActual - ( case tipoDescuento when 'P' then _valorActual *  cantidadDescuento / 100 else  cantidadDescuento end ) as decimal(16,2) )  precioTotal
-           
+
            into _nombreActividad , _nombreDescuento , _tipoDescuento, _totalDescuento, _precioConDescuento , _valorIva, _precioTotal
            FROM vw_productos_en_descuentos_activos
-         where  idProducto =  new.idProducto  
-		order by 
-           (case tipoDescuento when 'P' then _valorActual *  cantidadDescuento / 100 else  cantidadDescuento end ) desc , fechaInicial 
+         where  idProducto =  new.idProducto
+		order by
+           (case tipoDescuento when 'P' then _valorActual *  cantidadDescuento / 100 else  cantidadDescuento end ) desc , fechaInicial
         limit 1
 		;
         set new.descuentoAplicado = _nombreDescuento ;
-        set new.nombreActividadDescuento = _nombreActividad ; 
-        set new.descuento = _totalDescuento ; 
+        set new.nombreActividadDescuento = _nombreActividad ;
+        set new.descuento = _totalDescuento ;
         set new.IVA = _valorIva ;
         set new.presioVenta =_precioTotal ;
         set new.valorTotal = _precioTotal * new.cant_real_descontada ;
         set new.tipoDescuento = _tipoDescuento;
-        
+
    end if;
-   
+
 END */;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -2350,28 +2350,28 @@ DELIMITER ;
 DELIMITER ;;
 /*!50003 CREATE*/ /*!50017 DEFINER=`jdpsoluc_l_monrroy`@`%`*/ /*!50003 TRIGGER `documentos_listado_productos_AFTER_INSERT` AFTER INSERT ON `documentos_listado_productos` FOR EACH ROW BEGIN
  SET SQL_SAFE_UPDATES = 0;
-  if   getIdContadorByName('comprobante_cuentas_por_pagar') <>  new.tipoDocumento and 
-		 getIdContadorByName('cuentas_por_pagar') <>  new.tipoDocumento and 
-		  getIdContadorByName('comprobante_compras') <>  new.tipoDocumento and 
-		   getIdContadorByName('Pagos_cuenta_por_pagar') <>  new.tipoDocumento and 
-		    getIdContadorByName('compra_activa') <>  new.tipoDocumento then  
+  if   getIdContadorByName('comprobante_cuentas_por_pagar') <>  new.tipoDocumento and
+		 getIdContadorByName('cuentas_por_pagar') <>  new.tipoDocumento and
+		  getIdContadorByName('comprobante_compras') <>  new.tipoDocumento and
+		   getIdContadorByName('Pagos_cuenta_por_pagar') <>  new.tipoDocumento and
+		    getIdContadorByName('compra_activa') <>  new.tipoDocumento then
              update documentos set estado = 2  where usuario  = new.usuario;
-    else 
+    else
              update documentos set estado = 2  where tipoDocumentoFinal  =  getIdContadorByName('comprobante_cuentas_por_pagar')
-             or tipoDocumentoFinal  =  getIdContadorByName('cuentas_por_pagar') 
-         or tipoDocumentoFinal  =   getIdContadorByName('comprobante_compras') 
+             or tipoDocumentoFinal  =  getIdContadorByName('cuentas_por_pagar')
+         or tipoDocumentoFinal  =   getIdContadorByName('comprobante_compras')
           or tipoDocumentoFinal  =  getIdContadorByName('Pagos_cuenta_por_pagar')
 		 or tipoDocumentoFinal  =  getIdContadorByName('compra_activa') ;
     end if;
 
-		update documentos 
+		update documentos
 		set cantidadVendida = cantidadVendida + new.cant_real_descontada,
 		valorParcial = valorParcial + new.total_presioSinIVa ,
 		descuento = (new.total_descuento  ) + descuento,
 		estado = 1 ,
 		valorIVA = valorIVA + new.total_IVA,
-		valorTotal = new.valorTotal + valorTotal  where orden = new.orden ; 
- 
+		valorTotal = new.valorTotal + valorTotal  where orden = new.orden ;
+
 END */;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -2389,24 +2389,24 @@ DELIMITER ;
 DELIMITER ;;
 /*!50003 CREATE*/ /*!50017 DEFINER=`jdpsoluc_l_monrroy`@`%`*/ /*!50003 TRIGGER `documentos_listado_productos_AFTER_UPDATE` AFTER UPDATE ON `documentos_listado_productos` FOR EACH ROW BEGIN
 
-if   old.tipoDocumento <>  getIdContadorByName('comprobante_nota_debito') and 
+if   old.tipoDocumento <>  getIdContadorByName('comprobante_nota_debito') and
      old.tipoDocumento <>  getIdContadorByName('comprobante_devolucion')
  then
-		update documentos 
+		update documentos
 		set cantidadVendida = cantidadVendida - old.cant_real_descontada,
 		valorParcial = valorParcial - old.total_presioSinIVa ,
 		descuento = descuento - (old.total_descuento  )  ,
 		estado = 1 ,
 		valorIVA = valorIVA - old.total_IVA,
-		valorTotal = valorTotal - old.valorTotal  where orden = old.orden ; 
-		  
-		update documentos 
+		valorTotal = valorTotal - old.valorTotal  where orden = old.orden ;
+
+		update documentos
 		set cantidadVendida = cantidadVendida + new.cant_real_descontada,
 		valorParcial = valorParcial + new.total_presioSinIVa ,
 		descuento = (new.total_descuento  ) + descuento,
 		estado = 1 ,
 		valorIVA = valorIVA + new.total_IVA,
-		valorTotal = new.valorTotal + valorTotal  where orden = old.orden ; 
+		valorTotal = new.valorTotal + valorTotal  where orden = old.orden ;
 end if;
 END */;;
 DELIMITER ;
@@ -2425,13 +2425,13 @@ DELIMITER ;
 DELIMITER ;;
 /*!50003 CREATE*/ /*!50017 DEFINER=`jdpsoluc_l_monrroy`@`%`*/ /*!50003 TRIGGER `documentos_listado_productos_AFTER_DELETE` AFTER DELETE ON `documentos_listado_productos` FOR EACH ROW BEGIN
 
-update documentos 
+update documentos
 set cantidadVendida = cantidadVendida - old.cant_real_descontada,
 valorParcial = valorParcial - old.total_presioSinIVa ,
 descuento = descuento - old.total_descuento ,
 estado = 1 ,
 valorIVA = valorIVA - old.total_IVA,
-valorTotal = valorTotal - old.valorTotal   where orden = old.orden ; 
+valorTotal = valorTotal - old.valorTotal   where orden = old.orden ;
 END */;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -2537,10 +2537,10 @@ UNLOCK TABLES;
 /*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
 /*!50003 CREATE*/ /*!50017 DEFINER=`jdpsoluc_l_monrroy`@`%`*/ /*!50003 TRIGGER `documentos_pagos_BEFORE_INSERT` BEFORE INSERT ON `documentos_pagos` FOR EACH ROW BEGIN
-    if new.referencia = 'efectivo' and new.valorRecibido = 0 then 
+    if new.referencia = 'efectivo' and new.valorRecibido = 0 then
       set new.valorRecibido =  new.valorPagado ;
     end if;
-      
+
 END */;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -2557,17 +2557,17 @@ DELIMITER ;
 /*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
 /*!50003 CREATE*/ /*!50017 DEFINER=`jdpsoluc_l_monrroy`@`%`*/ /*!50003 TRIGGER `documentos_pagos_AFTER_INSERT` AFTER INSERT ON `documentos_pagos` FOR EACH ROW BEGIN
-     declare nombrePago text ; 
+     declare nombrePago text ;
      declare tipoDocumento int;
      select  tipoDocumentoFinal into tipoDocumento from documentos where orden  =  new.idDocumento;
-     select upper(nombre) into nombrePago from establecimiento_medios_de_pago where id =  new.idMedioDePago ; 
-     
+     select upper(nombre) into nombrePago from establecimiento_medios_de_pago where id =  new.idMedioDePago ;
+
      if nombrePago = 'EFECTIVO'    and new.movimiento = 'I' then
          update documentos
          set campo_auxiliar_1 = campo_auxiliar_1 + new.valorPagado
          where documentos.orden = new.idDocumento;
      end if;
-     
+
 END */;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -2634,7 +2634,7 @@ UNLOCK TABLES;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 DELIMITER ;;
 /*!50003 CREATE*/ /*!50017 DEFINER=`jdpsoluc_l_monrroy`@`%`*/ /*!50003 TRIGGER `establecimiento_AFTER_INSERT` AFTER INSERT ON `establecimiento` FOR EACH ROW BEGIN
-insert into establecimiento_medios_de_pago (  nombre, descripcion, estado, cuentaContable, establecimiento) 
+insert into establecimiento_medios_de_pago (  nombre, descripcion, estado, cuentaContable, establecimiento)
 values( 'Efectivo' , 'Pagos En Efectivo' , getEstado('A') , 0 , new.id );
 END */;;
 DELIMITER ;
@@ -2792,7 +2792,7 @@ if new.estado = 1 then
  set new.fechaInicio = CURRENT_TIMESTAMP();
  set new.fechaFin = '0000-00-00 00:00';
 end if;
-if new.estado = 2 then 
+if new.estado = 2 then
  set new.fechaFin =  CURRENT_TIMESTAMP();
 end if;
 END */;;
@@ -2926,7 +2926,7 @@ DELIMITER ;
 /*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
 /*!50003 CREATE*/ /*!50017 DEFINER=`jdpsoluc_l_monrroy`@`%`*/ /*!50003 TRIGGER `inv_bodegas_AFTER_INSERT` AFTER INSERT ON `inv_bodegas` FOR EACH ROW BEGIN
-insert into inv_mst_producto_existencias ( id_producto , id_bodega , ult_mov , usuario_creacion ) 
+insert into inv_mst_producto_existencias ( id_producto , id_bodega , ult_mov , usuario_creacion )
  select id , new.id ,concat('Creacion bodega ', new.nombre), new.usuario_creacion  FROM inv_mst_producto where id != '';
 END */;;
 DELIMITER ;
@@ -3188,7 +3188,7 @@ UNLOCK TABLES;
 DELIMITER ;;
 /*!50003 CREATE*/ /*!50017 DEFINER=`jdpsoluc_l_monrroy`@`%`*/ /*!50003 TRIGGER `inv_descuentos_actividad_BEFORE_INSERT` BEFORE INSERT ON `inv_descuentos_actividad` FOR EACH ROW BEGIN
       set new.fecha_creacion = now();
-      
+
       set new.estado = getEstado('a');
 END */;;
 DELIMITER ;
@@ -3563,8 +3563,8 @@ DELIMITER ;
 /*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
 /*!50003 CREATE*/ /*!50017 DEFINER=`jdpsoluc_l_monrroy`@`%`*/ /*!50003 TRIGGER `inv_mst_producto_AFTER_INSERT` AFTER INSERT ON `inv_mst_producto` FOR EACH ROW BEGIN
-   
-insert into inv_mst_producto_existencias (id_producto , id_bodega , ult_mov , usuario_creacion )  
+
+insert into inv_mst_producto_existencias (id_producto , id_bodega , ult_mov , usuario_creacion )
 select new.id , id ,'Creacion Producto' , new.usuario_creacion  FROM inv_bodegas;
 END */;;
 DELIMITER ;
@@ -3935,7 +3935,7 @@ UNLOCK TABLES;
 DELIMITER ;;
 /*!50003 CREATE*/ /*!50017 DEFINER=`jdpsoluc_l_monrroy`@`%`*/ /*!50003 TRIGGER `before_insert_inv_mst_servicios_costos` BEFORE INSERT ON `inv_mst_servicios_costos` FOR EACH ROW BEGIN
     SET NEW.fecha_creacion = NOW();
-    set NEW.estado =   getEstado('A') ; 
+    set NEW.estado =   getEstado('A') ;
 END */;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -4426,7 +4426,7 @@ DELIMITER ;;
 /*!50003 CREATE*/ /*!50017 DEFINER=`jdpsoluc_l_monrroy`@`%`*/ /*!50003 TRIGGER `mst_mov_creditos_BEFORE_INSERT` BEFORE INSERT ON `mst_mov_cartera` FOR EACH ROW BEGIN
   set new.fecha_creacion =  now();
   set new.estado =  getEstado('a');
-  set new.totalActual = new.valorInicial - new.abonoInicial ; 
+  set new.totalActual = new.valorInicial - new.abonoInicial ;
 END */;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -4447,30 +4447,30 @@ declare _contador int;
 declare _cuota decimal(16,2);
 declare _ultima_cuota decimal(16,2);
 declare _fecha_pago date;
-set _cuota = new.totalActual ; 
+set _cuota = new.totalActual ;
 set _fecha_pago =  now();
-  set _contador = 0; 
+  set _contador = 0;
 -- id, usuario_creacion, usuario_edicion, fecha_creacion, fecha_actualizacion, estado, valorInicial, totalActual, totalAbonos, abonoInicial, idTercero, idFacturaVenta, comprobante, fecha_ultimo_abono, cuotas, plazos
-   if new.cuotas = 1 then 
+   if new.cuotas = 1 then
       set _fecha_pago = DATE_ADD( CAST(_fecha_pago AS char), INTERVAL  new.plazos DAY);
-       insert into mst_mov_cartera_cuotas (fecha_max_pago , id_cartera	, usuarioCreador , valorCuota, numero_cuota) 
+       insert into mst_mov_cartera_cuotas (fecha_max_pago , id_cartera	, usuarioCreador , valorCuota, numero_cuota)
        values
-         (_fecha_pago, new.id , 
+         (_fecha_pago, new.id ,
          new.usuario_creacion , _cuota ,1 );
-   else  
+   else
       SET _cuota = ROUND(new.totalActual / NEW.cuotas, 2);
       SET _ultima_cuota = new.totalActual  - (_cuota * (NEW.cuotas - 1));
-      while  NEW.cuotas > _contador do 
+      while  NEW.cuotas > _contador do
         set  _contador = _contador + 1 ;
-        set _fecha_pago = DATE_ADD( CAST(_fecha_pago AS char), INTERVAL  new.plazos DAY);   
-            IF _contador = NEW.cuotas THEN 
-                INSERT INTO mst_mov_cartera_cuotas (fecha_max_pago, id_cartera, usuarioCreador, valorCuota, numero_cuota) 
+        set _fecha_pago = DATE_ADD( CAST(_fecha_pago AS char), INTERVAL  new.plazos DAY);
+            IF _contador = NEW.cuotas THEN
+                INSERT INTO mst_mov_cartera_cuotas (fecha_max_pago, id_cartera, usuarioCreador, valorCuota, numero_cuota)
                 VALUES (_fecha_pago, NEW.id, NEW.usuario_creacion, _ultima_cuota, _contador);
             ELSE
-                INSERT INTO mst_mov_cartera_cuotas (fecha_max_pago, id_cartera, usuarioCreador, valorCuota, numero_cuota) 
+                INSERT INTO mst_mov_cartera_cuotas (fecha_max_pago, id_cartera, usuarioCreador, valorCuota, numero_cuota)
                 VALUES (_fecha_pago, NEW.id, NEW.usuario_creacion, _cuota, _contador);
-            END IF; 
-          
+            END IF;
+
         end while;
    end if;
 END */;;
@@ -4489,8 +4489,8 @@ DELIMITER ;
 /*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
 /*!50003 CREATE*/ /*!50017 DEFINER=`jdpsoluc_l_monrroy`@`%`*/ /*!50003 TRIGGER `mst_mov_creditos_BEFORE_UPDATE` BEFORE UPDATE ON `mst_mov_cartera` FOR EACH ROW BEGIN
-  set new.fecha_actualizacion =  now(); 
-   set new.totalActual = new.totalActual - new.totalAbonos ; 
+  set new.fecha_actualizacion =  now();
+   set new.totalActual = new.totalActual - new.totalAbonos ;
 END */;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -4557,7 +4557,7 @@ DELIMITER ;;
 /*!50003 CREATE*/ /*!50017 DEFINER=`jdpsoluc_l_monrroy`@`%`*/ /*!50003 TRIGGER `mst_mov_cartera_abonos_AFTER_INSERT` AFTER INSERT ON `mst_mov_cartera_abonos` FOR EACH ROW BEGIN
      if new.id_cartera > 0 then
 		 update mst_mov_cartera
-		 set totalAbonos = totalAbonos + new.totalAbonos where id = new.id_cartera ;   
+		 set totalAbonos = totalAbonos + new.totalAbonos where id = new.id_cartera ;
          call distribuir_abono_en_cuotas(new.totalAbonos ,  new.id_cartera);
      end if;
 END */;;
@@ -4576,7 +4576,7 @@ DELIMITER ;
 /*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
 /*!50003 CREATE*/ /*!50017 DEFINER=`jdpsoluc_l_monrroy`@`%`*/ /*!50003 TRIGGER `mst_mov_cartera_abonos_BEFORE_UPDATE` BEFORE UPDATE ON `mst_mov_cartera_abonos` FOR EACH ROW BEGIN
- set new.fecha_actualizacion =  now(); 
+ set new.fecha_actualizacion =  now();
 END */;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -4633,7 +4633,7 @@ DELIMITER ;;
 /*!50003 CREATE*/ /*!50017 DEFINER=`jdpsoluc_l_monrroy`@`%`*/ /*!50003 TRIGGER `mst_mov_cartera_cuotas_BEFORE_INSERT` BEFORE INSERT ON `mst_mov_cartera_cuotas` FOR EACH ROW BEGIN
  if new.fecha_max_pago < curdate() then
     SET NEW.estadoCuota = 'OUTTIME';
-   end if; 
+   end if;
    set new.estado = getEstado('a');
 END */;;
 DELIMITER ;
@@ -4651,26 +4651,26 @@ DELIMITER ;
 /*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
 /*!50003 CREATE*/ /*!50017 DEFINER=`jdpsoluc_l_monrroy`@`%`*/ /*!50003 TRIGGER `mst_mov_cartera_cuotas_BEFORE_UPDATE` BEFORE UPDATE ON `mst_mov_cartera_cuotas` FOR EACH ROW BEGIN
-  
+
     SET NEW.fechaEdicion = now();
-    
+
    -- set NEW.fechaPago = now();
    if NEW.abono > 0 then
     set new.totalPagado = new.totalPagado + NEW.abono;
     set NEW.ultimoAbono = NEW.abono;
     set NEW.abono = 0;
       set NEW.fechaPago = now();
-        IF NEW.fechaPago <= NEW.fecha_max_pago    THEN 
-        
+        IF NEW.fechaPago <= NEW.fecha_max_pago    THEN
+
              IF   NEW.valorCuota > NEW.totalPagado THEN
 			   SET NEW.estadoCuota = 'INTIME_ABONADO';
-           ELSE     
+           ELSE
 				SET NEW.estadoCuota = 'INTIME_PAGADO';
              END IF;
         ELSE
            IF   NEW.valorCuota > NEW.totalPagado THEN
 			   SET NEW.estadoCuota = 'OUTTIME_ABONADO';
-           ELSE     
+           ELSE
 				SET NEW.estadoCuota = 'OUTTIME_PAGADO';
              END IF;
         END IF;
@@ -4734,7 +4734,7 @@ DELIMITER ;;
 /*!50003 CREATE*/ /*!50017 DEFINER=`jdpsoluc_l_monrroy`@`%`*/ /*!50003 TRIGGER `mst_mov_credito_BEFORE_INSERT` BEFORE INSERT ON `mst_mov_credito` FOR EACH ROW BEGIN
  set new.fecha_creacion =  curdate();
   set new.estado =  getEstado('a');
-  set new.totalActual = new.valorInicial - new.abonoInicial ; 
+  set new.totalActual = new.valorInicial - new.abonoInicial ;
   set new.edicionCompra =  false;
 END */;;
 DELIMITER ;
@@ -4756,35 +4756,35 @@ declare _contador int;
 declare _cuota decimal(16,2);
 declare _ultima_cuota decimal(16,2);
 declare _fecha_pago date;
-set _cuota = new.totalActual ; 
+set _cuota = new.totalActual ;
 set _fecha_pago =  new.fecha_inicio;
-  set _contador = 0; 
+  set _contador = 0;
 -- id, usuario_creacion, usuario_edicion, fecha_creacion, fecha_actualizacion, estado, valorInicial, totalActual, totalAbonos, abonoInicial, idTercero, idFacturaVenta, comprobante, fecha_ultimo_abono, cuotas, plazos
-   if new.cuotas = 1 then 
+   if new.cuotas = 1 then
       set _fecha_pago = DATE_ADD( CAST(_fecha_pago AS char), INTERVAL  new.plazos DAY);
-       insert into mst_mov_credito_cuotas (fecha_max_pago , id_cartera	, usuarioCreador , valorCuota, numero_cuota) 
+       insert into mst_mov_credito_cuotas (fecha_max_pago , id_cartera	, usuarioCreador , valorCuota, numero_cuota)
        values
-         (_fecha_pago, new.id , 
+         (_fecha_pago, new.id ,
          new.usuario_creacion , _cuota ,1 );
-   else  
+   else
       SET _cuota = ROUND(new.totalActual / NEW.cuotas, 2);
       SET _ultima_cuota = new.totalActual  - (_cuota * (NEW.cuotas - 1));
-      while  NEW.cuotas > _contador do 
+      while  NEW.cuotas > _contador do
         set  _contador = _contador + 1 ;
-        set _fecha_pago = DATE_ADD( CAST(_fecha_pago AS char), INTERVAL  new.plazos DAY);   
-            IF _contador = NEW.cuotas THEN 
-                INSERT INTO mst_mov_credito_cuotas (fecha_max_pago, id_cartera, usuarioCreador, valorCuota, numero_cuota) 
+        set _fecha_pago = DATE_ADD( CAST(_fecha_pago AS char), INTERVAL  new.plazos DAY);
+            IF _contador = NEW.cuotas THEN
+                INSERT INTO mst_mov_credito_cuotas (fecha_max_pago, id_cartera, usuarioCreador, valorCuota, numero_cuota)
                 VALUES (_fecha_pago, NEW.id, NEW.usuario_creacion, _ultima_cuota, _contador);
             ELSE
-                INSERT INTO mst_mov_credito_cuotas (fecha_max_pago, id_cartera, usuarioCreador, valorCuota, numero_cuota) 
+                INSERT INTO mst_mov_credito_cuotas (fecha_max_pago, id_cartera, usuarioCreador, valorCuota, numero_cuota)
                 VALUES (_fecha_pago, NEW.id, NEW.usuario_creacion, _cuota, _contador);
-            END IF; 
-          
+            END IF;
+
         end while;
    end if;
-   
-   
-   
+
+
+
    -- ----------------------------
 END */;;
 DELIMITER ;
@@ -4806,45 +4806,45 @@ declare _contador int;
 declare _cuota decimal(16,2);
 declare _ultima_cuota decimal(16,2);
 declare _fecha_pago date;
-set new.fecha_actualizacion =  now();  
-if new.edicionCompra = true then 
+set new.fecha_actualizacion =  now();
+if new.edicionCompra = true then
    set new.totalActual = new.totalActual - new.totalAbonos ;
    set new.edicionCompra = false;
    SET SQL_SAFE_UPDATES = 0;
    delete from  mst_mov_credito_cuotas where id_cartera =  new.id ;
-   
-   set _cuota = new.totalActual ; 
+
+   set _cuota = new.totalActual ;
    set _fecha_pago =  new.fecha_inicio;
-   set _contador = 0; 
+   set _contador = 0;
 -- id, usuario_creacion, usuario_edicion, fecha_creacion, fecha_actualizacion, estado, valorInicial, totalActual, totalAbonos, abonoInicial, idTercero, idFacturaVenta, comprobante, fecha_ultimo_abono, cuotas, plazos
-   if new.cuotas = 1 then 
+   if new.cuotas = 1 then
       set _fecha_pago = DATE_ADD( CAST(_fecha_pago AS char), INTERVAL  new.plazos DAY);
-       insert into mst_mov_credito_cuotas (fecha_max_pago , id_cartera	, usuarioCreador , valorCuota, numero_cuota) 
+       insert into mst_mov_credito_cuotas (fecha_max_pago , id_cartera	, usuarioCreador , valorCuota, numero_cuota)
        values
-         (_fecha_pago, new.id , 
+         (_fecha_pago, new.id ,
          new.usuario_creacion , _cuota ,1 );
-    else  
+    else
       SET _cuota = ROUND(new.totalActual / NEW.cuotas, 2);
       SET _ultima_cuota = new.totalActual  - (_cuota * (NEW.cuotas - 1));
-      while  NEW.cuotas > _contador do 
+      while  NEW.cuotas > _contador do
         set  _contador = _contador + 1 ;
-        set _fecha_pago = DATE_ADD( CAST(_fecha_pago AS char), INTERVAL  new.plazos DAY);   
-            IF _contador = NEW.cuotas THEN 
-                INSERT INTO mst_mov_credito_cuotas (fecha_max_pago, id_cartera, usuarioCreador, valorCuota, numero_cuota) 
+        set _fecha_pago = DATE_ADD( CAST(_fecha_pago AS char), INTERVAL  new.plazos DAY);
+            IF _contador = NEW.cuotas THEN
+                INSERT INTO mst_mov_credito_cuotas (fecha_max_pago, id_cartera, usuarioCreador, valorCuota, numero_cuota)
                 VALUES (_fecha_pago, NEW.id, NEW.usuario_creacion, _ultima_cuota, _contador);
             ELSE
-                INSERT INTO mst_mov_credito_cuotas (fecha_max_pago, id_cartera, usuarioCreador, valorCuota, numero_cuota) 
+                INSERT INTO mst_mov_credito_cuotas (fecha_max_pago, id_cartera, usuarioCreador, valorCuota, numero_cuota)
                 VALUES (_fecha_pago, NEW.id, NEW.usuario_creacion, _cuota, _contador);
-            END IF; 
-          
+            END IF;
+
         end while;
-        
-       
+
+
     end if;
-    
+
 	SET SQL_SAFE_UPDATES = 1;
-   
-        
+
+
    end if;
 END */;;
 DELIMITER ;
@@ -4914,10 +4914,10 @@ DELIMITER ;;
  if new.id_cartera > 0 then
    if new.origen = 'pagos' then
 		 update mst_mov_credito
-		 set totalAbonos = totalAbonos + new.totalAbonos where id = new.id_cartera ;   
+		 set totalAbonos = totalAbonos + new.totalAbonos where id = new.id_cartera ;
     else
         update mst_mov_credito
-		 set totalDevolucion = totalDevolucion + new.totalAbonos where id = new.id_cartera ;   
+		 set totalDevolucion = totalDevolucion + new.totalAbonos where id = new.id_cartera ;
     end if;
      call distribuir_abono_en_cuotas_credito(new.totalAbonos ,  new.id_cartera , new.fecha_creacion);
    end if;
@@ -4937,7 +4937,7 @@ DELIMITER ;
 /*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
 /*!50003 CREATE*/ /*!50017 DEFINER=`jdpsoluc_l_monrroy`@`%`*/ /*!50003 TRIGGER `mst_mov_credito_abonos_BEFORE_UPDATE` BEFORE UPDATE ON `mst_mov_credito_abonos` FOR EACH ROW BEGIN
-set new.fecha_actualizacion =  now(); 
+set new.fecha_actualizacion =  now();
 END */;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -4993,7 +4993,7 @@ DELIMITER ;;
 /*!50003 CREATE*/ /*!50017 DEFINER=`jdpsoluc_l_monrroy`@`%`*/ /*!50003 TRIGGER `mst_mov_credito_cuotas_BEFORE_INSERT` BEFORE INSERT ON `mst_mov_credito_cuotas` FOR EACH ROW BEGIN
    if new.fecha_max_pago < curdate() then
     SET NEW.estadoCuota = 'OUTTIME';
-   end if; 
+   end if;
    set new.estado = getEstado('a');
 END */;;
 DELIMITER ;
@@ -5013,23 +5013,23 @@ DELIMITER ;;
 /*!50003 CREATE*/ /*!50017 DEFINER=`jdpsoluc_l_monrroy`@`%`*/ /*!50003 TRIGGER `mst_mov_credito_cuotas_BEFORE_UPDATE` BEFORE UPDATE ON `mst_mov_credito_cuotas` FOR EACH ROW BEGIN
 
     SET NEW.fechaEdicion = now();
-    
+
    -- set NEW.fechaPago = now();
    if NEW.abono > 0 then
     set new.totalPagado = new.totalPagado + NEW.abono;
     set NEW.ultimoAbono = NEW.abono;
     set NEW.abono = 0;
-        IF coalesce(NEW.fechaPago,curdate()) <= NEW.fecha_max_pago    THEN 
-        
+        IF coalesce(NEW.fechaPago,curdate()) <= NEW.fecha_max_pago    THEN
+
              IF   NEW.valorCuota > NEW.totalPagado THEN
 			   SET NEW.estadoCuota = 'INTIME_ABONADO';
-           ELSE     
+           ELSE
 				SET NEW.estadoCuota = 'INTIME_PAGADO';
              END IF;
         ELSE
            IF   NEW.valorCuota > NEW.totalPagado THEN
 			   SET NEW.estadoCuota = 'OUTTIME_ABONADO';
-           ELSE     
+           ELSE
 				SET NEW.estadoCuota = 'OUTTIME_PAGADO';
              END IF;
         END IF;
@@ -5516,29 +5516,29 @@ DELIMITER ;;
     INSERT INTO `cnt_transacciones`
 ( `id_cuenta`,`varlor_credito`,`varlor_debito`,`fecha_transaccion`,
 `relacion_tabla`,`ingreso_saldos`,`usuario`,`fecha_ingreso`, cod_tercero,cod_comprobante, origen_comprobante)
-VALUES( id_cuenta_contable(510506) ,0, new.totalParcial,new.fecha,'compra','N',new.idUsuario ,now(),new.pagadoA ,  new.idSF   ,'nomina'  ); 
- 
+VALUES( id_cuenta_contable(510506) ,0, new.totalParcial,new.fecha,'compra','N',new.idUsuario ,now(),new.pagadoA ,  new.idSF   ,'nomina'  );
+
     INSERT INTO `cnt_transacciones`
 ( `id_cuenta`,`varlor_credito`,`varlor_debito`,`fecha_transaccion`,
 `relacion_tabla`,`ingreso_saldos`,`usuario`,`fecha_ingreso`, cod_tercero,cod_comprobante, origen_comprobante)
-VALUES( id_cuenta_contable(250501) ,0, new.totalPagado,new.fecha,'compra','N',new.idUsuario ,now(),new.pagadoA ,  new.idSF   ,'nomina'  ); 
+VALUES( id_cuenta_contable(250501) ,0, new.totalPagado,new.fecha,'compra','N',new.idUsuario ,now(),new.pagadoA ,  new.idSF   ,'nomina'  );
 
--- credito 
+-- credito
      INSERT INTO `cnt_transacciones`
 ( `id_cuenta`,`varlor_credito`,`varlor_debito`,`fecha_transaccion`,
 `relacion_tabla`,`ingreso_saldos`,`usuario`,`fecha_ingreso`, cod_tercero,cod_comprobante, origen_comprobante)
-VALUES( id_cuenta_contable(250501) , new.totalPagado,0,new.fecha,'compra','N',new.idUsuario ,now(),new.pagadoA ,  new.idSF   ,'nomina'  ); 
+VALUES( id_cuenta_contable(250501) , new.totalPagado,0,new.fecha,'compra','N',new.idUsuario ,now(),new.pagadoA ,  new.idSF   ,'nomina'  );
  -- caja general
      INSERT INTO `cnt_transacciones`
 ( `id_cuenta`,`varlor_credito`,`varlor_debito`,`fecha_transaccion`,
 `relacion_tabla`,`ingreso_saldos`,`usuario`,`fecha_ingreso`, cod_tercero,cod_comprobante, origen_comprobante)
-VALUES( id_cuenta_contable(110505) , new.totalPagado,0,new.fecha,'compra','N',new.idUsuario ,now(),new.pagadoA ,  new.idSF   ,'nomina'  ); 
+VALUES( id_cuenta_contable(110505) , new.totalPagado,0,new.fecha,'compra','N',new.idUsuario ,now(),new.pagadoA ,  new.idSF   ,'nomina'  );
 
 if new.`abonos/Anticipos` > 0 then
      INSERT INTO `cnt_transacciones`
 ( `id_cuenta`,`varlor_credito`,`varlor_debito`,`fecha_transaccion`,
 `relacion_tabla`,`ingreso_saldos`,`usuario`,`fecha_ingreso`, cod_tercero,cod_comprobante, origen_comprobante)
-VALUES( id_cuenta_contable(136595) , new.`abonos/Anticipos`,0,new.fecha,'compra','N',new.idUsuario ,now(),new.pagadoA ,  new.idSF   ,'nomina'  ); 
+VALUES( id_cuenta_contable(136595) , new.`abonos/Anticipos`,0,new.fecha,'compra','N',new.idUsuario ,now(),new.pagadoA ,  new.idSF   ,'nomina'  );
 end if;
 
 END */;;
@@ -5561,29 +5561,29 @@ DELIMITER ;;
     INSERT INTO `cnt_transacciones`
 ( `id_cuenta`,`varlor_credito`,`varlor_debito`,`fecha_transaccion`,
 `relacion_tabla`,`ingreso_saldos`,`usuario`,`fecha_ingreso`, cod_tercero,cod_comprobante, origen_comprobante)
-VALUES( id_cuenta_contable(510506) , old.totalParcial,0,old.fecha,'compra','N',old.idUsuario ,now(),old.pagadoA ,  old.idSF   ,'nomina'  ); 
- 
+VALUES( id_cuenta_contable(510506) , old.totalParcial,0,old.fecha,'compra','N',old.idUsuario ,now(),old.pagadoA ,  old.idSF   ,'nomina'  );
+
     INSERT INTO `cnt_transacciones`
 ( `id_cuenta`,`varlor_credito`,`varlor_debito`,`fecha_transaccion`,
 `relacion_tabla`,`ingreso_saldos`,`usuario`,`fecha_ingreso`, cod_tercero,cod_comprobante, origen_comprobante)
-VALUES( id_cuenta_contable(250501)  , old.totalPagado,0,old.fecha,'compra','N',old.idUsuario ,now(),old.pagadoA ,  old.idSF   ,'nomina'  ); 
+VALUES( id_cuenta_contable(250501)  , old.totalPagado,0,old.fecha,'compra','N',old.idUsuario ,now(),old.pagadoA ,  old.idSF   ,'nomina'  );
 
--- credito 
+-- credito
      INSERT INTO `cnt_transacciones`
 ( `id_cuenta`,`varlor_credito`,`varlor_debito`,`fecha_transaccion`,
 `relacion_tabla`,`ingreso_saldos`,`usuario`,`fecha_ingreso`, cod_tercero,cod_comprobante, origen_comprobante)
-VALUES( id_cuenta_contable(250501) ,0, old.totalPagado ,old.fecha,'compra','N',old.idUsuario ,now(),old.pagadoA ,  old.idSF   ,'nomina'  ); 
+VALUES( id_cuenta_contable(250501) ,0, old.totalPagado ,old.fecha,'compra','N',old.idUsuario ,now(),old.pagadoA ,  old.idSF   ,'nomina'  );
  -- caja general
      INSERT INTO `cnt_transacciones`
 ( `id_cuenta`,`varlor_credito`,`varlor_debito`,`fecha_transaccion`,
 `relacion_tabla`,`ingreso_saldos`,`usuario`,`fecha_ingreso`, cod_tercero,cod_comprobante, origen_comprobante)
-VALUES( id_cuenta_contable(110505) ,0, old.totalPagado ,old.fecha,'compra','N',old.idUsuario ,now(),old.pagadoA ,  old.idSF   ,'nomina'  ); 
+VALUES( id_cuenta_contable(110505) ,0, old.totalPagado ,old.fecha,'compra','N',old.idUsuario ,now(),old.pagadoA ,  old.idSF   ,'nomina'  );
 
 if old.`abonos/Anticipos` > 0 then
      INSERT INTO `cnt_transacciones`
 ( `id_cuenta`,`varlor_credito`,`varlor_debito`,`fecha_transaccion`,
 `relacion_tabla`,`ingreso_saldos`,`usuario`,`fecha_ingreso`, cod_tercero,cod_comprobante, origen_comprobante)
-VALUES( id_cuenta_contable(136595) ,0, old.`abonos/Anticipos` ,old.fecha,'compra','N',old.idUsuario ,now(),old.pagadoA ,  old.idSF   ,'nomina'  ); 
+VALUES( id_cuenta_contable(136595) ,0, old.`abonos/Anticipos` ,old.fecha,'compra','N',old.idUsuario ,now(),old.pagadoA ,  old.idSF   ,'nomina'  );
 end if;
 END */;;
 DELIMITER ;
@@ -5637,7 +5637,7 @@ DELIMITER ;;
 /*!50003 CREATE*/ /*!50017 DEFINER=`jdpsoluc_l_monrroy`@`%`*/ /*!50003 TRIGGER `pagosiva_BEFORE_INSERT` BEFORE INSERT ON `pagosiva` FOR EACH ROW BEGIN
 
 IF new.IVA < 0 then
-set new.exedente = (-1 * new.IVA)   ; 
+set new.exedente = (-1 * new.IVA)   ;
 set new.IVA = 0;
 
 end if;
@@ -5665,9 +5665,9 @@ DELIMITER ;;
    insert into  excedente_iva(
      valor_exedente, valor_iva_venta, valor_iva_compra, fecha_creacion )values
      (     new.exedente   ,new.iva_venta   ,new.iva_compra   ,      now()      );
-     
+
      UPDATE  compras SET ivacausado = 'PAGADO' WHERE ivacausado = 'none';
-     
+
 END */;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -6120,7 +6120,7 @@ UNLOCK TABLES;
 DELIMITER ;;
 /*!50003 CREATE*/ /*!50017 DEFINER=`jdpsoluc_l_monrroy`@`%`*/ /*!50003 TRIGGER `session_AFTER_INSERT` AFTER INSERT ON `session` FOR EACH ROW BEGIN
 update usuarios set ultimo_ingreso = now()
- where usuarios.ID =  NEW.usuario; 
+ where usuarios.ID =  NEW.usuario;
 END */;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -6247,7 +6247,7 @@ UNLOCK TABLES;
 /*!50003 SET sql_mode              = '' */ ;
 DELIMITER ;;
 /*!50003 CREATE*/ /*!50017 DEFINER=`jdpsoluc_l_monrroy`@`%`*/ /*!50003 TRIGGER `sync_historico_AFTER_INSERT` AFTER INSERT ON `sync_historico` FOR EACH ROW BEGIN
- update flags 
+ update flags
     set estado = 2
     WHERE id = ( SELECT id   FROM  flags WHERE codigo = 'FLAG_INICIO_ACTUALIZACION' ) ;
 END */;;
@@ -6445,7 +6445,7 @@ DELIMITER ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 DELIMITER ;;
 /*!50003 CREATE*/ /*!50017 DEFINER=`jdpsoluc_l_monrroy`@`%`*/ /*!50003 TRIGGER `tipos_medidas_AFTER_DELETE` AFTER DELETE ON `tipos_medidas` FOR EACH ROW BEGIN
-	delete from tipo_medida_grupo where  id_tipo_medida = old.id;    
+	delete from tipo_medida_grupo where  id_tipo_medida = old.id;
 END */;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -6539,7 +6539,7 @@ DROP TABLE IF EXISTS `vw_act_det_categoria`;
 /*!50001 DROP VIEW IF EXISTS `vw_act_det_categoria`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_act_det_categoria` AS SELECT 
+/*!50001 CREATE VIEW `vw_act_det_categoria` AS SELECT
  1 AS `id_actividad`,
  1 AS `id`,
  1 AS `idPadreCategoria`,
@@ -6565,7 +6565,7 @@ DROP TABLE IF EXISTS `vw_act_det_cliente`;
 /*!50001 DROP VIEW IF EXISTS `vw_act_det_cliente`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_act_det_cliente` AS SELECT 
+/*!50001 CREATE VIEW `vw_act_det_cliente` AS SELECT
  1 AS `id`,
  1 AS `usuario_creacion`,
  1 AS `idCategoria`,
@@ -6594,7 +6594,7 @@ DROP TABLE IF EXISTS `vw_act_det_marca`;
 /*!50001 DROP VIEW IF EXISTS `vw_act_det_marca`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_act_det_marca` AS SELECT 
+/*!50001 CREATE VIEW `vw_act_det_marca` AS SELECT
  1 AS `id_actividad`,
  1 AS `id`,
  1 AS `nombre`,
@@ -6614,7 +6614,7 @@ DROP TABLE IF EXISTS `vw_act_det_producto`;
 /*!50001 DROP VIEW IF EXISTS `vw_act_det_producto`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_act_det_producto` AS SELECT 
+/*!50001 CREATE VIEW `vw_act_det_producto` AS SELECT
  1 AS `id_actividad`,
  1 AS `id`,
  1 AS `usuario_creacion`,
@@ -6645,7 +6645,7 @@ DROP TABLE IF EXISTS `vw_act_det_tmp_categoria`;
 /*!50001 DROP VIEW IF EXISTS `vw_act_det_tmp_categoria`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_act_det_tmp_categoria` AS SELECT 
+/*!50001 CREATE VIEW `vw_act_det_tmp_categoria` AS SELECT
  1 AS `id`,
  1 AS `idPadreCategoria`,
  1 AS `letra`,
@@ -6670,7 +6670,7 @@ DROP TABLE IF EXISTS `vw_act_det_tmp_cliente`;
 /*!50001 DROP VIEW IF EXISTS `vw_act_det_tmp_cliente`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_act_det_tmp_cliente` AS SELECT 
+/*!50001 CREATE VIEW `vw_act_det_tmp_cliente` AS SELECT
  1 AS `id`,
  1 AS `usuario_creacion`,
  1 AS `idCategoria`,
@@ -6699,7 +6699,7 @@ DROP TABLE IF EXISTS `vw_act_det_tmp_marca`;
 /*!50001 DROP VIEW IF EXISTS `vw_act_det_tmp_marca`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_act_det_tmp_marca` AS SELECT 
+/*!50001 CREATE VIEW `vw_act_det_tmp_marca` AS SELECT
  1 AS `id`,
  1 AS `nombre`,
  1 AS `descripcion`,
@@ -6718,7 +6718,7 @@ DROP TABLE IF EXISTS `vw_act_det_tmp_producto`;
 /*!50001 DROP VIEW IF EXISTS `vw_act_det_tmp_producto`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_act_det_tmp_producto` AS SELECT 
+/*!50001 CREATE VIEW `vw_act_det_tmp_producto` AS SELECT
  1 AS `id`,
  1 AS `usuario_creacion`,
  1 AS `idCategoria`,
@@ -6747,7 +6747,7 @@ DROP TABLE IF EXISTS `vw_actividad_disponible_categoria`;
 /*!50001 DROP VIEW IF EXISTS `vw_actividad_disponible_categoria`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_actividad_disponible_categoria` AS SELECT 
+/*!50001 CREATE VIEW `vw_actividad_disponible_categoria` AS SELECT
  1 AS `id`,
  1 AS `idPadreCategoria`,
  1 AS `letra`,
@@ -6772,7 +6772,7 @@ DROP TABLE IF EXISTS `vw_actividad_disponible_cliente`;
 /*!50001 DROP VIEW IF EXISTS `vw_actividad_disponible_cliente`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_actividad_disponible_cliente` AS SELECT 
+/*!50001 CREATE VIEW `vw_actividad_disponible_cliente` AS SELECT
  1 AS `id`,
  1 AS `usuario_creacion`,
  1 AS `idCategoria`,
@@ -6801,7 +6801,7 @@ DROP TABLE IF EXISTS `vw_actividad_disponible_marca`;
 /*!50001 DROP VIEW IF EXISTS `vw_actividad_disponible_marca`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_actividad_disponible_marca` AS SELECT 
+/*!50001 CREATE VIEW `vw_actividad_disponible_marca` AS SELECT
  1 AS `id`,
  1 AS `nombre`,
  1 AS `descripcion`,
@@ -6820,7 +6820,7 @@ DROP TABLE IF EXISTS `vw_actividad_disponible_producto`;
 /*!50001 DROP VIEW IF EXISTS `vw_actividad_disponible_producto`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_actividad_disponible_producto` AS SELECT 
+/*!50001 CREATE VIEW `vw_actividad_disponible_producto` AS SELECT
  1 AS `id`,
  1 AS `usuario_creacion`,
  1 AS `idCategoria`,
@@ -6849,7 +6849,7 @@ DROP TABLE IF EXISTS `vw_cajas`;
 /*!50001 DROP VIEW IF EXISTS `vw_cajas`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_cajas` AS SELECT 
+/*!50001 CREATE VIEW `vw_cajas` AS SELECT
  1 AS `id`,
  1 AS `nombre`,
  1 AS `descripcion`,
@@ -6901,7 +6901,7 @@ DROP TABLE IF EXISTS `vw_cajas_activas`;
 /*!50001 DROP VIEW IF EXISTS `vw_cajas_activas`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_cajas_activas` AS SELECT 
+/*!50001 CREATE VIEW `vw_cajas_activas` AS SELECT
  1 AS `id`,
  1 AS `nombre`,
  1 AS `descripcion`,
@@ -6944,7 +6944,7 @@ DROP TABLE IF EXISTS `vw_cajas_por_usuario`;
 /*!50001 DROP VIEW IF EXISTS `vw_cajas_por_usuario`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_cajas_por_usuario` AS SELECT 
+/*!50001 CREATE VIEW `vw_cajas_por_usuario` AS SELECT
  1 AS `idUsuario`,
  1 AS `id`,
  1 AS `nombre`,
@@ -6997,7 +6997,7 @@ DROP TABLE IF EXISTS `vw_clientes`;
 /*!50001 DROP VIEW IF EXISTS `vw_clientes`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_clientes` AS SELECT 
+/*!50001 CREATE VIEW `vw_clientes` AS SELECT
  1 AS `idCliente`,
  1 AS `nit`,
  1 AS `nombre`,
@@ -7015,7 +7015,7 @@ DROP TABLE IF EXISTS `vw_cnt_clase`;
 /*!50001 DROP VIEW IF EXISTS `vw_cnt_clase`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_cnt_clase` AS SELECT 
+/*!50001 CREATE VIEW `vw_cnt_clase` AS SELECT
  1 AS `id_clase`,
  1 AS `cod_clase`,
  1 AS `nombre_clase`*/;
@@ -7029,7 +7029,7 @@ DROP TABLE IF EXISTS `vw_cnt_cuenta`;
 /*!50001 DROP VIEW IF EXISTS `vw_cnt_cuenta`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_cnt_cuenta` AS SELECT 
+/*!50001 CREATE VIEW `vw_cnt_cuenta` AS SELECT
  1 AS `id_cuenta`,
  1 AS `cod_grupo`,
  1 AS `cod_cuenta`,
@@ -7050,7 +7050,7 @@ DROP TABLE IF EXISTS `vw_cnt_grupos`;
 /*!50001 DROP VIEW IF EXISTS `vw_cnt_grupos`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_cnt_grupos` AS SELECT 
+/*!50001 CREATE VIEW `vw_cnt_grupos` AS SELECT
  1 AS `id_grupo`,
  1 AS `cod_clase`,
  1 AS `cod_grupo`,
@@ -7067,7 +7067,7 @@ DROP TABLE IF EXISTS `vw_cnt_operaciones`;
 /*!50001 DROP VIEW IF EXISTS `vw_cnt_operaciones`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_cnt_operaciones` AS SELECT 
+/*!50001 CREATE VIEW `vw_cnt_operaciones` AS SELECT
  1 AS `id`,
  1 AS `usuario`,
  1 AS `fechaOperacion`,
@@ -7091,7 +7091,7 @@ DROP TABLE IF EXISTS `vw_cnt_operaciones_automaticas`;
 /*!50001 DROP VIEW IF EXISTS `vw_cnt_operaciones_automaticas`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_cnt_operaciones_automaticas` AS SELECT 
+/*!50001 CREATE VIEW `vw_cnt_operaciones_automaticas` AS SELECT
  1 AS `id`,
  1 AS `usuario`,
  1 AS `fechaOperacion`,
@@ -7118,7 +7118,7 @@ DROP TABLE IF EXISTS `vw_cnt_operaciones_manuales`;
 /*!50001 DROP VIEW IF EXISTS `vw_cnt_operaciones_manuales`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_cnt_operaciones_manuales` AS SELECT 
+/*!50001 CREATE VIEW `vw_cnt_operaciones_manuales` AS SELECT
  1 AS `id`,
  1 AS `usuario`,
  1 AS `fechaOperacion`,
@@ -7142,7 +7142,7 @@ DROP TABLE IF EXISTS `vw_cnt_scuentas`;
 /*!50001 DROP VIEW IF EXISTS `vw_cnt_scuentas`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_cnt_scuentas` AS SELECT 
+/*!50001 CREATE VIEW `vw_cnt_scuentas` AS SELECT
  1 AS `id_scuenta`,
  1 AS `nro_scuenta`,
  1 AS `modificar`,
@@ -7165,7 +7165,7 @@ DROP TABLE IF EXISTS `vw_contadores`;
 /*!50001 DROP VIEW IF EXISTS `vw_contadores`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_contadores` AS SELECT 
+/*!50001 CREATE VIEW `vw_contadores` AS SELECT
  1 AS `id`,
  1 AS `codContador`,
  1 AS `establecimiento`,
@@ -7194,7 +7194,7 @@ DROP TABLE IF EXISTS `vw_corte_de_caja`;
 /*!50001 DROP VIEW IF EXISTS `vw_corte_de_caja`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_corte_de_caja` AS SELECT 
+/*!50001 CREATE VIEW `vw_corte_de_caja` AS SELECT
  1 AS `id`,
  1 AS `usuario_apertura`,
  1 AS `usuario_cierre`,
@@ -7220,7 +7220,7 @@ DROP TABLE IF EXISTS `vw_corte_de_caja_pagos`;
 /*!50001 DROP VIEW IF EXISTS `vw_corte_de_caja_pagos`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_corte_de_caja_pagos` AS SELECT 
+/*!50001 CREATE VIEW `vw_corte_de_caja_pagos` AS SELECT
  1 AS `cod_cierre`,
  1 AS `idMedioDePago`,
  1 AS `nombre`,
@@ -7238,7 +7238,7 @@ DROP TABLE IF EXISTS `vw_corte_de_caja_pagos_general`;
 /*!50001 DROP VIEW IF EXISTS `vw_corte_de_caja_pagos_general`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_corte_de_caja_pagos_general` AS SELECT 
+/*!50001 CREATE VIEW `vw_corte_de_caja_pagos_general` AS SELECT
  1 AS `id`,
  1 AS `idDocumento`,
  1 AS `idMedioDePago`,
@@ -7260,7 +7260,7 @@ DROP TABLE IF EXISTS `vw_corte_de_caja_parcial`;
 /*!50001 DROP VIEW IF EXISTS `vw_corte_de_caja_parcial`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_corte_de_caja_parcial` AS SELECT 
+/*!50001 CREATE VIEW `vw_corte_de_caja_parcial` AS SELECT
  1 AS `id`,
  1 AS `id_cierre_total`,
  1 AS `usuario_apertura`,
@@ -7287,7 +7287,7 @@ DROP TABLE IF EXISTS `vw_documento_operaciones`;
 /*!50001 DROP VIEW IF EXISTS `vw_documento_operaciones`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_documento_operaciones` AS SELECT 
+/*!50001 CREATE VIEW `vw_documento_operaciones` AS SELECT
  1 AS `nombreOperacion`,
  1 AS `tipoDocumentoFinal`,
  1 AS `nombreTipoDocumentoFinal`,
@@ -7306,7 +7306,7 @@ DROP TABLE IF EXISTS `vw_documentos`;
 /*!50001 DROP VIEW IF EXISTS `vw_documentos`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_documentos` AS SELECT 
+/*!50001 CREATE VIEW `vw_documentos` AS SELECT
  1 AS `orden`,
  1 AS `tipoDocumentoFinal`,
  1 AS `nombreTipoDocumentoFinal`,
@@ -7369,7 +7369,7 @@ DROP TABLE IF EXISTS `vw_documentos_domicilio`;
 /*!50001 DROP VIEW IF EXISTS `vw_documentos_domicilio`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_documentos_domicilio` AS SELECT 
+/*!50001 CREATE VIEW `vw_documentos_domicilio` AS SELECT
  1 AS `id`,
  1 AS `cod_doc`,
  1 AS `cod_cliente`,
@@ -7400,7 +7400,7 @@ DROP TABLE IF EXISTS `vw_documentos_listado_productos_por_cierre`;
 /*!50001 DROP VIEW IF EXISTS `vw_documentos_listado_productos_por_cierre`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_documentos_listado_productos_por_cierre` AS SELECT 
+/*!50001 CREATE VIEW `vw_documentos_listado_productos_por_cierre` AS SELECT
  1 AS `id`,
  1 AS `orden`,
  1 AS `tipoDocumento`,
@@ -7439,7 +7439,7 @@ DROP TABLE IF EXISTS `vw_documentos_pagos`;
 /*!50001 DROP VIEW IF EXISTS `vw_documentos_pagos`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_documentos_pagos` AS SELECT 
+/*!50001 CREATE VIEW `vw_documentos_pagos` AS SELECT
  1 AS `id`,
  1 AS `idDocumento`,
  1 AS `idMedioDePago`,
@@ -7463,7 +7463,7 @@ DROP TABLE IF EXISTS `vw_empleados_obj`;
 /*!50001 DROP VIEW IF EXISTS `vw_empleados_obj`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_empleados_obj` AS SELECT 
+/*!50001 CREATE VIEW `vw_empleados_obj` AS SELECT
  1 AS `id`,
  1 AS `tipo`,
  1 AS `idPersona`,
@@ -7498,7 +7498,7 @@ DROP TABLE IF EXISTS `vw_empleados_tipo`;
 /*!50001 DROP VIEW IF EXISTS `vw_empleados_tipo`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_empleados_tipo` AS SELECT 
+/*!50001 CREATE VIEW `vw_empleados_tipo` AS SELECT
  1 AS `id`,
  1 AS `nombre`,
  1 AS `descripcion`,
@@ -7520,7 +7520,7 @@ DROP TABLE IF EXISTS `vw_establecimiento`;
 /*!50001 DROP VIEW IF EXISTS `vw_establecimiento`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_establecimiento` AS SELECT 
+/*!50001 CREATE VIEW `vw_establecimiento` AS SELECT
  1 AS `id`,
  1 AS `nombre`,
  1 AS `descripcion`,
@@ -7574,7 +7574,7 @@ DROP TABLE IF EXISTS `vw_flags`;
 /*!50001 DROP VIEW IF EXISTS `vw_flags`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_flags` AS SELECT 
+/*!50001 CREATE VIEW `vw_flags` AS SELECT
  1 AS `id`,
  1 AS `codigo`,
  1 AS `estado`,
@@ -7592,7 +7592,7 @@ DROP TABLE IF EXISTS `vw_gastos_no_operacionales`;
 /*!50001 DROP VIEW IF EXISTS `vw_gastos_no_operacionales`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_gastos_no_operacionales` AS SELECT 
+/*!50001 CREATE VIEW `vw_gastos_no_operacionales` AS SELECT
  1 AS `id_scuenta`,
  1 AS `nro_scuenta`,
  1 AS `modificar`,
@@ -7614,7 +7614,7 @@ DROP TABLE IF EXISTS `vw_inv_bodegas`;
 /*!50001 DROP VIEW IF EXISTS `vw_inv_bodegas`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_inv_bodegas` AS SELECT 
+/*!50001 CREATE VIEW `vw_inv_bodegas` AS SELECT
  1 AS `id`,
  1 AS `nombre`,
  1 AS `descripcion`,
@@ -7638,7 +7638,7 @@ DROP TABLE IF EXISTS `vw_inv_categorias`;
 /*!50001 DROP VIEW IF EXISTS `vw_inv_categorias`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_inv_categorias` AS SELECT 
+/*!50001 CREATE VIEW `vw_inv_categorias` AS SELECT
  1 AS `id`,
  1 AS `idPadreCategoria`,
  1 AS `letra`,
@@ -7664,7 +7664,7 @@ DROP TABLE IF EXISTS `vw_inv_descuentos`;
 /*!50001 DROP VIEW IF EXISTS `vw_inv_descuentos`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_inv_descuentos` AS SELECT 
+/*!50001 CREATE VIEW `vw_inv_descuentos` AS SELECT
  1 AS `id`,
  1 AS `tipo`,
  1 AS `NombreTipo`,
@@ -7690,7 +7690,7 @@ DROP TABLE IF EXISTS `vw_inv_descuentos_actividad`;
 /*!50001 DROP VIEW IF EXISTS `vw_inv_descuentos_actividad`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_inv_descuentos_actividad` AS SELECT 
+/*!50001 CREATE VIEW `vw_inv_descuentos_actividad` AS SELECT
  1 AS `id`,
  1 AS `nombre`,
  1 AS `descripcion`,
@@ -7718,7 +7718,7 @@ DROP TABLE IF EXISTS `vw_inv_inventario_ingreso_auxiliar`;
 /*!50001 DROP VIEW IF EXISTS `vw_inv_inventario_ingreso_auxiliar`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_inv_inventario_ingreso_auxiliar` AS SELECT 
+/*!50001 CREATE VIEW `vw_inv_inventario_ingreso_auxiliar` AS SELECT
  1 AS `id`,
  1 AS `cod_producto`,
  1 AS `cantidad`,
@@ -7746,7 +7746,7 @@ DROP TABLE IF EXISTS `vw_inv_marcas`;
 /*!50001 DROP VIEW IF EXISTS `vw_inv_marcas`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_inv_marcas` AS SELECT 
+/*!50001 CREATE VIEW `vw_inv_marcas` AS SELECT
  1 AS `id`,
  1 AS `nombre`,
  1 AS `descripcion`,
@@ -7766,7 +7766,7 @@ DROP TABLE IF EXISTS `vw_inv_mst_producto`;
 /*!50001 DROP VIEW IF EXISTS `vw_inv_mst_producto`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_inv_mst_producto` AS SELECT 
+/*!50001 CREATE VIEW `vw_inv_mst_producto` AS SELECT
  1 AS `id`,
  1 AS `usuario_creacion`,
  1 AS `idCategoria`,
@@ -7803,7 +7803,7 @@ DROP TABLE IF EXISTS `vw_inv_mst_producto_existencias`;
 /*!50001 DROP VIEW IF EXISTS `vw_inv_mst_producto_existencias`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_inv_mst_producto_existencias` AS SELECT 
+/*!50001 CREATE VIEW `vw_inv_mst_producto_existencias` AS SELECT
  1 AS `id`,
  1 AS `id_producto`,
  1 AS `id_bodega`,
@@ -7835,7 +7835,7 @@ DROP TABLE IF EXISTS `vw_inv_mst_producto_existencias_by_caja`;
 /*!50001 DROP VIEW IF EXISTS `vw_inv_mst_producto_existencias_by_caja`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_inv_mst_producto_existencias_by_caja` AS SELECT 
+/*!50001 CREATE VIEW `vw_inv_mst_producto_existencias_by_caja` AS SELECT
  1 AS `id`,
  1 AS `nombreCaja`,
  1 AS `descripcionCaja`,
@@ -7897,7 +7897,7 @@ DROP TABLE IF EXISTS `vw_inv_mst_producto_existencias_byprd`;
 /*!50001 DROP VIEW IF EXISTS `vw_inv_mst_producto_existencias_byprd`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_inv_mst_producto_existencias_byprd` AS SELECT 
+/*!50001 CREATE VIEW `vw_inv_mst_producto_existencias_byprd` AS SELECT
  1 AS `id_producto`,
  1 AS `objeto`*/;
 SET character_set_client = @saved_cs_client;
@@ -7910,7 +7910,7 @@ DROP TABLE IF EXISTS `vw_inv_mst_producto_existencias_resumen`;
 /*!50001 DROP VIEW IF EXISTS `vw_inv_mst_producto_existencias_resumen`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_inv_mst_producto_existencias_resumen` AS SELECT 
+/*!50001 CREATE VIEW `vw_inv_mst_producto_existencias_resumen` AS SELECT
  1 AS `id_producto`,
  1 AS `compras`,
  1 AS `ventas`,
@@ -7951,7 +7951,7 @@ DROP TABLE IF EXISTS `vw_inv_mst_producto_images`;
 /*!50001 DROP VIEW IF EXISTS `vw_inv_mst_producto_images`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_inv_mst_producto_images` AS SELECT 
+/*!50001 CREATE VIEW `vw_inv_mst_producto_images` AS SELECT
  1 AS `id`,
  1 AS `id_producto`,
  1 AS `descripcion`,
@@ -7973,7 +7973,7 @@ DROP TABLE IF EXISTS `vw_inv_mst_producto_images_byprd`;
 /*!50001 DROP VIEW IF EXISTS `vw_inv_mst_producto_images_byprd`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_inv_mst_producto_images_byprd` AS SELECT 
+/*!50001 CREATE VIEW `vw_inv_mst_producto_images_byprd` AS SELECT
  1 AS `id_producto`,
  1 AS `objeto`*/;
 SET character_set_client = @saved_cs_client;
@@ -7986,7 +7986,7 @@ DROP TABLE IF EXISTS `vw_inv_mst_producto_marcas_obj`;
 /*!50001 DROP VIEW IF EXISTS `vw_inv_mst_producto_marcas_obj`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_inv_mst_producto_marcas_obj` AS SELECT 
+/*!50001 CREATE VIEW `vw_inv_mst_producto_marcas_obj` AS SELECT
  1 AS `id`,
  1 AS `nombre`,
  1 AS `descripcion`,
@@ -8009,7 +8009,7 @@ DROP TABLE IF EXISTS `vw_inv_mst_producto_obj`;
 /*!50001 DROP VIEW IF EXISTS `vw_inv_mst_producto_obj`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_inv_mst_producto_obj` AS SELECT 
+/*!50001 CREATE VIEW `vw_inv_mst_producto_obj` AS SELECT
  1 AS `id`,
  1 AS `obj`*/;
 SET character_set_client = @saved_cs_client;
@@ -8022,7 +8022,7 @@ DROP TABLE IF EXISTS `vw_inv_mst_producto_precios_Json`;
 /*!50001 DROP VIEW IF EXISTS `vw_inv_mst_producto_precios_Json`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_inv_mst_producto_precios_Json` AS SELECT 
+/*!50001 CREATE VIEW `vw_inv_mst_producto_precios_Json` AS SELECT
  1 AS `id_producto`,
  1 AS `estado`,
  1 AS `obj`*/;
@@ -8036,7 +8036,7 @@ DROP TABLE IF EXISTS `vw_inv_mst_producto_precios_json_byprd`;
 /*!50001 DROP VIEW IF EXISTS `vw_inv_mst_producto_precios_json_byprd`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_inv_mst_producto_precios_json_byprd` AS SELECT 
+/*!50001 CREATE VIEW `vw_inv_mst_producto_precios_json_byprd` AS SELECT
  1 AS `id_producto`,
  1 AS `objeto`*/;
 SET character_set_client = @saved_cs_client;
@@ -8049,7 +8049,7 @@ DROP TABLE IF EXISTS `vw_inv_mst_producto_precios_obj`;
 /*!50001 DROP VIEW IF EXISTS `vw_inv_mst_producto_precios_obj`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_inv_mst_producto_precios_obj` AS SELECT 
+/*!50001 CREATE VIEW `vw_inv_mst_producto_precios_obj` AS SELECT
  1 AS `id_producto`,
  1 AS `estado`,
  1 AS `obj`*/;
@@ -8063,7 +8063,7 @@ DROP TABLE IF EXISTS `vw_inv_mst_producto_precios_obj_byprd`;
 /*!50001 DROP VIEW IF EXISTS `vw_inv_mst_producto_precios_obj_byprd`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_inv_mst_producto_precios_obj_byprd` AS SELECT 
+/*!50001 CREATE VIEW `vw_inv_mst_producto_precios_obj_byprd` AS SELECT
  1 AS `id_producto`,
  1 AS `objeto`*/;
 SET character_set_client = @saved_cs_client;
@@ -8076,7 +8076,7 @@ DROP TABLE IF EXISTS `vw_inv_mst_servicios`;
 /*!50001 DROP VIEW IF EXISTS `vw_inv_mst_servicios`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_inv_mst_servicios` AS SELECT 
+/*!50001 CREATE VIEW `vw_inv_mst_servicios` AS SELECT
  1 AS `id`,
  1 AS `nombre`,
  1 AS `estado`,
@@ -8101,7 +8101,7 @@ DROP TABLE IF EXISTS `vw_inv_mst_tipos_servicios`;
 /*!50001 DROP VIEW IF EXISTS `vw_inv_mst_tipos_servicios`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_inv_mst_tipos_servicios` AS SELECT 
+/*!50001 CREATE VIEW `vw_inv_mst_tipos_servicios` AS SELECT
  1 AS `id`,
  1 AS `usuario_creacion`,
  1 AS `name_usuario_creacion`,
@@ -8123,7 +8123,7 @@ DROP TABLE IF EXISTS `vw_inv_mst_vehiculos_tipos`;
 /*!50001 DROP VIEW IF EXISTS `vw_inv_mst_vehiculos_tipos`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_inv_mst_vehiculos_tipos` AS SELECT 
+/*!50001 CREATE VIEW `vw_inv_mst_vehiculos_tipos` AS SELECT
  1 AS `id`,
  1 AS `usuario_creacion`,
  1 AS `name_usuario_creacion`,
@@ -8145,7 +8145,7 @@ DROP TABLE IF EXISTS `vw_inv_producto`;
 /*!50001 DROP VIEW IF EXISTS `vw_inv_producto`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_inv_producto` AS SELECT 
+/*!50001 CREATE VIEW `vw_inv_producto` AS SELECT
  1 AS `id`,
  1 AS `usuario_creacion`,
  1 AS `idCategoria`,
@@ -8180,7 +8180,7 @@ DROP TABLE IF EXISTS `vw_maestros`;
 /*!50001 DROP VIEW IF EXISTS `vw_maestros`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_maestros` AS SELECT 
+/*!50001 CREATE VIEW `vw_maestros` AS SELECT
  1 AS `id`,
  1 AS `id_maestro`,
  1 AS `descripcion`,
@@ -8197,7 +8197,7 @@ DROP TABLE IF EXISTS `vw_medidas_relacionadas_grupos`;
 /*!50001 DROP VIEW IF EXISTS `vw_medidas_relacionadas_grupos`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_medidas_relacionadas_grupos` AS SELECT 
+/*!50001 CREATE VIEW `vw_medidas_relacionadas_grupos` AS SELECT
  1 AS `id_relacion`,
  1 AS `id_tipo_medida`,
  1 AS `id_grupo`,
@@ -8219,7 +8219,7 @@ DROP TABLE IF EXISTS `vw_medios`;
 /*!50001 DROP VIEW IF EXISTS `vw_medios`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_medios` AS SELECT 
+/*!50001 CREATE VIEW `vw_medios` AS SELECT
  1 AS `id`,
  1 AS `nombre`,
  1 AS `descripcion`,
@@ -8239,7 +8239,7 @@ DROP TABLE IF EXISTS `vw_medios_bonos`;
 /*!50001 DROP VIEW IF EXISTS `vw_medios_bonos`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_medios_bonos` AS SELECT 
+/*!50001 CREATE VIEW `vw_medios_bonos` AS SELECT
  1 AS `id`,
  1 AS `nombre`,
  1 AS `descripcion`,
@@ -8259,7 +8259,7 @@ DROP TABLE IF EXISTS `vw_medios_by_cajas`;
 /*!50001 DROP VIEW IF EXISTS `vw_medios_by_cajas`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_medios_by_cajas` AS SELECT 
+/*!50001 CREATE VIEW `vw_medios_by_cajas` AS SELECT
  1 AS `id`,
  1 AS `nombre`,
  1 AS `descripcion`,
@@ -8290,7 +8290,7 @@ DROP TABLE IF EXISTS `vw_medios_de_cajas_activas`;
 /*!50001 DROP VIEW IF EXISTS `vw_medios_de_cajas_activas`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_medios_de_cajas_activas` AS SELECT 
+/*!50001 CREATE VIEW `vw_medios_de_cajas_activas` AS SELECT
  1 AS `id`,
  1 AS `nombre`,
  1 AS `descripcion`,
@@ -8313,7 +8313,7 @@ DROP TABLE IF EXISTS `vw_medios_de_pago`;
 /*!50001 DROP VIEW IF EXISTS `vw_medios_de_pago`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_medios_de_pago` AS SELECT 
+/*!50001 CREATE VIEW `vw_medios_de_pago` AS SELECT
  1 AS `id`,
  1 AS `nombre`,
  1 AS `descripcion`,
@@ -8333,7 +8333,7 @@ DROP TABLE IF EXISTS `vw_mov_vehiculos_ingreso_servicios`;
 /*!50001 DROP VIEW IF EXISTS `vw_mov_vehiculos_ingreso_servicios`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_mov_vehiculos_ingreso_servicios` AS SELECT 
+/*!50001 CREATE VIEW `vw_mov_vehiculos_ingreso_servicios` AS SELECT
  1 AS `id`,
  1 AS `cod_servicio`,
  1 AS `idCliente`,
@@ -8362,7 +8362,7 @@ DROP TABLE IF EXISTS `vw_mst_mov_cartera`;
 /*!50001 DROP VIEW IF EXISTS `vw_mst_mov_cartera`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_mst_mov_cartera` AS SELECT 
+/*!50001 CREATE VIEW `vw_mst_mov_cartera` AS SELECT
  1 AS `id`,
  1 AS `usuario_creacion`,
  1 AS `usuario_edicion`,
@@ -8392,7 +8392,7 @@ DROP TABLE IF EXISTS `vw_mst_mov_cartera_abonos`;
 /*!50001 DROP VIEW IF EXISTS `vw_mst_mov_cartera_abonos`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_mst_mov_cartera_abonos` AS SELECT 
+/*!50001 CREATE VIEW `vw_mst_mov_cartera_abonos` AS SELECT
  1 AS `id`,
  1 AS `usuario_creacion`,
  1 AS `usuario_edicion`,
@@ -8412,7 +8412,7 @@ DROP TABLE IF EXISTS `vw_mst_mov_credito`;
 /*!50001 DROP VIEW IF EXISTS `vw_mst_mov_credito`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_mst_mov_credito` AS SELECT 
+/*!50001 CREATE VIEW `vw_mst_mov_credito` AS SELECT
  1 AS `id`,
  1 AS `usuario_creacion`,
  1 AS `usuario_edicion`,
@@ -8444,7 +8444,7 @@ DROP TABLE IF EXISTS `vw_mst_per_clientes`;
 /*!50001 DROP VIEW IF EXISTS `vw_mst_per_clientes`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_mst_per_clientes` AS SELECT 
+/*!50001 CREATE VIEW `vw_mst_per_clientes` AS SELECT
  1 AS `id`,
  1 AS `tipoIdentificacion`,
  1 AS `numIdentificacion`,
@@ -8489,7 +8489,7 @@ DROP TABLE IF EXISTS `vw_mst_per_clientes_ciudades`;
 /*!50001 DROP VIEW IF EXISTS `vw_mst_per_clientes_ciudades`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_mst_per_clientes_ciudades` AS SELECT 
+/*!50001 CREATE VIEW `vw_mst_per_clientes_ciudades` AS SELECT
  1 AS `id`,
  1 AS `cod_pais`,
  1 AS `cod_departamento`,
@@ -8508,7 +8508,7 @@ DROP TABLE IF EXISTS `vw_mst_per_clientes_deptos`;
 /*!50001 DROP VIEW IF EXISTS `vw_mst_per_clientes_deptos`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_mst_per_clientes_deptos` AS SELECT 
+/*!50001 CREATE VIEW `vw_mst_per_clientes_deptos` AS SELECT
  1 AS `id`,
  1 AS `cod_departamento`,
  1 AS `nombre`,
@@ -8525,7 +8525,7 @@ DROP TABLE IF EXISTS `vw_mst_per_clientes_obj`;
 /*!50001 DROP VIEW IF EXISTS `vw_mst_per_clientes_obj`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_mst_per_clientes_obj` AS SELECT 
+/*!50001 CREATE VIEW `vw_mst_per_clientes_obj` AS SELECT
  1 AS `id`,
  1 AS `tipoIdentificacion`,
  1 AS `numIdentificacion`,
@@ -8541,7 +8541,7 @@ DROP TABLE IF EXISTS `vw_mst_per_empleados`;
 /*!50001 DROP VIEW IF EXISTS `vw_mst_per_empleados`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_mst_per_empleados` AS SELECT 
+/*!50001 CREATE VIEW `vw_mst_per_empleados` AS SELECT
  1 AS `id`,
  1 AS `tipo`,
  1 AS `idPersona`,
@@ -8575,7 +8575,7 @@ DROP TABLE IF EXISTS `vw_mst_per_empleados_vendedores`;
 /*!50001 DROP VIEW IF EXISTS `vw_mst_per_empleados_vendedores`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_mst_per_empleados_vendedores` AS SELECT 
+/*!50001 CREATE VIEW `vw_mst_per_empleados_vendedores` AS SELECT
  1 AS `id`,
  1 AS `tipo`,
  1 AS `idPersona`,
@@ -8609,7 +8609,7 @@ DROP TABLE IF EXISTS `vw_mst_per_proveedores`;
 /*!50001 DROP VIEW IF EXISTS `vw_mst_per_proveedores`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_mst_per_proveedores` AS SELECT 
+/*!50001 CREATE VIEW `vw_mst_per_proveedores` AS SELECT
  1 AS `id`,
  1 AS `tipoIdentificacion`,
  1 AS `numIdentificacion`,
@@ -8645,7 +8645,7 @@ DROP TABLE IF EXISTS `vw_obj_documentos`;
 /*!50001 DROP VIEW IF EXISTS `vw_obj_documentos`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_obj_documentos` AS SELECT 
+/*!50001 CREATE VIEW `vw_obj_documentos` AS SELECT
  1 AS `orden`,
  1 AS `campo_info_6`,
  1 AS `establecimiento`,
@@ -8707,7 +8707,7 @@ DROP TABLE IF EXISTS `vw_obj_documentos_abonos_iddoc`;
 /*!50001 DROP VIEW IF EXISTS `vw_obj_documentos_abonos_iddoc`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_obj_documentos_abonos_iddoc` AS SELECT 
+/*!50001 CREATE VIEW `vw_obj_documentos_abonos_iddoc` AS SELECT
  1 AS `idDocumento`,
  1 AS `objeto`*/;
 SET character_set_client = @saved_cs_client;
@@ -8720,7 +8720,7 @@ DROP TABLE IF EXISTS `vw_obj_documentos_clientes`;
 /*!50001 DROP VIEW IF EXISTS `vw_obj_documentos_clientes`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_obj_documentos_clientes` AS SELECT 
+/*!50001 CREATE VIEW `vw_obj_documentos_clientes` AS SELECT
  1 AS `orden`,
  1 AS `id`,
  1 AS `name`,
@@ -8735,7 +8735,7 @@ DROP TABLE IF EXISTS `vw_obj_documentos_compra`;
 /*!50001 DROP VIEW IF EXISTS `vw_obj_documentos_compra`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_obj_documentos_compra` AS SELECT 
+/*!50001 CREATE VIEW `vw_obj_documentos_compra` AS SELECT
  1 AS `orden`,
  1 AS `establecimiento`,
  1 AS `nombreTipoContador`,
@@ -8805,7 +8805,7 @@ DROP TABLE IF EXISTS `vw_obj_documentos_cuentas_por_pagar`;
 /*!50001 DROP VIEW IF EXISTS `vw_obj_documentos_cuentas_por_pagar`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_obj_documentos_cuentas_por_pagar` AS SELECT 
+/*!50001 CREATE VIEW `vw_obj_documentos_cuentas_por_pagar` AS SELECT
  1 AS `orden`,
  1 AS `campo_info_6`,
  1 AS `establecimiento`,
@@ -8867,7 +8867,7 @@ DROP TABLE IF EXISTS `vw_obj_documentos_devolucion`;
 /*!50001 DROP VIEW IF EXISTS `vw_obj_documentos_devolucion`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_obj_documentos_devolucion` AS SELECT 
+/*!50001 CREATE VIEW `vw_obj_documentos_devolucion` AS SELECT
  1 AS `saldo_bono`,
  1 AS `estado_bono`,
  1 AS `uso_del_bono`,
@@ -8931,7 +8931,7 @@ DROP TABLE IF EXISTS `vw_obj_documentos_old`;
 /*!50001 DROP VIEW IF EXISTS `vw_obj_documentos_old`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_obj_documentos_old` AS SELECT 
+/*!50001 CREATE VIEW `vw_obj_documentos_old` AS SELECT
  1 AS `establecimiento`,
  1 AS `nombreEsta`,
  1 AS `idAuxiliar`,
@@ -8978,7 +8978,7 @@ DROP TABLE IF EXISTS `vw_obj_documentos_pagos`;
 /*!50001 DROP VIEW IF EXISTS `vw_obj_documentos_pagos`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_obj_documentos_pagos` AS SELECT 
+/*!50001 CREATE VIEW `vw_obj_documentos_pagos` AS SELECT
  1 AS `id`,
  1 AS `idDocumento`,
  1 AS `idMedioDePago`,
@@ -8999,7 +8999,7 @@ DROP TABLE IF EXISTS `vw_obj_documentos_pagos_CPP`;
 /*!50001 DROP VIEW IF EXISTS `vw_obj_documentos_pagos_CPP`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_obj_documentos_pagos_CPP` AS SELECT 
+/*!50001 CREATE VIEW `vw_obj_documentos_pagos_CPP` AS SELECT
  1 AS `orden`,
  1 AS `campo_info_6`,
  1 AS `establecimiento`,
@@ -9061,7 +9061,7 @@ DROP TABLE IF EXISTS `vw_obj_documentos_pagos_iddoc`;
 /*!50001 DROP VIEW IF EXISTS `vw_obj_documentos_pagos_iddoc`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_obj_documentos_pagos_iddoc` AS SELECT 
+/*!50001 CREATE VIEW `vw_obj_documentos_pagos_iddoc` AS SELECT
  1 AS `idDocumento`,
  1 AS `objeto`*/;
 SET character_set_client = @saved_cs_client;
@@ -9074,7 +9074,7 @@ DROP TABLE IF EXISTS `vw_obj_documentos_por_cliente`;
 /*!50001 DROP VIEW IF EXISTS `vw_obj_documentos_por_cliente`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_obj_documentos_por_cliente` AS SELECT 
+/*!50001 CREATE VIEW `vw_obj_documentos_por_cliente` AS SELECT
  1 AS `cliente`,
  1 AS `nombreCompleto`,
  1 AS `tipoDocumentoFinal`,
@@ -9089,7 +9089,7 @@ DROP TABLE IF EXISTS `vw_obj_documentos_por_tipo_documento_final`;
 /*!50001 DROP VIEW IF EXISTS `vw_obj_documentos_por_tipo_documento_final`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_obj_documentos_por_tipo_documento_final` AS SELECT 
+/*!50001 CREATE VIEW `vw_obj_documentos_por_tipo_documento_final` AS SELECT
  1 AS `tipoDocumentoFinal`,
  1 AS `objeto`*/;
 SET character_set_client = @saved_cs_client;
@@ -9102,7 +9102,7 @@ DROP TABLE IF EXISTS `vw_obj_documentos_por_usuario`;
 /*!50001 DROP VIEW IF EXISTS `vw_obj_documentos_por_usuario`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_obj_documentos_por_usuario` AS SELECT 
+/*!50001 CREATE VIEW `vw_obj_documentos_por_usuario` AS SELECT
  1 AS `usuario`,
  1 AS `nombreCompleto`,
  1 AS `tipoDocumentoFinal`,
@@ -9117,7 +9117,7 @@ DROP TABLE IF EXISTS `vw_obj_listado_documento`;
 /*!50001 DROP VIEW IF EXISTS `vw_obj_listado_documento`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_obj_listado_documento` AS SELECT 
+/*!50001 CREATE VIEW `vw_obj_listado_documento` AS SELECT
  1 AS `orden`,
  1 AS `idDocumento`,
  1 AS `tipoDocumento`,
@@ -9137,7 +9137,7 @@ DROP TABLE IF EXISTS `vw_obj_listado_documento_iddoc`;
 /*!50001 DROP VIEW IF EXISTS `vw_obj_listado_documento_iddoc`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_obj_listado_documento_iddoc` AS SELECT 
+/*!50001 CREATE VIEW `vw_obj_listado_documento_iddoc` AS SELECT
  1 AS `orden`,
  1 AS `objeto`*/;
 SET character_set_client = @saved_cs_client;
@@ -9150,7 +9150,7 @@ DROP TABLE IF EXISTS `vw_obj_listado_documento_impuestos`;
 /*!50001 DROP VIEW IF EXISTS `vw_obj_listado_documento_impuestos`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_obj_listado_documento_impuestos` AS SELECT 
+/*!50001 CREATE VIEW `vw_obj_listado_documento_impuestos` AS SELECT
  1 AS `documento`,
  1 AS `obj`*/;
 SET character_set_client = @saved_cs_client;
@@ -9163,7 +9163,7 @@ DROP TABLE IF EXISTS `vw_obj_listado_documento_impuestos_iddoc`;
 /*!50001 DROP VIEW IF EXISTS `vw_obj_listado_documento_impuestos_iddoc`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_obj_listado_documento_impuestos_iddoc` AS SELECT 
+/*!50001 CREATE VIEW `vw_obj_listado_documento_impuestos_iddoc` AS SELECT
  1 AS `idDocumento`,
  1 AS `objeto`*/;
 SET character_set_client = @saved_cs_client;
@@ -9176,7 +9176,7 @@ DROP TABLE IF EXISTS `vw_obj_ventas`;
 /*!50001 DROP VIEW IF EXISTS `vw_obj_ventas`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_obj_ventas` AS SELECT 
+/*!50001 CREATE VIEW `vw_obj_ventas` AS SELECT
  1 AS `orden`,
  1 AS `establecimiento`,
  1 AS `nombreTipoContador`,
@@ -9237,7 +9237,7 @@ DROP TABLE IF EXISTS `vw_perfil_recurso`;
 /*!50001 DROP VIEW IF EXISTS `vw_perfil_recurso`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_perfil_recurso` AS SELECT 
+/*!50001 CREATE VIEW `vw_perfil_recurso` AS SELECT
  1 AS `idperfil_recurso`,
  1 AS `id_perfil`,
  1 AS `idRecurso`,
@@ -9259,7 +9259,7 @@ DROP TABLE IF EXISTS `vw_personas_disponibles_para_usuarios`;
 /*!50001 DROP VIEW IF EXISTS `vw_personas_disponibles_para_usuarios`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_personas_disponibles_para_usuarios` AS SELECT 
+/*!50001 CREATE VIEW `vw_personas_disponibles_para_usuarios` AS SELECT
  1 AS `orden`,
  1 AS `id`,
  1 AS `name`,
@@ -9296,7 +9296,7 @@ DROP TABLE IF EXISTS `vw_productos_con_existencia`;
 /*!50001 DROP VIEW IF EXISTS `vw_productos_con_existencia`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_productos_con_existencia` AS SELECT 
+/*!50001 CREATE VIEW `vw_productos_con_existencia` AS SELECT
  1 AS `id`,
  1 AS `obj`*/;
 SET character_set_client = @saved_cs_client;
@@ -9309,7 +9309,7 @@ DROP TABLE IF EXISTS `vw_productos_en_descuentos_activos`;
 /*!50001 DROP VIEW IF EXISTS `vw_productos_en_descuentos_activos`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_productos_en_descuentos_activos` AS SELECT 
+/*!50001 CREATE VIEW `vw_productos_en_descuentos_activos` AS SELECT
  1 AS `idActividad`,
  1 AS `nombreActividad`,
  1 AS `descripcion`,
@@ -9337,7 +9337,7 @@ DROP TABLE IF EXISTS `vw_productos_obj`;
 /*!50001 DROP VIEW IF EXISTS `vw_productos_obj`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_productos_obj` AS SELECT 
+/*!50001 CREATE VIEW `vw_productos_obj` AS SELECT
  1 AS `id`,
  1 AS `obj`*/;
 SET character_set_client = @saved_cs_client;
@@ -9350,7 +9350,7 @@ DROP TABLE IF EXISTS `vw_recurso`;
 /*!50001 DROP VIEW IF EXISTS `vw_recurso`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_recurso` AS SELECT 
+/*!50001 CREATE VIEW `vw_recurso` AS SELECT
  1 AS `id`,
  1 AS `nombre_recurso`,
  1 AS `estado`,
@@ -9370,7 +9370,7 @@ DROP TABLE IF EXISTS `vw_recurso_dir_array`;
 /*!50001 DROP VIEW IF EXISTS `vw_recurso_dir_array`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_recurso_dir_array` AS SELECT 
+/*!50001 CREATE VIEW `vw_recurso_dir_array` AS SELECT
  1 AS `id_recurso`,
  1 AS `direcciones`*/;
 SET character_set_client = @saved_cs_client;
@@ -9383,7 +9383,7 @@ DROP TABLE IF EXISTS `vw_session`;
 /*!50001 DROP VIEW IF EXISTS `vw_session`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_session` AS SELECT 
+/*!50001 CREATE VIEW `vw_session` AS SELECT
  1 AS `id`,
  1 AS `nombre`,
  1 AS `usuario`,
@@ -9403,7 +9403,7 @@ DROP TABLE IF EXISTS `vw_sucursales`;
 /*!50001 DROP VIEW IF EXISTS `vw_sucursales`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_sucursales` AS SELECT 
+/*!50001 CREATE VIEW `vw_sucursales` AS SELECT
  1 AS `id_suc`,
  1 AS `nombre_suc`,
  1 AS `tel1`,
@@ -9435,7 +9435,7 @@ DROP TABLE IF EXISTS `vw_sync_historico`;
 /*!50001 DROP VIEW IF EXISTS `vw_sync_historico`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_sync_historico` AS SELECT 
+/*!50001 CREATE VIEW `vw_sync_historico` AS SELECT
  1 AS `id`,
  1 AS `llave`,
  1 AS `fecha_hora`,
@@ -9453,7 +9453,7 @@ DROP TABLE IF EXISTS `vw_t_documentos_con_cont`;
 /*!50001 DROP VIEW IF EXISTS `vw_t_documentos_con_cont`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_t_documentos_con_cont` AS SELECT 
+/*!50001 CREATE VIEW `vw_t_documentos_con_cont` AS SELECT
  1 AS `id`,
  1 AS `nombre`,
  1 AS `estado`*/;
@@ -9467,7 +9467,7 @@ DROP TABLE IF EXISTS `vw_tipo_establecimiento`;
 /*!50001 DROP VIEW IF EXISTS `vw_tipo_establecimiento`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_tipo_establecimiento` AS SELECT 
+/*!50001 CREATE VIEW `vw_tipo_establecimiento` AS SELECT
  1 AS `id`,
  1 AS `nombre`,
  1 AS `descripcion`,
@@ -9486,7 +9486,7 @@ DROP TABLE IF EXISTS `vw_tipos_de_documentos`;
 /*!50001 DROP VIEW IF EXISTS `vw_tipos_de_documentos`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_tipos_de_documentos` AS SELECT 
+/*!50001 CREATE VIEW `vw_tipos_de_documentos` AS SELECT
  1 AS `id`,
  1 AS `nombre`,
  1 AS `estado`,
@@ -9501,7 +9501,7 @@ DROP TABLE IF EXISTS `vw_transacciones`;
 /*!50001 DROP VIEW IF EXISTS `vw_transacciones`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_transacciones` AS SELECT 
+/*!50001 CREATE VIEW `vw_transacciones` AS SELECT
  1 AS `cod_transaccion`,
  1 AS `nro_cuenta`,
  1 AS `nro_subcuenta`,
@@ -9532,7 +9532,7 @@ DROP TABLE IF EXISTS `vw_transacciones_activas`;
 /*!50001 DROP VIEW IF EXISTS `vw_transacciones_activas`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_transacciones_activas` AS SELECT 
+/*!50001 CREATE VIEW `vw_transacciones_activas` AS SELECT
  1 AS `cod_transaccion`,
  1 AS `id_cuenta`,
  1 AS `valor_credito`,
@@ -9558,7 +9558,7 @@ DROP TABLE IF EXISTS `vw_transacciones_tmp`;
 /*!50001 DROP VIEW IF EXISTS `vw_transacciones_tmp`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_transacciones_tmp` AS SELECT 
+/*!50001 CREATE VIEW `vw_transacciones_tmp` AS SELECT
  1 AS `cod_transaccion`,
  1 AS `nro_cuenta`,
  1 AS `nro_subcuenta`,
@@ -9590,7 +9590,7 @@ DROP TABLE IF EXISTS `vw_usuario`;
 /*!50001 DROP VIEW IF EXISTS `vw_usuario`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_usuario` AS SELECT 
+/*!50001 CREATE VIEW `vw_usuario` AS SELECT
  1 AS `ID`,
  1 AS `Login`,
  1 AS `libranza`,
@@ -9623,7 +9623,7 @@ DROP TABLE IF EXISTS `vw_usuario_response_ok`;
 /*!50001 DROP VIEW IF EXISTS `vw_usuario_response_ok`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_usuario_response_ok` AS SELECT 
+/*!50001 CREATE VIEW `vw_usuario_response_ok` AS SELECT
  1 AS `_result`,
  1 AS `llave_session`,
  1 AS `ID`,
@@ -9659,7 +9659,7 @@ DROP TABLE IF EXISTS `vw_vehiculos_propietario`;
 /*!50001 DROP VIEW IF EXISTS `vw_vehiculos_propietario`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_vehiculos_propietario` AS SELECT 
+/*!50001 CREATE VIEW `vw_vehiculos_propietario` AS SELECT
  1 AS `propietario`,
  1 AS `nombrePropietario`,
  1 AS `cod_tipo_vehiculo`,
@@ -9682,7 +9682,7 @@ DROP TABLE IF EXISTS `vw_vehiculos_servicios_costos`;
 /*!50001 DROP VIEW IF EXISTS `vw_vehiculos_servicios_costos`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vw_vehiculos_servicios_costos` AS SELECT 
+/*!50001 CREATE VIEW `vw_vehiculos_servicios_costos` AS SELECT
  1 AS `id`,
  1 AS `cod_servicio`,
  1 AS `cod_tipo_vehiculo`,
@@ -9711,7 +9711,7 @@ DROP TABLE IF EXISTS `vwcorte_de_caja`;
 /*!50001 DROP VIEW IF EXISTS `vwcorte_de_caja`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vwcorte_de_caja` AS SELECT 
+/*!50001 CREATE VIEW `vwcorte_de_caja` AS SELECT
  1 AS `id`,
  1 AS `usuario_apertura`,
  1 AS `usuario_cierre`,
@@ -9751,7 +9751,7 @@ DROP TABLE IF EXISTS `vwcorte_de_caja_pagos`;
 /*!50001 DROP VIEW IF EXISTS `vwcorte_de_caja_pagos`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vwcorte_de_caja_pagos` AS SELECT 
+/*!50001 CREATE VIEW `vwcorte_de_caja_pagos` AS SELECT
  1 AS `id`,
  1 AS `tipo_pago`,
  1 AS `valor`,
@@ -9767,7 +9767,7 @@ DROP TABLE IF EXISTS `vwcorte_de_caja_parcial`;
 /*!50001 DROP VIEW IF EXISTS `vwcorte_de_caja_parcial`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vwcorte_de_caja_parcial` AS SELECT 
+/*!50001 CREATE VIEW `vwcorte_de_caja_parcial` AS SELECT
  1 AS `id`,
  1 AS `usuario_apertura`,
  1 AS `usuario_cierre`,
@@ -9808,7 +9808,7 @@ DROP TABLE IF EXISTS `vwcorte_de_caja_parcial_pagos`;
 /*!50001 DROP VIEW IF EXISTS `vwcorte_de_caja_parcial_pagos`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vwcorte_de_caja_parcial_pagos` AS SELECT 
+/*!50001 CREATE VIEW `vwcorte_de_caja_parcial_pagos` AS SELECT
  1 AS `id`,
  1 AS `tipo_pago`,
  1 AS `valor`,
@@ -9887,19 +9887,19 @@ CREATE DEFINER=`jdpsoluc_l_monrroy`@`%` FUNCTION `getEstablecimientoActivo`(`_ke
 BEGIN
 declare _flag int;
 declare _esta int;
-set _esta = -1 ; 
+set _esta = -1 ;
 set _key = trim(_key);
 if _key <> '' then
-  SELECT count(*) into _flag FROM    `session` 
+  SELECT count(*) into _flag FROM    `session`
   inner join estado_registro on nombre_estado = 'Activo'
-  and  `session`.estado =  estado_registro.id  
+  and  `session`.estado =  estado_registro.id
   where `session`.key = _key ;
   if _flag > 0 then
-   SELECT establecimiento into _esta FROM vw_cajas_activas 
-   inner join  `session` on 
+   SELECT establecimiento into _esta FROM vw_cajas_activas
+   inner join  `session` on
    usuario = usuarioEstadoCaja  and `session`.key = _key ;
-  else 
-    set _esta = -2 ; 
+  else
+    set _esta = -2 ;
   end if;
 end if;
 RETURN _esta;
@@ -9922,7 +9922,7 @@ DELIMITER ;;
 CREATE DEFINER=`jdpsoluc_l_monrroy`@`%` FUNCTION `getEstado`(`letra` CHAR) RETURNS int
 BEGIN
 
-RETURN (SELECT id FROM  estado_registro where estado = letra) ; 
+RETURN (SELECT id FROM  estado_registro where estado = letra) ;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -9981,7 +9981,7 @@ DELIMITER ;
 DELIMITER ;;
 CREATE DEFINER=`jdpsoluc_l_monrroy`@`%` FUNCTION `getIdContadorByName`(`_NOMBRE` CHAR(50)) RETURNS int
 BEGIN
-RETURN (SELECT id FROM  tipos_de_documentos WHERE TRIM(nombre ) = TRIM(_NOMBRE)); 
+RETURN (SELECT id FROM  tipos_de_documentos WHERE TRIM(nombre ) = TRIM(_NOMBRE));
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -10000,7 +10000,7 @@ DELIMITER ;
 DELIMITER ;;
 CREATE DEFINER=`jdpsoluc_l_monrroy`@`%` FUNCTION `getIdDocumentoByIdFactura`(idFactura text) RETURNS int
 BEGIN
-   
+
 RETURN coalesce( (select orden from documentos where idDocumentoFinal = idFactura ), 0 ) ;
 END ;;
 DELIMITER ;
@@ -10020,7 +10020,7 @@ DELIMITER ;
 DELIMITER ;;
 CREATE DEFINER=`jdpsoluc_l_monrroy`@`%` FUNCTION `getIdEmpleadoPorTipNombre`(`_NOMBRE` CHAR(50)) RETURNS int
 BEGIN
-RETURN (SELECT id FROM  mst_per_empleados_tipos WHERE TRIM(nombre ) = TRIM(_NOMBRE)); 
+RETURN (SELECT id FROM  mst_per_empleados_tipos WHERE TRIM(nombre ) = TRIM(_NOMBRE));
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -10079,15 +10079,15 @@ CREATE DEFINER=`jdpsoluc_l_monrroy`@`%` FUNCTION `getIdExistenciaActiva`(`_key` 
 BEGIN
 declare _flag int;
 declare _esta int;
-set _esta = -1 ;  
-  SELECT count(*) into _flag FROM    `prd_actualizacion_existencias`  where bodega = _key and estado = 1 ; 
-   
+set _esta = -1 ;
+  SELECT count(*) into _flag FROM    `prd_actualizacion_existencias`  where bodega = _key and estado = 1 ;
+
   if _flag > 0 then
-    SELECT id into _esta FROM    `prd_actualizacion_existencias` 
-    where bodega = _key and estado = 1 ; 
-  else 
-    set _esta = -2 ; 
-  end if; 
+    SELECT id into _esta FROM    `prd_actualizacion_existencias`
+    where bodega = _key and estado = 1 ;
+  else
+    set _esta = -2 ;
+  end if;
 RETURN _esta;
 END ;;
 DELIMITER ;
@@ -10108,7 +10108,7 @@ DELIMITER ;;
 CREATE DEFINER=`jdpsoluc_l_monrroy`@`%` FUNCTION `getIdTipoDocumentoPorNombre`(`_name` VARCHAR(45)) RETURNS int
 BEGIN
 
-RETURN (select coalesce(id,-1) as id from 
+RETURN (select coalesce(id,-1) as id from
 tipos_de_documentos where   nombre = _name);
 END ;;
 DELIMITER ;
@@ -10151,8 +10151,8 @@ DELIMITER ;
 DELIMITER ;;
 CREATE DEFINER=`jdpsoluc_l_monrroy`@`%` FUNCTION `getNameProducto`(  idProducto text) RETURNS text CHARSET utf8mb4
 BEGIN
-  RETURN ( select nombre from inv_mst_producto where id = coalesce(idProducto , '' ) ); 
-  
+  RETURN ( select nombre from inv_mst_producto where id = coalesce(idProducto , '' ) );
+
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -10170,7 +10170,7 @@ DELIMITER ;
 /*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
 CREATE DEFINER=`jdpsoluc_l_monrroy`@`%` FUNCTION `getNumTotalHijos`( _id bigint) RETURNS int
-BEGIN 
+BEGIN
 RETURN ( select count(0) from inv_categorias b where b.idPadreCategoria = _id) ;
 END ;;
 DELIMITER ;
@@ -10191,7 +10191,7 @@ DELIMITER ;;
 CREATE DEFINER=`jdpsoluc_l_monrroy`@`%` FUNCTION `getParametroNumerico`(_codPar text) RETURNS decimal(16,2)
 BEGIN
 
-RETURN coalesce((SELECT par_numerico FROM parametros 
+RETURN coalesce((SELECT par_numerico FROM parametros
 where cod_parametro = _codPar) , 0 ) ;
 END ;;
 DELIMITER ;
@@ -10211,7 +10211,7 @@ DELIMITER ;
 DELIMITER ;;
 CREATE DEFINER=`jdpsoluc_l_monrroy`@`%` FUNCTION `getPrefijoContadorByName`(`_NOMBRE` int) RETURNS text CHARSET utf8mb4
 BEGIN
-RETURN (SELECT coalesce( prefijoAux ,concat('AUX',_NOMBRE) ) FROM  tipos_de_documentos WHERE id = _NOMBRE );  
+RETURN (SELECT coalesce( prefijoAux ,concat('AUX',_NOMBRE) ) FROM  tipos_de_documentos WHERE id = _NOMBRE );
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -10252,7 +10252,7 @@ BEGIN
 if _name_tipo_relacion <> '' then
 set @id_tipo = '';
 SELECT id_relacion  into @id_tipo FROM tipo_relacion_mail_cliente where descripcion = trim(_name_tipo_relacion);
-else 
+else
 	set @id_tipo = '-1';
 end if;
 RETURN @id_tipo;
@@ -10277,7 +10277,7 @@ BEGIN
 if _name_tip_notificacion <> '' then
 set @id_tipo = '';
 SELECT id_tipo  into @id_tipo FROM tipo_notificacion where nom_tipo_notificacion = trim(_name_tip_notificacion);
-else 
+else
 	set @id_tipo = '-1';
 end if;
 RETURN @id_tipo;
@@ -10325,30 +10325,30 @@ BEGIN
 	select count(0) into count from cajas where id = idCaja and estadoCaja = 1 ;
     if count > 0 then
 		select -1 as _result , 'La caja ya se encuentra abierta - Valide por favor' as msg;
-	else 
+	else
     select estadoCaja into _estado_caja from cajas where id = idCaja ;
      update cajas set  estadoCaja = 1 ,
-	   usuarioEstadoCaja = usuarioId where id = idCaja ; 
-    if _estado_caja = 3 then 
+	   usuarioEstadoCaja = usuarioId where id = idCaja ;
+    if _estado_caja = 3 then
      select getIdCierreDeCajaActivo(idCaja) into _id_cierre;
-      select   base into _valorInicial  from corte_de_caja where id = _id_cierre ; 
+      select   base into _valorInicial  from corte_de_caja where id = _id_cierre ;
     insert into  corte_de_caja_parcial(base , id_Caja, usuario_apertura , fecha_apertura , id_cierre_total )
        values
        (_valorInicial , idCaja , usuarioId , now()  , _id_cierre  );
-       
-    else    
+
+    else
        insert into  corte_de_caja(base , id_Caja, usuario_apertura , fecha_apertura  )
        values
        (_valorInicial , idCaja , usuarioId , now() );
         select getIdCierreDeCajaActivo(idCaja) into _id_cierre;
-        
-      select   base into _valorInicial  from corte_de_caja where id = _id_cierre ; 
+
+      select   base into _valorInicial  from corte_de_caja where id = _id_cierre ;
        insert into  corte_de_caja_parcial(base , id_Caja, usuario_apertura , fecha_apertura , id_cierre_total )
        values
        (_valorInicial , idCaja , usuarioId , now() , _id_cierre );
-       
+
     end if;
-     
+
 		select 100 as _result , 'Caja abierta con exito' as msg;
     end if;
 END ;;
@@ -10372,51 +10372,51 @@ BEGIN
      declare _idMedioDePago int ;
      declare _valorPagado decimal(16,2);
      declare _id_cierre_caja , _id_cierre_caja_p int;
-    
+
      DECLARE recorrerPagos CURSOR FOR SELECT  idMedioDePago, valorPagado
-     from documentos_pagos where `idDocumento` =  _documento;	 
-     
-     
-     DECLARE CONTINUE HANDLER FOR NOT FOUND SET @finito = TRUE; 
-     set @finito = false;    
-     
-     select id_cierre_caja  , id_cierre_caja_p into _id_cierre_caja , _id_cierre_caja_p  from documentos where 
-     orden = _documento ; 
-     
+     from documentos_pagos where `idDocumento` =  _documento;
+
+
+     DECLARE CONTINUE HANDLER FOR NOT FOUND SET @finito = TRUE;
+     set @finito = false;
+
+     select id_cierre_caja  , id_cierre_caja_p into _id_cierre_caja , _id_cierre_caja_p  from documentos where
+     orden = _documento ;
+
      OPEN recorrerPagos;
-     
+
 		loop1: LOOP
 		FETCH recorrerPagos INTO  _idMedioDePago , _valorPagado;
-		
+
         IF @finito THEN
 				LEAVE loop1;
 		END IF;
         -- _id_cierre_caja , _id_cierre_caja_p
           set @existe = 0 ;
-           select count(0)  into @existe from corte_de_caja_pagos where 
+           select count(0)  into @existe from corte_de_caja_pagos where
            tipo_pago = _idMedioDePago and   cod_cierre = _id_cierre_caja ;
           if @existe = 0 then
             insert into corte_de_caja_pagos( tipo_pago, valor, cod_cierre)
             values ( _idMedioDePago , 0 ,  _id_cierre_caja );
           end if;
           set @existe = 0 ;
-           select count(0)  into @existe from corte_de_caja_parcial_pagos where 
+           select count(0)  into @existe from corte_de_caja_parcial_pagos where
            tipo_pago = _idMedioDePago and   cod_cierre = _id_cierre_caja_p ;
           if @existe = 0 then
             insert into corte_de_caja_parcial_pagos( tipo_pago, valor, cod_cierre)
             values ( _idMedioDePago , 0 ,  _id_cierre_caja_p );
           end if;
-          
+
 SET SQL_SAFE_UPDATES = 0;
           update corte_de_caja_pagos
-         set valor =  valor + _valorPagado where 
+         set valor =  valor + _valorPagado where
          tipo_pago = _idMedioDePago and  cod_cierre = _id_cierre_caja;
          update corte_de_caja_parcial_pagos
-         set valor =  valor + _valorPagado where 
+         set valor =  valor + _valorPagado where
          tipo_pago = _idMedioDePago and  cod_cierre = _id_cierre_caja_p;
-         
+
 SET SQL_SAFE_UPDATES = 1;
-       END LOOP loop1; 
+       END LOOP loop1;
        close recorrerPagos;
 END ;;
 DELIMITER ;
@@ -10435,12 +10435,12 @@ DELIMITER ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 DELIMITER ;;
 CREATE DEFINER=`jdpsoluc_l_monrroy`@`%` PROCEDURE `cambiarDocumentoActual`(IN `_usuario` INT, IN `_documento` INT)
-BEGIN 
+BEGIN
 declare _esta int;
 declare _caja int;
     SET SQL_SAFE_UPDATES = 0;
     update documentos set estado = 2  where usuario  = _usuario;
-    update documentos set estado = 1  where orden  = _documento; 
+    update documentos set estado = 1  where orden  = _documento;
     select 100 as _result , 'Documento creador con exito' as msg;
 END ;;
 DELIMITER ;
@@ -10459,12 +10459,12 @@ DELIMITER ;
 /*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
 CREATE DEFINER=`jdpsoluc_l_monrroy`@`%` PROCEDURE `cambiarDocumentoCompraActual`(IN `_documento` INT)
-BEGIN 
+BEGIN
 declare _esta int;
 declare _caja int;
     SET SQL_SAFE_UPDATES = 0;
     update documentos set estado = 2  where tipoDocumentoFinal  = getIdContadorByName('compra_activa');
-    update documentos set estado = 1  where orden  = _documento; 
+    update documentos set estado = 1  where orden  = _documento;
     select 100 as _result , 'Documento seleccionado con exito' as msg;
 END ;;
 DELIMITER ;
@@ -10483,24 +10483,24 @@ DELIMITER ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 DELIMITER ;;
 CREATE DEFINER=`jdpsoluc_l_monrroy`@`%` PROCEDURE `cancelarDocumento`(IN `_usuario` INT, IN `_documento` INT)
-BEGIN 
+BEGIN
 declare CONTADOR int;
     select count(*) into contador from documentos where  usuario  = _usuario
     and orden = _documento ;
-    if CONTADOR = 0 then 
+    if CONTADOR = 0 then
     select -1 as _result , 'Documento no existe o no pertenece al usuario' as msg;
-    else 
+    else
     SET SQL_SAFE_UPDATES = 0;
     update documentos set estado = 2 ,
     tipoDocumentoFinal = (SELECT id FROM tipos_de_documentos where nombre = 'eliminado'),
     usuario  = _usuario
-    where orden = _documento ; 
-    
+    where orden = _documento ;
+
     update documentos_listado_productos set estado_linea_venta = 'E' ,
     usuario  = _usuario
-    where orden = _documento ; 
-    
-    
+    where orden = _documento ;
+
+
     	select 100 as _result , 'Documento Cancelado con exito' as msg;
    end if;
 
@@ -10528,19 +10528,19 @@ BEGIN
     if count <= 0 then
 		select -1 as _result , 'La caja no se encuentra abierta - Valide por favor' as msg;
 	else
-     update cajas set 
+     update cajas set
 	   estadoCaja = 2 ,
-	   usuarioEstadoCaja = usuarioId where id = idCaja ; 
-       select id into _id from corte_de_caja where id_Caja = idCaja 
+	   usuarioEstadoCaja = usuarioId where id = idCaja ;
+       select id into _id from corte_de_caja where id_Caja = idCaja
         and coalesce(fecha_cierre,-1) = -1 ;
-       if _id > 0 then 
-        update corte_de_caja set usuario_cierre =  usuarioId , fecha_cierre = now()  where 
-        id  = _id; 
-        
-        update corte_de_caja_parcial set usuario_cierre =  usuarioId , fecha_cierre = now()  where 
-        id_cierre_total  = _id and coalesce(fecha_cierre,-1)  = -1 ; 
+       if _id > 0 then
+        update corte_de_caja set usuario_cierre =  usuarioId , fecha_cierre = now()  where
+        id  = _id;
+
+        update corte_de_caja_parcial set usuario_cierre =  usuarioId , fecha_cierre = now()  where
+        id_cierre_total  = _id and coalesce(fecha_cierre,-1)  = -1 ;
 		select 100 as _result , 'Caja cerrada con exito' as msg;
-        else 
+        else
         select -1 as _result , 'Error al cerrar la caja' as msg;
         end if;
     end if;
@@ -10561,16 +10561,16 @@ DELIMITER ;
 /*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
 CREATE DEFINER=`jdpsoluc_l_monrroy`@`%` PROCEDURE `crearNuevoDocumento`(IN `_usuario` INT)
-BEGIN 
+BEGIN
 declare _esta int;
 declare _caja int;
     SET SQL_SAFE_UPDATES = 0;
     update documentos set estado = 2  where usuario  = _usuario;
-    select establecimiento , id into _esta ,_caja from  cajas 
-    where estadoCaja = 1 and 
-	      usuarioEstadoCaja = _usuario; 
+    select establecimiento , id into _esta ,_caja from  cajas
+    where estadoCaja = 1 and
+	      usuarioEstadoCaja = _usuario;
     SET SQL_SAFE_UPDATES = 1;
-    insert into documentos( caja, establecimiento,  usuario, cod_vendedor) 
+    insert into documentos( caja, establecimiento,  usuario, cod_vendedor)
           values( _caja, _esta ,_usuario,_usuario);
           SET SESSION group_concat_max_len = 1000000;
     	select 100 as _result , 'Documento creador con exito' as msg , objeto as OBJ
@@ -10592,22 +10592,22 @@ DELIMITER ;
 /*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
 CREATE DEFINER=`jdpsoluc_l_monrroy`@`%` PROCEDURE `crearNuevoDocumentoAbonoCxC`(IN `_usuario` INT , in idCliente int)
-BEGIN 
+BEGIN
 declare _esta int;
 declare _caja int;
-declare _documento_creado int; 
+declare _documento_creado int;
 declare _clienteNombre text;
-SELECT coalesce(nombreCompleto, 'NA')  into _clienteNombre FROM  mst_per_clientes where id = idCliente ; 
+SELECT coalesce(nombreCompleto, 'NA')  into _clienteNombre FROM  mst_per_clientes where id = idCliente ;
     SET SQL_SAFE_UPDATES = 0;
     update documentos set estado = 2  where usuario  = _usuario;
-    select establecimiento , id into _esta ,_caja from  cajas 
-    where estadoCaja = 1 and 
-	      usuarioEstadoCaja = _usuario; 
+    select establecimiento , id into _esta ,_caja from  cajas
+    where estadoCaja = 1 and
+	      usuarioEstadoCaja = _usuario;
     SET SQL_SAFE_UPDATES = 1;
-    insert into documentos( id_cliente , cliente , caja, establecimiento,  usuario, cod_vendedor, campo_info_5, campo_info_6 ,campo_info_1,campo_info_2) 
+    insert into documentos( id_cliente , cliente , caja, establecimiento,  usuario, cod_vendedor, campo_info_5, campo_info_6 ,campo_info_1,campo_info_2)
           values( idCliente, idCliente ,_caja, _esta ,_usuario,_usuario,   'NO_FACTURABLE' , 'RecaudosCuentaXCobrar' , 'Comprobante' , _clienteNombre);
-          SET SESSION group_concat_max_len = 1000000; 
-	set  _documento_creado = LAST_INSERT_ID() ;  
+          SET SESSION group_concat_max_len = 1000000;
+	set  _documento_creado = LAST_INSERT_ID() ;
     	select 100 as _result , 'Documento creador con exito' as msg , _documento_creado as idIngresado ;
 END ;;
 DELIMITER ;
@@ -10626,21 +10626,21 @@ DELIMITER ;
 /*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
 CREATE DEFINER=`jdpsoluc_l_monrroy`@`%` PROCEDURE `crearNuevoDocumentoAbonoCxP`(IN `_usuario` INT , in idCliente int , in _establecimiento int)
-BEGIN 
+BEGIN
 declare _esta int;
 declare _caja int;
-declare _documento_creado int; 
+declare _documento_creado int;
 declare _clienteNombre text;
-SELECT coalesce(nombreCompleto, 'NA')  into _clienteNombre FROM  mst_per_clientes where id = idCliente ; 
+SELECT coalesce(nombreCompleto, 'NA')  into _clienteNombre FROM  mst_per_clientes where id = idCliente ;
     SET SQL_SAFE_UPDATES = 0;
-    update documentos set estado = 2  where usuario  = _usuario;  
+    update documentos set estado = 2  where usuario  = _usuario;
     SET SQL_SAFE_UPDATES = 1;
-    
+
  --   Borrador_pagos_cuenta_por_pagar
-    insert into documentos(     tipoDocumentoFinal , id_cliente , cliente , caja, establecimiento,  usuario, cod_vendedor, campo_info_5, campo_info_6 ,campo_info_1,campo_info_2) 
+    insert into documentos(     tipoDocumentoFinal , id_cliente , cliente , caja, establecimiento,  usuario, cod_vendedor, campo_info_5, campo_info_6 ,campo_info_1,campo_info_2)
           values( getIdTipoDocumentoPorNombre('Borrador_pagos_cuenta_por_pagar'), idCliente, idCliente ,0, _establecimiento ,_usuario,_usuario,   'NO_FACTURABLE' , 'Pagos_cuenta_por_pagar' , 'Comprobante' , _clienteNombre);
-          SET SESSION group_concat_max_len = 1000000; 
-	set  _documento_creado = LAST_INSERT_ID() ;  
+          SET SESSION group_concat_max_len = 1000000;
+	set  _documento_creado = LAST_INSERT_ID() ;
     	select 100 as _result , 'Documento creador con exito' as msg , _documento_creado as idIngresado ;
 END ;;
 DELIMITER ;
@@ -10659,14 +10659,14 @@ DELIMITER ;
 /*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
 CREATE DEFINER=`jdpsoluc_l_monrroy`@`%` PROCEDURE `crearNuevoDocumentoCompra`(IN `_usuario` INT , IN `_esta` INT)
-BEGIN  
+BEGIN
     SET SQL_SAFE_UPDATES = 0;
-    update documentos set estado = 2  where usuario  = _usuario and tipoDocumentoFinal = getIdTipoDocumentoPorNombre('compra_activa')   ; 
+    update documentos set estado = 2  where usuario  = _usuario and tipoDocumentoFinal = getIdTipoDocumentoPorNombre('compra_activa')   ;
     SET SQL_SAFE_UPDATES = 1;
    -- select 0, _esta ,_usuario,_usuario ,_usuario ,  getIdTipoDocumentoPorNombre('compra_activa') ;
-    insert into documentos( caja, establecimiento,  usuario, cod_vendedor, vendedor ,tipoDocumentoFinal) 
+    insert into documentos( caja, establecimiento,  usuario, cod_vendedor, vendedor ,tipoDocumentoFinal)
           values( 0, _esta ,_usuario,_usuario ,_usuario ,  getIdTipoDocumentoPorNombre('compra_activa')  );
-          
+
           SET SESSION group_concat_max_len = 1000000;
     	select 100 as _result , 'Documento Compra creador con exito' as msg , objeto as OBJ
         from vw_obj_documentos_por_usuario where usuario = _usuario and vw_obj_documentos_por_usuario.tipoDocumentoFinal = getIdTipoDocumentoPorNombre('compra_activa') ;
@@ -10687,15 +10687,15 @@ DELIMITER ;
 /*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
 CREATE DEFINER=`jdpsoluc_l_monrroy`@`%` PROCEDURE `crearNuevoDocumentoDevolucion`(IN `_usuario` INT , in idFactura text)
-BEGIN  
+BEGIN
 declare _caja ,_esta, idCliente int;
-declare _documento_creado int;   
+declare _documento_creado int;
 	select
      caja, establecimiento,  cliente into _caja ,_esta, idCliente from documentos where idDocumentoFinal = idFactura;
-    insert into documentos( id_cliente , cliente , caja, establecimiento,  usuario, cod_vendedor, campo_info_5, campo_info_6 ,campo_info_1,campo_info_2,campo_info_3) 
+    insert into documentos( id_cliente , cliente , caja, establecimiento,  usuario, cod_vendedor, campo_info_5, campo_info_6 ,campo_info_1,campo_info_2,campo_info_3)
           values( idCliente, idCliente ,_caja, _esta ,_usuario,_usuario,   'NO_FACTURABLE' , 'comprobante_devolucion' , 'Comprobante' , 'devolucion de factura',idFactura);
-          SET SESSION group_concat_max_len = 1000000; 
-	set  _documento_creado = LAST_INSERT_ID() ;  
+          SET SESSION group_concat_max_len = 1000000;
+	set  _documento_creado = LAST_INSERT_ID() ;
     	select 100 as _result , 'Documento creador con exito' as msg , _documento_creado as idIngresado ;
 END ;;
 DELIMITER ;
@@ -10714,20 +10714,20 @@ DELIMITER ;
 /*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
 CREATE DEFINER=`jdpsoluc_l_monrroy`@`%` PROCEDURE `crearNuevoDocumentoGasto`(IN `_usuario` INT)
-BEGIN 
+BEGIN
 declare _esta int;
 declare _caja int;
-declare _documento_creado int; 
+declare _documento_creado int;
     SET SQL_SAFE_UPDATES = 0;
     update documentos set estado = 2  where usuario  = _usuario;
-    select establecimiento , id into _esta ,_caja from  cajas 
-    where estadoCaja = 1 and 
-	      usuarioEstadoCaja = _usuario; 
+    select establecimiento , id into _esta ,_caja from  cajas
+    where estadoCaja = 1 and
+	      usuarioEstadoCaja = _usuario;
     SET SQL_SAFE_UPDATES = 1;
-    insert into documentos( caja, establecimiento,  usuario, cod_vendedor) 
+    insert into documentos( caja, establecimiento,  usuario, cod_vendedor)
           values( _caja, _esta ,_usuario,_usuario);
-          SET SESSION group_concat_max_len = 1000000; 
-	set  _documento_creado = LAST_INSERT_ID() ;  
+          SET SESSION group_concat_max_len = 1000000;
+	set  _documento_creado = LAST_INSERT_ID() ;
     	select 100 as _result , 'Documento creador con exito' as msg , _documento_creado as idIngresado ;
 END ;;
 DELIMITER ;
@@ -10749,12 +10749,12 @@ CREATE DEFINER=`jdpsoluc_l_monrroy`@`%` PROCEDURE `crearNuevoDocumentoNotaDebito
 BEGIN
 
 declare _caja ,_esta, idCliente int;
-declare _documento_creado int;   
+declare _documento_creado int;
 	select caja, establecimiento,  cliente into _caja ,_esta, idCliente from documentos where idDocumentoFinal = idFactura;
-    insert into documentos( id_cliente , cliente , caja, establecimiento,  usuario, cod_vendedor, campo_info_5, campo_info_6 ,campo_info_1,campo_info_2,campo_info_3) 
+    insert into documentos( id_cliente , cliente , caja, establecimiento,  usuario, cod_vendedor, campo_info_5, campo_info_6 ,campo_info_1,campo_info_2,campo_info_3)
           values( idCliente, idCliente ,_caja, _esta ,_usuario,_usuario,   'NO_FACTURABLE' , 'comprobante_nota_debito' , 'Comprobante' , 'Nota debito de compra',idFactura);
-          SET SESSION group_concat_max_len = 1000000; 
-	set  _documento_creado = LAST_INSERT_ID() ;  
+          SET SESSION group_concat_max_len = 1000000;
+	set  _documento_creado = LAST_INSERT_ID() ;
     	select 100 as _result , 'Documento creador con exito' as msg , _documento_creado as idIngresado ;
 END ;;
 DELIMITER ;
@@ -10774,18 +10774,18 @@ DELIMITER ;
 DELIMITER ;;
 CREATE DEFINER=`jdpsoluc_l_monrroy`@`%` PROCEDURE `crearNuevoDocumentoPorIngresoVehiculo`(IN `_usuario` INT ,  in cajaId int,
 in _infoAdicional text,
-in _cliente int 
+in _cliente int
 
 )
-BEGIN 
+BEGIN
 declare _esta int;
-declare _caja int; 
-declare _documento_creado int; 
-    select establecimiento , id into _esta ,_caja from  cajas 
-    where  id = cajaId;  
-    insert into documentos( caja, establecimiento,  usuario, cod_vendedor, campo_info_1 , cliente) 
+declare _caja int;
+declare _documento_creado int;
+    select establecimiento , id into _esta ,_caja from  cajas
+    where  id = cajaId;
+    insert into documentos( caja, establecimiento,  usuario, cod_vendedor, campo_info_1 , cliente)
           values( _caja, _esta ,_usuario,_usuario, _infoAdicional, _cliente);
-	set  _documento_creado = LAST_INSERT_ID() ;  
+	set  _documento_creado = LAST_INSERT_ID() ;
     	select 100 as _result , 'Documento creador con exito' as msg , _documento_creado as idIngresado ;
 END ;;
 DELIMITER ;
@@ -10805,13 +10805,13 @@ DELIMITER ;
 DELIMITER ;;
 CREATE DEFINER=`jdpsoluc_l_monrroy`@`%` PROCEDURE `devolucionTotal`(IN `Id_Venta` VARCHAR(12), IN `codusuario` INT, OUT `estatus` VARCHAR(10), OUT `totalDevuelto` DOUBLE, OUT `ivaDevuelto` DOUBLE, OUT `totalProductos` INT, OUT `totalPresioVent` DOUBLE)
 BEGIN
-		declare count int ; 
+		declare count int ;
         declare id_cuenta_cartera varchar(100);
 		declare contProductos int;
 		declare  iva_devuelto,  precio_venta ,total_devuelto , cntDevuelta, cntDevuelta_real float ;
-		declare vidProducto varchar(12) ;		
+		declare vidProducto varchar(12) ;
 		DECLARE recorrerVentas CURSOR FOR SELECT  `idProducto` , `cantidadVendida` , cant_real_descontada from ventastemp where `idVenta` =  Id_Venta;
-		DECLARE CONTINUE HANDLER FOR NOT FOUND SET @hecho = TRUE; 
+		DECLARE CONTINUE HANDLER FOR NOT FOUND SET @hecho = TRUE;
 		set count = 0 ;
 		set contProductos = 0 ;
 		OPEN recorrerVentas;
@@ -10819,16 +10819,16 @@ BEGIN
 		set @flagInicio =0;
 		START TRANSACTION;
 		select count(*) from ventastemp where  `idVenta` =  Id_Venta and `estado_venta` = 'C' into @flagInicio ;
-		
+
 		if (@flagInicio = 0) then
 
 		loop1: LOOP
 		FETCH recorrerVentas INTO  vidProducto, cntDevuelta, cntDevuelta_real;
-		
+
         IF @hecho THEN
 				LEAVE loop1;
 		END IF;
-        
+
 		set contProductos = contProductos + cntDevuelta;
 		update producto set  `cantActual` =  `cantActual` + cntDevuelta_real ,
 						`ventas` = `ventas` - cntDevuelta_real , `devoluciones` = `devoluciones` + cntDevuelta_real
@@ -10836,7 +10836,7 @@ BEGIN
 		if ( ROW_COUNT() <= 0) THEN
 					set count = 1 ;
 		end if ;
- 		
+
 		END LOOP loop1;
 		update ventastemp set `estado_venta` = 'C'  where `idVenta` =  Id_Venta;
 		 select ROW_COUNT() into @flag ;
@@ -10845,12 +10845,12 @@ BEGIN
 					set count = 1 ;
 		end if ;
 
-		update ventas  set estadoFactura = 'C' where `idVenta` =  Id_Venta ; 
+		update ventas  set estadoFactura = 'C' where `idVenta` =  Id_Venta ;
 
 		if ( ROW_COUNT() <= 0) THEN
 					set count = 1 ;
-		end if ; 
-select   `valorIVA` ,    `valorParcial` , `valorTotal` from  
+		end if ;
+select   `valorIVA` ,    `valorParcial` , `valorTotal` from
 ventas  where `idVenta` =  Id_Venta into iva_devuelto , precio_venta , total_devuelto;
 
 INSERT INTO `devoluciones`
@@ -10884,17 +10884,17 @@ select idCuenta from  cartera where refFact = Id_Venta into id_cuenta_cartera;
 update cartera set TotalActual = 0 , origen = 'devolucion' where refFact = Id_Venta ;
 
 insert into abonoscartera (  idCliente, idFactura, valorAbono, fecha )
-SELECT  idCliente, idFactura, (-1 * valorAbono), curdate() 
+SELECT  idCliente, idFactura, (-1 * valorAbono), curdate()
 from abonoscartera where idFactura = id_cuenta_cartera;
 
 		if ( count = 0 ) THEN
 					COMMIT;
 					set estatus = 'ok';
-		else 
+		else
 					ROLLBACK;
 					set estatus = 'error';
-					
-		end if ;	
+
+		end if ;
 else
 set estatus = 'error2';
 end if ;
@@ -10924,7 +10924,7 @@ BEGIN
     DECLARE done INT DEFAULT 0;
 
     -- Inicializar el abono restante con el valor del abono recibido
- 
+
 
     -- Cursor para recorrer las cuotas activas más antiguas primero
     DECLARE cur CURSOR FOR
@@ -10949,14 +10949,14 @@ BEGIN
         IF remaining_abono >= cuota_total_actual THEN
             -- Actualizar la cuota pagada completamente
             UPDATE mst_mov_cartera_cuotas
-            SET abono = cuota_total_actual 
+            SET abono = cuota_total_actual
             WHERE id = cuota_id;
             -- Restar el totalActual de la cuota del abono restante
             SET remaining_abono = remaining_abono - cuota_total_actual;
         ELSE
             -- Actualizar la cuota parcialmente
             UPDATE mst_mov_cartera_cuotas
-            SET abono = remaining_abono 
+            SET abono = remaining_abono
             WHERE id = cuota_id;
 
             -- El abono se ha distribuido completamente
@@ -10991,7 +10991,7 @@ BEGIN
     DECLARE done INT DEFAULT 0;
 
     -- Inicializar el abono restante con el valor del abono recibido
- 
+
 
     -- Cursor para recorrer las cuotas activas más antiguas primero
     DECLARE cur CURSOR FOR
@@ -11005,13 +11005,13 @@ BEGIN
     DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1;
    SET remaining_abono = p_abono;
     set done = false;
-    OPEN cur; 
+    OPEN cur;
     read_loop: LOOP
         FETCH cur INTO cuota_id, cuota_total_actual, cuota_total_pagado;
         IF done THEN
             LEAVE read_loop;
         END IF;
-        
+
         -- select cuota_id, cuota_total_actual, cuota_total_pagado;
         if remaining_abono > 0 then
         -- Si el abono restante es mayor o igual al totalActual de la cuota
@@ -11052,95 +11052,95 @@ DELIMITER ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 DELIMITER ;;
 CREATE DEFINER=`jdpsoluc_l_monrroy`@`%` PROCEDURE `editarListaCompra`(IN `id_compra` INT)
-BEGIN 
-declare _idLinea int; 
-declare _idCompra VARCHAR(10);  
-declare _idProducto VARCHAR(10);  
-declare _nombreProducto VARCHAR(100);  
-declare _presioCompra VARCHAR(10);   
-declare _cantidad VARCHAR(10);   
-declare _valorTotal VARCHAR(10);  
-declare _usuario VARCHAR(10);  
-declare _iva double;  
-declare _porcent_iva float;  
-declare _valorsiva double;  
-declare _estado VARCHAR(1);  
-declare _id_linea_editar INT;  
+BEGIN
+declare _idLinea int;
+declare _idCompra VARCHAR(10);
+declare _idProducto VARCHAR(10);
+declare _nombreProducto VARCHAR(100);
+declare _presioCompra VARCHAR(10);
+declare _cantidad VARCHAR(10);
+declare _valorTotal VARCHAR(10);
+declare _usuario VARCHAR(10);
+declare _iva double;
+declare _porcent_iva float;
+declare _valorsiva double;
+declare _estado VARCHAR(1);
+declare _id_linea_editar INT;
 declare _cantidad_edicion FLOAT;
 
-DECLARE recorrerCompraEditada CURSOR FOR 		
+DECLARE recorrerCompraEditada CURSOR FOR
 SELECT * FROM `listacompraedicion`
-where  `idCompra` = id_compra ; 
-DECLARE CONTINUE HANDLER FOR NOT FOUND SET @hecho = TRUE; 
- 
-DECLARE EXIT HANDLER FOR SQLEXCEPTION 
-BEGIN 
-ROLLBACK; 
-SELECT '-2'as _error; 
-END; 
+where  `idCompra` = id_compra ;
+DECLARE CONTINUE HANDLER FOR NOT FOUND SET @hecho = TRUE;
+
+DECLARE EXIT HANDLER FOR SQLEXCEPTION
+BEGIN
+ROLLBACK;
+SELECT '-2'as _error;
+END;
 
 SET autocommit = 0;
 START TRANSACTION;
     OPEN recorrerCompraEditada;
-    
-    loop1: LOOP 
-	FETCH recorrerCompraEditada into _idLinea, _idCompra,  _idProducto,  _nombreProducto,  _presioCompra,  
-    _cantidad,  _valorTotal,  _usuario,  _iva,  _porcent_iva,  _valorsiva,  _estado,  _id_linea_editar,  
+
+    loop1: LOOP
+	FETCH recorrerCompraEditada into _idLinea, _idCompra,  _idProducto,  _nombreProducto,  _presioCompra,
+    _cantidad,  _valorTotal,  _usuario,  _iva,  _porcent_iva,  _valorsiva,  _estado,  _id_linea_editar,
     _cantidad_edicion ;
-    
+
      IF @hecho THEN
 		LEAVE loop1;
 	END IF;
 
-	 IF _estado = 'E'  THEN 
-        
+	 IF _estado = 'E'  THEN
+
         IF _cantidad_edicion <>  _cantidad THEN
          update `producto` set `producto`.`cantActual` = (`producto`.`cantActual` - _cantidad ) ,
 		`producto`.`compras` = (`producto`.`compras` - _cantidad) where `idProducto` = _idProducto ;
-        
-        
+
+
          update `producto` set `producto`.`cantActual` = (`producto`.`cantActual` + _cantidad_edicion ),
 		`producto`.`compras` = ( `producto`.`compras` + _cantidad_edicion ) where `idProducto` = _idProducto ;
-        
-        UPDATE listacompra SET cantidad = _cantidad_edicion ,    
-        valorTotal =  ( _presioCompra * _cantidad_edicion  ) , 
-        valorsiva = (( _presioCompra * _cantidad_edicion  ) -(( _presioCompra * _cantidad_edicion  ) * (_porcent_iva / 100))) 
+
+        UPDATE listacompra SET cantidad = _cantidad_edicion ,
+        valorTotal =  ( _presioCompra * _cantidad_edicion  ) ,
+        valorsiva = (( _presioCompra * _cantidad_edicion  ) -(( _presioCompra * _cantidad_edicion  ) * (_porcent_iva / 100)))
          WHERE idLinea = _id_linea_editar;
-        
-        
+
+
        END IF;
-       
-		ELSEIF _estado = 'D' THEN 
+
+		ELSEIF _estado = 'D' THEN
 			update `producto` set `producto`.`cantActual` = `producto`.`cantActual` - _cantidad ,
 		     `producto`.`compras` = `producto`.`compras` - _cantidad where `idProducto` = _idProducto ;
-             
+
             DELETE FROM listacompra WHERE idLinea = _id_linea_editar;
-      
-			ELSEIF _estado = 'N'  THEN   
-            
+
+			ELSEIF _estado = 'N'  THEN
+
               INSERT INTO `listacompra`  ( `idCompra`,`idProducto`,`nombreProducto`,`presioCompra`,
 				`cantidad`,`valorTotal`,`usuario`,`iva`,`porcent_iva`,`valorsiva`) VALUES
 				(_idCompra,_idProducto,_nombreProducto,_presioCompra,_cantidad,
 				_valorTotal,_usuario,_iva,_porcent_iva,_valorsiva);
 
-            
+
               update `producto` set `producto`.`cantActual` = `producto`.`cantActual` + _cantidad ,
 		`producto`.`compras` = `producto`.`compras` + _cantidad where `idProducto` = _idProducto ;
 
-            
+
     END IF;
 
-   
-    
-    
-   
+
+
+
+
 	END LOOP loop1;
-                
+
 	COMMIT;
     CLOSE recorrerCompraEditada;
     SET autocommit = 1;
         select '100' _error ;
- 
+
 end ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -11159,30 +11159,30 @@ DELIMITER ;
 DELIMITER ;;
 CREATE DEFINER=`jdpsoluc_l_monrroy`@`%` PROCEDURE `eliminarCompras`(IN `id_compra` INT)
 BEGIN
-declare _idProducto , _cantidad float ; 
-DECLARE recorrerCompra CURSOR FOR 		
+declare _idProducto , _cantidad float ;
+DECLARE recorrerCompra CURSOR FOR
 SELECT `listacompra`.`idProducto`, `listacompra`.`cantidad`
 FROM `listacompra`
 where `listacompra`.`idCompra` = id_compra ;
-DECLARE CONTINUE HANDLER FOR NOT FOUND SET @hecho = TRUE; 
- 
-DECLARE EXIT HANDLER FOR SQLEXCEPTION 
-BEGIN 
-SELECT '-2'as _error; 
-ROLLBACK; 
-END; 
+DECLARE CONTINUE HANDLER FOR NOT FOUND SET @hecho = TRUE;
 
- 
-SELECT  
+DECLARE EXIT HANDLER FOR SQLEXCEPTION
+BEGIN
+SELECT '-2'as _error;
+ROLLBACK;
+END;
+
+
+SELECT
     `compras`.`estado`,
     `compras`.`referencia`
 FROM `compras` where `compras`.`idCompra` = id_compra into @estado,@referencia;
 
 SET autocommit = 0;
 START TRANSACTION;
-if @estado = 'activo' then 	if @referencia <> 'ninguno' then 		SELECT count(*) FROM  abonoscredito  where 
+if @estado = 'activo' then 	if @referencia <> 'ninguno' then 		SELECT count(*) FROM  abonoscredito  where
         abonoscredito.idFactura = @referencia into @countAbonos;
-        if @countAbonos = 0 then 
+        if @countAbonos = 0 then
 			delete from credito where idCuenta = @referencia;
             set @continuar = 'ok';
 		else
@@ -11192,15 +11192,15 @@ if @estado = 'activo' then 	if @referencia <> 'ninguno' then 		SELECT count(*) F
      set @continuar = 'ok';
 	END if ;
     OPEN recorrerCompra;
-    loop1: LOOP 
+    loop1: LOOP
 	FETCH recorrerCompra into _idProducto , _cantidad;
     IF @hecho THEN
 		LEAVE loop1;
 	END IF;
-    
+
     update `producto` set `producto`.`cantActual` = `producto`.`cantActual` - _cantidad ,
     `producto`.`compras` = `producto`.`compras` - _cantidad where `idProducto` = _idProducto ;
-    
+
 	END LOOP loop1;
     DELETE FROM `listacompra` WHERE `listacompra`.`idCompra` = id_compra;
 	DELETE FROM `compras` WHERE `compras`.`idCompra` = id_compra;
@@ -11229,21 +11229,21 @@ DELIMITER ;;
 CREATE DEFINER=`jdpsoluc_l_monrroy`@`%` PROCEDURE `generarDomicilio`(IN `_documento` INT)
 BEGIN
     declare _id_cliente , _state_id, _country_id  int;
-    declare _display_name,_email, _mobile, _phone, _street, _city, _street2 
+    declare _display_name,_email, _mobile, _phone, _street, _city, _street2
            , _nombre_pais , _nombre_estado char(45) ;
-    
+
     select cliente into _id_cliente  from documentos where orden = _documento;
-    SELECT  display_name,email, mobile, phone, street, city, street2, state_id, country_id , 
+    SELECT  display_name,email, mobile, phone, street, city, street2, state_id, country_id ,
     nombre_pais , nombre_estado
-    into _display_name,_email, _mobile, _phone, _street, _city, _street2, _state_id, _country_id 
-    , _nombre_pais , _nombre_estado FROM  documentos_clientes where 
-    orden = _id_cliente ; 
-      
+    into _display_name,_email, _mobile, _phone, _street, _city, _street2, _state_id, _country_id
+    , _nombre_pais , _nombre_estado FROM  documentos_clientes where
+    orden = _id_cliente ;
+
       insert into documentos_domicilio ( cod_doc, cod_cliente, estado_domicilio, direccion, cod_doc_pago)
-      values ( _documento , _id_cliente,getIdEstadoEnvio('Generado'), concat_ws('-' , _country_id  , _nombre_pais , 
+      values ( _documento , _id_cliente,getIdEstadoEnvio('Generado'), concat_ws('-' , _country_id  , _nombre_pais ,
                              _state_id , _nombre_estado , _city,
                              _street,  _street2 ) , 0 ) ;
-      
+
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -11268,7 +11268,7 @@ BEGIN
     declare img_obj text ;
     DECLARE resultado VARCHAR(255) ;
      DECLARE errorCode INT;
-    DECLARE errorMessage VARCHAR(255); 
+    DECLARE errorMessage VARCHAR(255);
        -- Manejo de errores
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
@@ -11276,54 +11276,54 @@ BEGIN
         GET DIAGNOSTICS CONDITION 1 errorCode = MYSQL_ERRNO, errorMessage = MESSAGE_TEXT;
         -- Formatear el mensaje de error en JSON
         SET resultado = CONCAT('{ "estado" : "error", "codigo" : ', errorCode, ', "mensaje" : "', errorMessage, '" }');
-        
+
         select resultado as _result ;
         -- Devolver el mensaje de error
-        SELECT resultado AS obj; 
-    END;   
+        SELECT resultado AS obj;
+    END;
     SET SESSION group_concat_max_len = 1000000;
     set precio_obj = '';
     set existencia_obj = '';
     set img_obj = '' ;
-     -- Obtener productos 
-    if    cnt > 0 then 
+     -- Obtener productos
+    if    cnt > 0 then
              -- Crear tabla temporal para productos limitados
 			CREATE TEMPORARY TABLE temp_productos_categoria AS
-			SELECT id FROM inv_mst_producto   where idCategoria = _idCategoria            
+			SELECT id FROM inv_mst_producto   where idCategoria = _idCategoria
             LIMIT inicio, cnt;
-	else 
+	else
 		 -- Crear tabla temporal para productos limitados
 			CREATE TEMPORARY TABLE temp_productos_categoria AS
 			SELECT id FROM inv_mst_producto  where idCategoria = _idCategoria  ;
     end if;
      SELECT JSON_ARRAYAGG(obj ) INTO  prd_obj FROM vw_inv_mst_producto_obj
-			where id   IN (SELECT id FROM temp_productos_categoria);  
+			where id   IN (SELECT id FROM temp_productos_categoria);
 			-- Obtener precios
 			SELECT JSON_ARRAYAGG( json_object(
-            'id_producto',id_producto, 
-            'objeto' , objeto)) INTO precio_obj 
-			FROM vw_inv_mst_producto_precios_obj_byprd 
+            'id_producto',id_producto,
+            'objeto' , objeto)) INTO precio_obj
+			FROM vw_inv_mst_producto_precios_obj_byprd
 			WHERE id_producto IN (SELECT id FROM temp_productos_categoria);
 
 			-- Obtener existencias
 			SELECT    JSON_ARRAYAGG( json_object(
-            'id_producto',id_producto, 
-            'objeto' , objeto)) INTO existencia_obj 
-			FROM vw_inv_mst_producto_existencias_byprd 
+            'id_producto',id_producto,
+            'objeto' , objeto)) INTO existencia_obj
+			FROM vw_inv_mst_producto_existencias_byprd
 			WHERE id_producto IN (SELECT id FROM temp_productos_categoria);
 
 			-- Obtener imágenes
 			SELECT JSON_ARRAYAGG( json_object(
-           'id_producto',id_producto, 
+           'id_producto',id_producto,
            'objeto' , objeto)) INTO img_obj
-			FROM vw_inv_mst_producto_images_byprd 
-			WHERE id_producto IN (SELECT id FROM temp_productos_categoria); 
-     
-       select  'ok' as _result , coalesce( prd_obj ,JSON_ARRAY() )   as producto, 
-          coalesce(img_obj , JSON_ARRAY()) as img , 
-        coalesce(precio_obj , JSON_ARRAY()) as precios , 
+			FROM vw_inv_mst_producto_images_byprd
+			WHERE id_producto IN (SELECT id FROM temp_productos_categoria);
+
+       select  'ok' as _result , coalesce( prd_obj ,JSON_ARRAY() )   as producto,
+          coalesce(img_obj , JSON_ARRAY()) as img ,
+        coalesce(precio_obj , JSON_ARRAY()) as precios ,
         coalesce(existencia_obj, JSON_ARRAY())  as existencias ;
-     
+
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -11348,7 +11348,7 @@ BEGIN
     declare img_obj text ;
     DECLARE resultado VARCHAR(255) ;
      DECLARE errorCode INT;
-    DECLARE errorMessage VARCHAR(255); 
+    DECLARE errorMessage VARCHAR(255);
        -- Manejo de errores
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
@@ -11356,56 +11356,56 @@ BEGIN
         GET DIAGNOSTICS CONDITION 1 errorCode = MYSQL_ERRNO, errorMessage = MESSAGE_TEXT;
         -- Formatear el mensaje de error en JSON
         SET resultado = CONCAT('{ "estado" : "error", "codigo" : ', errorCode, ', "mensaje" : "', errorMessage, '" }');
-        
+
         select resultado as _result ;
         -- Devolver el mensaje de error
-        SELECT resultado AS obj; 
-    END;   
+        SELECT resultado AS obj;
+    END;
     SET SESSION group_concat_max_len = 1000000;
     set precio_obj = '';
     set existencia_obj = '';
     set img_obj = '' ;
-     
+
      -- Obtener productos
-    if    cnt > 0 then 
+    if    cnt > 0 then
              -- Crear tabla temporal para productos limitados
 			CREATE TEMPORARY TABLE temp_productos_marca AS
 			SELECT id FROM inv_mst_producto  where idMarca = _idMarca   LIMIT inicio, cnt;
-	else 
+	else
 		 -- Crear tabla temporal para productos limitados
 			CREATE TEMPORARY TABLE temp_productos_marca AS
 			SELECT id FROM inv_mst_producto where idMarca = _idMarca;
     end if;
             SELECT JSON_ARRAYAGG(obj ) INTO  prd_obj FROM vw_inv_mst_producto_obj
-			where id   IN (SELECT id FROM temp_productos_marca);  
+			where id   IN (SELECT id FROM temp_productos_marca);
 			-- Obtener precios
 			SELECT JSON_ARRAYAGG( json_object(
-            'id_producto',id_producto, 
-            'objeto' , objeto)) INTO precio_obj 
-			FROM vw_inv_mst_producto_precios_obj_byprd 
+            'id_producto',id_producto,
+            'objeto' , objeto)) INTO precio_obj
+			FROM vw_inv_mst_producto_precios_obj_byprd
 			WHERE id_producto IN (SELECT id FROM temp_productos_marca);
 
 			-- Obtener existencias
 			SELECT    JSON_ARRAYAGG( json_object(
-            'id_producto',id_producto, 
-            'objeto' , objeto)) INTO existencia_obj 
-			FROM vw_inv_mst_producto_existencias_byprd 
+            'id_producto',id_producto,
+            'objeto' , objeto)) INTO existencia_obj
+			FROM vw_inv_mst_producto_existencias_byprd
 			WHERE id_producto IN (SELECT id FROM temp_productos_marca);
 
 			-- Obtener imágenes
 			SELECT JSON_ARRAYAGG( json_object(
-           'id_producto',id_producto, 
+           'id_producto',id_producto,
            'objeto' , objeto)) INTO img_obj
-			FROM vw_inv_mst_producto_images_byprd 
-			WHERE id_producto IN (SELECT id FROM temp_productos_marca); 
+			FROM vw_inv_mst_producto_images_byprd
+			WHERE id_producto IN (SELECT id FROM temp_productos_marca);
 
-     
-       select  'ok' as _result , coalesce( prd_obj ,JSON_ARRAY() )   as producto, 
-          coalesce(img_obj , JSON_ARRAY()) as img , 
-        coalesce(precio_obj , JSON_ARRAY()) as precios , 
+
+       select  'ok' as _result , coalesce( prd_obj ,JSON_ARRAY() )   as producto,
+          coalesce(img_obj , JSON_ARRAY()) as img ,
+        coalesce(precio_obj , JSON_ARRAY()) as precios ,
         coalesce(existencia_obj, JSON_ARRAY())  as existencias ;
-   
-     
+
+
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -11430,7 +11430,7 @@ BEGIN
     declare img_obj , _IdProducto text ;
     DECLARE resultado VARCHAR(255) ;
      DECLARE errorCode INT;
-    DECLARE errorMessage VARCHAR(255); 
+    DECLARE errorMessage VARCHAR(255);
        -- Manejo de errores
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
@@ -11438,11 +11438,11 @@ BEGIN
         GET DIAGNOSTICS CONDITION 1 errorCode = MYSQL_ERRNO, errorMessage = MESSAGE_TEXT;
         -- Formatear el mensaje de error en JSON
         SET resultado = CONCAT('{ "estado" : "error", "codigo" : ', errorCode, ', "mensaje" : "', errorMessage, '" }');
-        
+
         select resultado as _result ;
         -- Devolver el mensaje de error
-        SELECT resultado AS obj; 
-    END;   
+        SELECT resultado AS obj;
+    END;
     SET SESSION group_concat_max_len = 1000000;
     set precio_obj = '';
     set existencia_obj = '';
@@ -11450,49 +11450,49 @@ BEGIN
      -- Obtener productos
 	set _IdProducto = upper(trim(_dato_busqueda) ) ;
     set  _dato_busqueda = concat('%' , trim(_dato_busqueda) , '%' ) ;
-    if    cnt > 0 then 
+    if    cnt > 0 then
              -- Crear tabla temporal para productos limitados
 			CREATE TEMPORARY TABLE temp_productos_nombre AS
-			SELECT id FROM inv_mst_producto  where nombre like _dato_busqueda 
-            or nombre2 like _dato_busqueda  or nombre3 like _dato_busqueda 
+			SELECT id FROM inv_mst_producto  where nombre like _dato_busqueda
+            or nombre2 like _dato_busqueda  or nombre3 like _dato_busqueda
             or upper(cod_prd_externo) = _IdProducto
             LIMIT inicio, cnt;
-	else 
+	else
 		 -- Crear tabla temporal para productos limitados
 			CREATE TEMPORARY TABLE temp_productos_nombre AS
-			SELECT id FROM inv_mst_producto where nombre like _dato_busqueda 
-            or nombre2 like _dato_busqueda  or nombre3 like _dato_busqueda 
+			SELECT id FROM inv_mst_producto where nombre like _dato_busqueda
+            or nombre2 like _dato_busqueda  or nombre3 like _dato_busqueda
             ;
     end if;
             SELECT JSON_ARRAYAGG(obj ) INTO  prd_obj FROM vw_inv_mst_producto_obj
-			where id   IN (SELECT id FROM temp_productos_nombre);  
+			where id   IN (SELECT id FROM temp_productos_nombre);
 			-- Obtener precios
 			SELECT JSON_ARRAYAGG( json_object(
-            'id_producto',id_producto, 
-            'objeto' , objeto)) INTO precio_obj 
-			FROM vw_inv_mst_producto_precios_obj_byprd 
+            'id_producto',id_producto,
+            'objeto' , objeto)) INTO precio_obj
+			FROM vw_inv_mst_producto_precios_obj_byprd
 			WHERE id_producto IN (SELECT id FROM temp_productos_nombre);
 
 			-- Obtener existencias
 			SELECT    JSON_ARRAYAGG( json_object(
-            'id_producto',id_producto, 
-            'objeto' , objeto)) INTO existencia_obj 
-			FROM vw_inv_mst_producto_existencias_byprd 
+            'id_producto',id_producto,
+            'objeto' , objeto)) INTO existencia_obj
+			FROM vw_inv_mst_producto_existencias_byprd
 			WHERE id_producto IN (SELECT id FROM temp_productos_nombre);
 
 			-- Obtener imágenes
 			SELECT JSON_ARRAYAGG( json_object(
-           'id_producto',id_producto, 
+           'id_producto',id_producto,
            'objeto' , objeto)) INTO img_obj
-			FROM vw_inv_mst_producto_images_byprd 
-			WHERE id_producto IN (SELECT id FROM temp_productos_nombre); 
-     
-       select  'ok' as _result , coalesce( prd_obj ,JSON_ARRAY() )   as producto, 
-          coalesce(img_obj , JSON_ARRAY()) as img , 
-        coalesce(precio_obj , JSON_ARRAY()) as precios , 
+			FROM vw_inv_mst_producto_images_byprd
+			WHERE id_producto IN (SELECT id FROM temp_productos_nombre);
+
+       select  'ok' as _result , coalesce( prd_obj ,JSON_ARRAY() )   as producto,
+          coalesce(img_obj , JSON_ARRAY()) as img ,
+        coalesce(precio_obj , JSON_ARRAY()) as precios ,
         coalesce(existencia_obj, JSON_ARRAY())  as existencias ;
-   
-     
+
+
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -11517,7 +11517,7 @@ BEGIN
     declare img_obj text ;
     DECLARE resultado VARCHAR(255) ;
      DECLARE errorCode INT;
-    DECLARE errorMessage VARCHAR(255); 
+    DECLARE errorMessage VARCHAR(255);
        -- Manejo de errores
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
@@ -11525,55 +11525,55 @@ BEGIN
         GET DIAGNOSTICS CONDITION 1 errorCode = MYSQL_ERRNO, errorMessage = MESSAGE_TEXT;
         -- Formatear el mensaje de error en JSON
         SET resultado = CONCAT('{ "estado" : "error", "codigo" : ', errorCode, ', "mensaje" : "', errorMessage, '" }');
-        
+
         select resultado as _result ;
         -- Devolver el mensaje de error
-        SELECT resultado AS obj; 
-    END;   
+        SELECT resultado AS obj;
+    END;
     SET SESSION group_concat_max_len = 1000000;
     set precio_obj = '';
     set existencia_obj = '';
     set img_obj = '' ;
-     -- Obtener productos 
-    if    cnt > 0 then 
+     -- Obtener productos
+    if    cnt > 0 then
              -- Crear tabla temporal para productos limitados
-		
+
 			CREATE TEMPORARY TABLE temp_productos_completos AS
 			SELECT id FROM inv_mst_producto LIMIT inicio, cnt;
-	else 
+	else
 		 -- Crear tabla temporal para productos limitados
 			CREATE TEMPORARY TABLE temp_productos_completos AS
 			SELECT id FROM inv_mst_producto ;
     end if;
             SELECT JSON_ARRAYAGG(obj ) INTO  prd_obj FROM vw_inv_mst_producto_obj
-			where id   IN (SELECT id FROM temp_productos_completos);  
+			where id   IN (SELECT id FROM temp_productos_completos);
 			-- Obtener precios
 			SELECT JSON_ARRAYAGG( json_object(
-            'id_producto',id_producto, 
-            'objeto' , objeto)) INTO precio_obj 
-			FROM vw_inv_mst_producto_precios_obj_byprd 
+            'id_producto',id_producto,
+            'objeto' , objeto)) INTO precio_obj
+			FROM vw_inv_mst_producto_precios_obj_byprd
 			WHERE id_producto IN (SELECT id FROM temp_productos_completos);
 
 			-- Obtener existencias
 			SELECT    JSON_ARRAYAGG( json_object(
-            'id_producto',id_producto, 
-            'objeto' , objeto)) INTO existencia_obj 
-			FROM vw_inv_mst_producto_existencias_byprd 
+            'id_producto',id_producto,
+            'objeto' , objeto)) INTO existencia_obj
+			FROM vw_inv_mst_producto_existencias_byprd
 			WHERE id_producto IN (SELECT id FROM temp_productos_completos);
 
 			-- Obtener imágenes
 			SELECT JSON_ARRAYAGG( json_object(
-           'id_producto',id_producto, 
+           'id_producto',id_producto,
            'objeto' , objeto)) INTO img_obj
-			FROM vw_inv_mst_producto_images_byprd 
-			WHERE id_producto IN (SELECT id FROM temp_productos_completos); 
+			FROM vw_inv_mst_producto_images_byprd
+			WHERE id_producto IN (SELECT id FROM temp_productos_completos);
 
-     
-       select  'ok' as _result , coalesce( prd_obj ,JSON_ARRAY() )   as producto, 
-          coalesce(img_obj , JSON_ARRAY()) as img , 
-        coalesce(precio_obj , JSON_ARRAY()) as precios , 
+
+       select  'ok' as _result , coalesce( prd_obj ,JSON_ARRAY() )   as producto,
+          coalesce(img_obj , JSON_ARRAY()) as img ,
+        coalesce(precio_obj , JSON_ARRAY()) as precios ,
         coalesce(existencia_obj, JSON_ARRAY())  as existencias ;
-     
+
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -11608,21 +11608,21 @@ BEGIN
         -- Formatear el mensaje de error en JSON
         SET resultado = CONCAT('{ "estado" : "error", "codigo" : ', errorCode, ', "mensaje" : "', errorMessage, '" }');
         -- Devolver el mensaje de error
-        SELECT resultado AS obj; 
-    END; 
+        SELECT resultado AS obj;
+    END;
     -- Inicializar variables
     SET tempID = categoriaID;
     SET resultado = '';
 
-    
-  SELECT   UPPER(letra)  as letra  INTO letras 
+
+  SELECT   UPPER(letra)  as letra  INTO letras
         FROM inv_categorias
-        WHERE id = categoriaID;  
+        WHERE id = categoriaID;
     -- Devolver el resultado
     SET resultado = letras;
-    
+
      -- Iniciar una transacción
-   
+
 
     -- Bloquear la fila para evitar concurrencia
     SELECT contador INTO _contador
@@ -11638,7 +11638,7 @@ BEGIN
     SET contador = _contador
     WHERE id = categoriaID;
     -- Confirmar la transacción
-    
+
  -- Formatear el resultado final
     SET resultado = CONCAT(' { "estado" : "ok" ,  "idProducto" : "', CONCAT(letras, LPAD(_contador, 4, '0')), '"  , "letras" : "', letras, '" , "contador" : ', _contador, ' } ');
     -- Devolver el resultado
@@ -11662,24 +11662,24 @@ DELIMITER ;;
 CREATE DEFINER=`jdpsoluc_l_monrroy`@`%` PROCEDURE `GetMenus`()
 BEGIN
     WITH RECURSIVE MenuHierarchy AS (
-        SELECT 
+        SELECT
             r.id,
             r.nombre_recurso AS name,
             r.padreId AS parent_id,
             r.img AS icon,
             CAST(NULL AS JSON) AS children
-        FROM 
+        FROM
             recurso r
-        WHERE 
+        WHERE
             r.padreId = 0
         UNION ALL
-        SELECT 
+        SELECT
             r.id,
             r.nombre_recurso,
             r.padreId,
             r.img,
             CAST(NULL AS JSON)
-        FROM 
+        FROM
             recurso r
         INNER JOIN MenuHierarchy mh ON r.padreId = mh.id
     )
@@ -11694,7 +11694,7 @@ BEGIN
     FROM MenuHierarchy root
     WHERE root.parent_id = 0;
 
- 
+
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -11717,10 +11717,10 @@ BEGIN
     declare precio_obj text ;
     declare existencia_obj text ;
     declare img_obj text ;
-    declare contador int ; 
+    declare contador int ;
     DECLARE resultado VARCHAR(255) ;
      DECLARE errorCode INT;
-    DECLARE errorMessage VARCHAR(255); 
+    DECLARE errorMessage VARCHAR(255);
        -- Manejo de errores
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
@@ -11728,11 +11728,11 @@ BEGIN
         GET DIAGNOSTICS CONDITION 1 errorCode = MYSQL_ERRNO, errorMessage = MESSAGE_TEXT;
         -- Formatear el mensaje de error en JSON
         SET resultado = CONCAT('{ "estado" : "error", "codigo" : ', errorCode, ', "mensaje" : "', errorMessage, '" }');
-        
+
         select resultado as _result ;
         -- Devolver el mensaje de error
-        SELECT resultado AS obj; 
-    END;   
+        SELECT resultado AS obj;
+    END;
     SET SESSION group_concat_max_len = 1000000;
     set precio_obj = '';
     set existencia_obj = '';
@@ -11740,43 +11740,43 @@ BEGIN
       select obj into prd_obj from  vw_inv_mst_producto_obj where upper(id) =  upper(IdProducto) ;
      if trim(prd_obj) <> '' then
         select objeto into precio_obj from  vw_inv_mst_producto_precios_obj_byprd where id_producto = IdProducto ;
-		select objeto into existencia_obj from  vw_inv_mst_producto_existencias_byprd where id_producto = IdProducto ; 
-		select objeto into img_obj from  vw_inv_mst_producto_images_byprd where id_producto = IdProducto ;  
-      else 
+		select objeto into existencia_obj from  vw_inv_mst_producto_existencias_byprd where id_producto = IdProducto ;
+		select objeto into img_obj from  vw_inv_mst_producto_images_byprd where id_producto = IdProducto ;
+      else
            select upper(id) into IdProducto from inv_mst_producto where upper(barcode) = upper(IdProducto) ;
            select obj into prd_obj from  vw_inv_mst_producto_obj where id = IdProducto ;
 			 if trim(prd_obj) <> '' then
 				select objeto into precio_obj from  vw_inv_mst_producto_precios_obj_byprd where upper(id_producto) = IdProducto ;
-				select objeto into existencia_obj from  vw_inv_mst_producto_existencias_byprd where upper(id_producto) = IdProducto ; 
-				select objeto into img_obj from  vw_inv_mst_producto_images_byprd where upper(id_producto) = IdProducto ; 
-             else 
+				select objeto into existencia_obj from  vw_inv_mst_producto_existencias_byprd where upper(id_producto) = IdProducto ;
+				select objeto into img_obj from  vw_inv_mst_producto_images_byprd where upper(id_producto) = IdProducto ;
+             else
 				select  JSON_ARRAY(obj ) into prd_obj from  vw_inv_mst_producto_obj where id in (
 								select upper(id)   from inv_mst_producto
-								where upper(cod_prd_externo) = upper(IdProducto) 
+								where upper(cod_prd_externo) = upper(IdProducto)
                    ) ;
-		 
+
 					 if trim(prd_obj) <> '' then
-						select objeto into precio_obj from  vw_inv_mst_producto_precios_obj_byprd where upper(id_producto) 
-                        in (  select upper(id)   from inv_mst_producto where upper(cod_prd_externo) = upper(IdProducto) 
-                   ) ; 
-                   
+						select objeto into precio_obj from  vw_inv_mst_producto_precios_obj_byprd where upper(id_producto)
+                        in (  select upper(id)   from inv_mst_producto where upper(cod_prd_externo) = upper(IdProducto)
+                   ) ;
+
 						select objeto into existencia_obj from  vw_inv_mst_producto_existencias_byprd where upper(id_producto) in (
-                    select upper(id)   from inv_mst_producto where upper(cod_prd_externo) = upper(IdProducto) 
-                   ) ;   
-                   
+                    select upper(id)   from inv_mst_producto where upper(cod_prd_externo) = upper(IdProducto)
+                   ) ;
+
 						select objeto into img_obj from  vw_inv_mst_producto_images_byprd where upper(id_producto) in (
-                    select upper(id)   from inv_mst_producto where upper(cod_prd_externo) = upper(IdProducto) 
-                   ) ; 
+                    select upper(id)   from inv_mst_producto where upper(cod_prd_externo) = upper(IdProducto)
+                   ) ;
 						end if;
 			 end if;
-        
+
      end if;
-     
-       select  'ok' as _result ,coalesce( prd_obj , JSON_ARRAY() ) as producto,  COALESCE(img_obj, JSON_ARRAY())   as img , 
-      coalesce(precio_obj , JSON_ARRAY()) as precios , 
+
+       select  'ok' as _result ,coalesce( prd_obj , JSON_ARRAY() ) as producto,  COALESCE(img_obj, JSON_ARRAY())   as img ,
+      coalesce(precio_obj , JSON_ARRAY()) as precios ,
       coalesce(existencia_obj, JSON_ARRAY())  as existencias ;
-   
-     
+
+
 
 END ;;
 DELIMITER ;
@@ -11796,7 +11796,7 @@ DELIMITER ;
 DELIMITER ;;
 CREATE DEFINER=`jdpsoluc_l_monrroy`@`%` PROCEDURE `getProductoCompletoExistencia`( in _id_producto text ,  in _id_caja int)
 BEGIN
-    select obj from vw_inv_mst_producto_existencias_by_caja where id = _id_caja and id_producto = _id_producto ; 
+    select obj from vw_inv_mst_producto_existencias_by_caja where id = _id_caja and id_producto = _id_producto ;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -11855,26 +11855,26 @@ DELIMITER ;
 /*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
 CREATE DEFINER=`jdpsoluc_l_monrroy`@`%` PROCEDURE `getUserGenericDocuments`( in idUser integer , in validarCaja integer)
-BEGIN  
+BEGIN
     SET SESSION group_concat_max_len = 1000000;
-    
+
     -- SELECT * FROM vw_cajas_activas where usuarioEstadoCaja = 1;
-    
-   if idUser = 0 then 
-      if validarCaja = 0 then 
-    	select  *  from vw_obj_documentos_por_usuario 
+
+   if idUser = 0 then
+      if validarCaja = 0 then
+    	select  *  from vw_obj_documentos_por_usuario
         where  vw_obj_documentos_por_usuario.tipoDocumentoFinal = 1 ;
-	  else  
-		 select  vw_obj_documentos_por_usuario.* from vw_obj_documentos_por_usuario 
+	  else
+		 select  vw_obj_documentos_por_usuario.* from vw_obj_documentos_por_usuario
          inner join vw_cajas_activas on usuarioEstadoCaja = vw_obj_documentos_por_usuario.usuario
 		 where  vw_obj_documentos_por_usuario.tipoDocumentoFinal = 1 ;
 	  end if;
-   else  
-       if validarCaja = 0 then 
-    	select  vw_obj_documentos_por_usuario.*  from vw_obj_documentos_por_usuario 
+   else
+       if validarCaja = 0 then
+    	select  vw_obj_documentos_por_usuario.*  from vw_obj_documentos_por_usuario
         where usuario = idUser and vw_obj_documentos_por_usuario.tipoDocumentoFinal = 1 ;
-	  else  
-		 select vw_obj_documentos_por_usuario.* from vw_obj_documentos_por_usuario 
+	  else
+		 select vw_obj_documentos_por_usuario.* from vw_obj_documentos_por_usuario
          inner join vw_cajas_activas on usuarioEstadoCaja = vw_obj_documentos_por_usuario.usuario
 		 where usuario = idUser and vw_obj_documentos_por_usuario.tipoDocumentoFinal = 1 ;
 	  end if;
@@ -11901,13 +11901,13 @@ declare _dia ,_mes,_anio , _count int;
 declare  _clase ,_grupo , _cuenta int;
 select YEAR(_fecha)into _anio;  #Selecciona el año
 select MONTH (_fecha) into _mes;  #Selecciona el mes
-select DAY(_fecha) into _dia; #Selecciona el día  
+select DAY(_fecha) into _dia; #Selecciona el día
 
-select cod_clase ,cod_grupo ,cod_cuenta from vw_cnt_scuentas where id_scuenta = id_subcuenta 
+select cod_clase ,cod_grupo ,cod_cuenta from vw_cnt_scuentas where id_scuenta = id_subcuenta
 into _clase ,_grupo , _cuenta;
 set @_tabla = '' ;
 set @columna = '' ;
- 
+
 if _debito = 0 then
 	set @num_debito = 0;
 	set @num_credito = 1;
@@ -11916,11 +11916,11 @@ if _credito = 0 then
 	set @num_debito = 1;
 	set @num_credito = 0;
 end if;
- 
+
 -- when 'cuenta' then
 select count(*) from cnt_saldo_cuenta where cod_cuenta = _cuenta
 and anio = _anio into _count;
-if _count = 0 then  
+if _count = 0 then
 insert into cnt_saldo_cuenta (cod_cuenta,anio,grupo,clase) values(_cuenta ,_anio , _grupo  , _clase );
 END IF;
 
@@ -11929,14 +11929,14 @@ END IF;
 select count(*) from cnt_saldo_grupo where cod_grupo = _grupo
 and anio = _anio into _count;
 -- _clase ,_grupo , _cuenta
-if _count = 0 then  
+if _count = 0 then
 insert into cnt_saldo_grupo (cod_grupo,anio , clase) values(_grupo ,_anio , _clase);
 END IF;
 
 -- when 'clase' then
 select count(*) from cnt_saldo_clases where cod_clase = _clase
 and anio = _anio into _count;
-if _count = 0 then  
+if _count = 0 then
   insert into cnt_saldo_clases (cod_clase,anio) values(_clase ,_anio );
 END IF;
 SET SQL_SAFE_UPDATES = 0;
@@ -11949,11 +11949,11 @@ num_trn_c_1 = num_trn_c_1 + @num_credito ,
 num_trn_d_1 = num_trn_d_1 + @num_debito,
 saldo_credito_t = saldo_credito_t + _credito,
 saldo_debito_t = saldo_debito_t + _debito,
-saldo_total = saldo_total +( _debito - _credito)  , 
+saldo_total = saldo_total +( _debito - _credito)  ,
 num_trn_credito = num_trn_credito + @num_credito ,
 num_trn_debito = num_trn_debito  + @num_debito ,
 num_trn_total = num_trn_total + 1  ,
-saldo_1 = saldo_1 +( _debito - _credito) 
+saldo_1 = saldo_1 +( _debito - _credito)
 where cod_cuenta = _cuenta and  anio =  _anio;
 
 update cnt_saldo_grupo
@@ -11963,27 +11963,27 @@ num_trn_c_1 = num_trn_c_1 + @num_credito ,
 num_trn_d_1 = num_trn_d_1 + @num_debito,
 saldo_credito_t = saldo_credito_t + _credito,
 saldo_debito_t = saldo_debito_t + _debito,
-saldo_total = saldo_total +( _debito - _credito)  , 
+saldo_total = saldo_total +( _debito - _credito)  ,
 num_trn_credito = num_trn_credito + @num_credito ,
 num_trn_debito = num_trn_debito  + @num_debito ,
 num_trn_total = num_trn_total + 1 ,
-saldo_1 = saldo_1 +( _debito - _credito) 
+saldo_1 = saldo_1 +( _debito - _credito)
 where cod_grupo = _grupo and  anio =  _anio;
 
-update cnt_saldo_clases 
+update cnt_saldo_clases
 set debito_1 = debito_1 + _debito ,
 credito_1 = credito_1 + _credito,
 num_trn_c_1 = num_trn_c_1 + @num_credito ,
 num_trn_d_1 = num_trn_d_1 + @num_debito,
 saldo_credito_t = saldo_credito_t + _credito,
 saldo_debito_t = saldo_debito_t + _debito,
-saldo_total = saldo_total +( _debito - _credito)  , 
+saldo_total = saldo_total +( _debito - _credito)  ,
 num_trn_credito = num_trn_credito + @num_credito ,
 num_trn_debito = num_trn_debito  + @num_debito ,
 num_trn_total = num_trn_total + 1 ,
-saldo_1 = saldo_1 +( _debito - _credito) 
+saldo_1 = saldo_1 +( _debito - _credito)
 where cod_clase = _clase and  anio =  _anio;
- 
+
 when 2 then
 update cnt_saldo_cuenta
 set debito_2 = debito_2 + _debito ,
@@ -11992,11 +11992,11 @@ num_trn_c_2 = num_trn_c_2 + @num_credito ,
 num_trn_d_2 = num_trn_d_2 + @num_debito,
 saldo_credito_t = saldo_credito_t + _credito,
 saldo_debito_t = saldo_debito_t + _debito,
-saldo_total = saldo_total +( _debito - _credito)  , 
+saldo_total = saldo_total +( _debito - _credito)  ,
 num_trn_credito = num_trn_credito + @num_credito ,
 num_trn_debito = num_trn_debito  + @num_debito ,
 num_trn_total = num_trn_total + 1   ,
-saldo_2 = saldo_2 +( _debito - _credito) 
+saldo_2 = saldo_2 +( _debito - _credito)
 where cod_cuenta = _cuenta and  anio =  _anio;
 
 update cnt_saldo_grupo
@@ -12006,25 +12006,25 @@ num_trn_c_2 = num_trn_c_2 + @num_credito ,
 num_trn_d_2 = num_trn_d_2 + @num_debito,
 saldo_credito_t = saldo_credito_t + _credito,
 saldo_debito_t = saldo_debito_t + _debito,
-saldo_total = saldo_total +( _debito - _credito)  , 
+saldo_total = saldo_total +( _debito - _credito)  ,
 num_trn_credito = num_trn_credito + @num_credito ,
 num_trn_debito = num_trn_debito  + @num_debito ,
 num_trn_total = num_trn_total + 1  ,
-saldo_2 = saldo_2 +( _debito - _credito) 
+saldo_2 = saldo_2 +( _debito - _credito)
 where cod_grupo = _grupo and  anio =  _anio;
 
-update cnt_saldo_clases 
+update cnt_saldo_clases
 set debito_2 = debito_2 + _debito ,
 credito_2 = credito_2 + _credito,
 num_trn_c_2 = num_trn_c_2 + @num_credito ,
 num_trn_d_2 = num_trn_d_2 + @num_debito,
 saldo_credito_t = saldo_credito_t + _credito,
 saldo_debito_t = saldo_debito_t + _debito,
-saldo_total = saldo_total +( _debito - _credito)  , 
+saldo_total = saldo_total +( _debito - _credito)  ,
 num_trn_credito = num_trn_credito + @num_credito ,
 num_trn_debito = num_trn_debito  + @num_debito ,
 num_trn_total = num_trn_total + 1  ,
-saldo_2 = saldo_2 +( _debito - _credito) 
+saldo_2 = saldo_2 +( _debito - _credito)
 where cod_clase = _clase and  anio =  _anio;
 
 when 3 then
@@ -12035,11 +12035,11 @@ num_trn_c_3 = num_trn_c_3 + @num_credito ,
 num_trn_d_3 = num_trn_d_3 + @num_debito,
 saldo_credito_t = saldo_credito_t + _credito,
 saldo_debito_t = saldo_debito_t + _debito,
-saldo_total = saldo_total +( _debito - _credito)  , 
+saldo_total = saldo_total +( _debito - _credito)  ,
 num_trn_credito = num_trn_credito + @num_credito ,
 num_trn_debito = num_trn_debito  + @num_debito ,
 num_trn_total = num_trn_total + 1   ,
-saldo_3 = saldo_3 +( _debito - _credito) 
+saldo_3 = saldo_3 +( _debito - _credito)
 where cod_cuenta = _cuenta and  anio =  _anio;
 
 update cnt_saldo_grupo
@@ -12049,25 +12049,25 @@ num_trn_c_3 = num_trn_c_3 + @num_credito ,
 num_trn_d_3 = num_trn_d_3 + @num_debito,
 saldo_credito_t = saldo_credito_t + _credito,
 saldo_debito_t = saldo_debito_t + _debito,
-saldo_total = saldo_total +( _debito - _credito)  , 
+saldo_total = saldo_total +( _debito - _credito)  ,
 num_trn_credito = num_trn_credito + @num_credito ,
 num_trn_debito = num_trn_debito  + @num_debito ,
 num_trn_total = num_trn_total + 1  ,
-saldo_3 = saldo_3 +( _debito - _credito) 
+saldo_3 = saldo_3 +( _debito - _credito)
 where cod_grupo = _grupo and  anio =  _anio;
 
-update cnt_saldo_clases 
+update cnt_saldo_clases
 set debito_3 = debito_3 + _debito ,
 credito_3 = credito_3 + _credito,
 num_trn_c_3 = num_trn_c_3 + @num_credito ,
 num_trn_d_3 = num_trn_d_3 + @num_debito,
 saldo_credito_t = saldo_credito_t + _credito,
 saldo_debito_t = saldo_debito_t + _debito,
-saldo_total = saldo_total +( _debito - _credito)  , 
+saldo_total = saldo_total +( _debito - _credito)  ,
 num_trn_credito = num_trn_credito + @num_credito ,
 num_trn_debito = num_trn_debito  + @num_debito ,
 num_trn_total = num_trn_total + 1  ,
-saldo_3 = saldo_3 +( _debito - _credito) 
+saldo_3 = saldo_3 +( _debito - _credito)
 where cod_clase = _clase and  anio =  _anio;
 
 when 4 then
@@ -12078,11 +12078,11 @@ num_trn_c_4 = num_trn_c_4 + @num_credito ,
 num_trn_d_4 = num_trn_d_4 + @num_debito,
 saldo_credito_t = saldo_credito_t + _credito,
 saldo_debito_t = saldo_debito_t + _debito,
-saldo_total = saldo_total +( _debito - _credito)  , 
+saldo_total = saldo_total +( _debito - _credito)  ,
 num_trn_credito = num_trn_credito + @num_credito ,
 num_trn_debito = num_trn_debito  + @num_debito ,
 num_trn_total = num_trn_total + 1   ,
-saldo_4 = saldo_4 +( _debito - _credito) 
+saldo_4 = saldo_4 +( _debito - _credito)
 where cod_cuenta = _cuenta and  anio =  _anio;
 
 update cnt_saldo_grupo
@@ -12092,25 +12092,25 @@ num_trn_c_4 = num_trn_c_4 + @num_credito ,
 num_trn_d_4 = num_trn_d_4 + @num_debito,
 saldo_credito_t = saldo_credito_t + _credito,
 saldo_debito_t = saldo_debito_t + _debito,
-saldo_total = saldo_total +( _debito - _credito)  , 
+saldo_total = saldo_total +( _debito - _credito)  ,
 num_trn_credito = num_trn_credito + @num_credito ,
 num_trn_debito = num_trn_debito  + @num_debito ,
 num_trn_total = num_trn_total + 1  ,
-saldo_4 = saldo_4 +( _debito - _credito) 
+saldo_4 = saldo_4 +( _debito - _credito)
 where cod_grupo = _grupo and  anio =  _anio;
 
-update cnt_saldo_clases 
+update cnt_saldo_clases
 set debito_4 = debito_4 + _debito ,
 credito_4 = credito_4 + _credito,
 num_trn_c_4 = num_trn_c_4 + @num_credito ,
 num_trn_d_4 = num_trn_d_4 + @num_debito,
 saldo_credito_t = saldo_credito_t + _credito,
 saldo_debito_t = saldo_debito_t + _debito,
-saldo_total = saldo_total +( _debito - _credito)  , 
+saldo_total = saldo_total +( _debito - _credito)  ,
 num_trn_credito = num_trn_credito + @num_credito ,
 num_trn_debito = num_trn_debito  + @num_debito ,
 num_trn_total = num_trn_total + 1  ,
-saldo_4 = saldo_4 +( _debito - _credito) 
+saldo_4 = saldo_4 +( _debito - _credito)
 where cod_clase = _clase and  anio =  _anio;
 
 when 5 then
@@ -12121,11 +12121,11 @@ num_trn_c_5 = num_trn_c_5 + @num_credito ,
 num_trn_d_5 = num_trn_d_5 + @num_debito,
 saldo_credito_t = saldo_credito_t + _credito,
 saldo_debito_t = saldo_debito_t + _debito,
-saldo_total = saldo_total +( _debito - _credito)  , 
+saldo_total = saldo_total +( _debito - _credito)  ,
 num_trn_credito = num_trn_credito + @num_credito ,
 num_trn_debito = num_trn_debito  + @num_debito ,
 num_trn_total = num_trn_total + 1   ,
-saldo_5 = saldo_5 +( _debito - _credito) 
+saldo_5 = saldo_5 +( _debito - _credito)
 where cod_cuenta = _cuenta and  anio =  _anio;
 
 update cnt_saldo_grupo
@@ -12135,25 +12135,25 @@ num_trn_c_5 = num_trn_c_5 + @num_credito ,
 num_trn_d_5 = num_trn_d_5 + @num_debito,
 saldo_credito_t = saldo_credito_t + _credito,
 saldo_debito_t = saldo_debito_t + _debito,
-saldo_total = saldo_total +( _debito - _credito)  , 
+saldo_total = saldo_total +( _debito - _credito)  ,
 num_trn_credito = num_trn_credito + @num_credito ,
 num_trn_debito = num_trn_debito  + @num_debito ,
 num_trn_total = num_trn_total + 1  ,
-saldo_5 = saldo_5 +( _debito - _credito) 
+saldo_5 = saldo_5 +( _debito - _credito)
 where cod_grupo = _grupo and  anio =  _anio;
 
-update cnt_saldo_clases 
+update cnt_saldo_clases
 set debito_5 = debito_5 + _debito ,
 credito_5 = credito_5 + _credito,
 num_trn_c_5 = num_trn_c_5 + @num_credito ,
 num_trn_d_5 = num_trn_d_5 + @num_debito,
 saldo_credito_t = saldo_credito_t + _credito,
 saldo_debito_t = saldo_debito_t + _debito,
-saldo_total = saldo_total +( _debito - _credito)  , 
+saldo_total = saldo_total +( _debito - _credito)  ,
 num_trn_credito = num_trn_credito + @num_credito ,
 num_trn_debito = num_trn_debito  + @num_debito ,
 num_trn_total = num_trn_total + 1  ,
-saldo_5 = saldo_5 +( _debito - _credito) 
+saldo_5 = saldo_5 +( _debito - _credito)
 where cod_clase = _clase and  anio =  _anio;
 
 when 6 then
@@ -12164,11 +12164,11 @@ num_trn_c_6 = num_trn_c_6 + @num_credito ,
 num_trn_d_6 = num_trn_d_6 + @num_debito,
 saldo_credito_t = saldo_credito_t + _credito,
 saldo_debito_t = saldo_debito_t + _debito,
-saldo_total = saldo_total +( _debito - _credito)  , 
+saldo_total = saldo_total +( _debito - _credito)  ,
 num_trn_credito = num_trn_credito + @num_credito ,
 num_trn_debito = num_trn_debito  + @num_debito ,
 num_trn_total = num_trn_total + 1   ,
-saldo_6 = saldo_6 +( _debito - _credito) 
+saldo_6 = saldo_6 +( _debito - _credito)
 where cod_cuenta = _cuenta and  anio =  _anio;
 
 update cnt_saldo_grupo
@@ -12178,25 +12178,25 @@ num_trn_c_6 = num_trn_c_6 + @num_credito ,
 num_trn_d_6 = num_trn_d_6 + @num_debito,
 saldo_credito_t = saldo_credito_t + _credito,
 saldo_debito_t = saldo_debito_t + _debito,
-saldo_total = saldo_total +( _debito - _credito)  , 
+saldo_total = saldo_total +( _debito - _credito)  ,
 num_trn_credito = num_trn_credito + @num_credito ,
 num_trn_debito = num_trn_debito  + @num_debito ,
 num_trn_total = num_trn_total + 1  ,
-saldo_6 = saldo_6 +( _debito - _credito) 
+saldo_6 = saldo_6 +( _debito - _credito)
 where cod_grupo = _grupo and  anio =  _anio;
 
-update cnt_saldo_clases 
+update cnt_saldo_clases
 set debito_6 = debito_6 + _debito ,
 credito_6 = credito_6 + _credito,
 num_trn_c_6 = num_trn_c_6 + @num_credito ,
 num_trn_d_6 = num_trn_d_6 + @num_debito,
 saldo_credito_t = saldo_credito_t + _credito,
 saldo_debito_t = saldo_debito_t + _debito,
-saldo_total = saldo_total +( _debito - _credito)  , 
+saldo_total = saldo_total +( _debito - _credito)  ,
 num_trn_credito = num_trn_credito + @num_credito ,
 num_trn_debito = num_trn_debito  + @num_debito ,
 num_trn_total = num_trn_total + 1  ,
-saldo_6 = saldo_6 +( _debito - _credito) 
+saldo_6 = saldo_6 +( _debito - _credito)
 where cod_clase = _clase and  anio =  _anio;
 
 when 7 then
@@ -12207,11 +12207,11 @@ num_trn_c_7 = num_trn_c_7 + @num_credito ,
 num_trn_d_7 = num_trn_d_7 + @num_debito,
 saldo_credito_t = saldo_credito_t + _credito,
 saldo_debito_t = saldo_debito_t + _debito,
-saldo_total = saldo_total +( _debito - _credito)  , 
+saldo_total = saldo_total +( _debito - _credito)  ,
 num_trn_credito = num_trn_credito + @num_credito ,
 num_trn_debito = num_trn_debito  + @num_debito ,
 num_trn_total = num_trn_total + 1   ,
-saldo_7 = saldo_7 +( _debito - _credito) 
+saldo_7 = saldo_7 +( _debito - _credito)
 where cod_cuenta = _cuenta and  anio =  _anio;
 
 update cnt_saldo_grupo
@@ -12221,25 +12221,25 @@ num_trn_c_7 = num_trn_c_7 + @num_credito ,
 num_trn_d_7 = num_trn_d_7 + @num_debito,
 saldo_credito_t = saldo_credito_t + _credito,
 saldo_debito_t = saldo_debito_t + _debito,
-saldo_total = saldo_total +( _debito - _credito)  , 
+saldo_total = saldo_total +( _debito - _credito)  ,
 num_trn_credito = num_trn_credito + @num_credito ,
 num_trn_debito = num_trn_debito  + @num_debito ,
 num_trn_total = num_trn_total + 1  ,
-saldo_7 = saldo_7 +( _debito - _credito) 
+saldo_7 = saldo_7 +( _debito - _credito)
 where cod_grupo = _grupo and  anio =  _anio;
 
-update cnt_saldo_clases 
+update cnt_saldo_clases
 set debito_7 = debito_7 + _debito ,
 credito_7 = credito_7 + _credito,
 num_trn_c_7 = num_trn_c_7 + @num_credito ,
 num_trn_d_7 = num_trn_d_7 + @num_debito,
 saldo_credito_t = saldo_credito_t + _credito,
 saldo_debito_t = saldo_debito_t + _debito,
-saldo_total = saldo_total +( _debito - _credito)  , 
+saldo_total = saldo_total +( _debito - _credito)  ,
 num_trn_credito = num_trn_credito + @num_credito ,
 num_trn_debito = num_trn_debito  + @num_debito ,
 num_trn_total = num_trn_total + 1  ,
-saldo_7 = saldo_7 +( _debito - _credito) 
+saldo_7 = saldo_7 +( _debito - _credito)
 where cod_clase = _clase and  anio =  _anio;
 
 when 8 then
@@ -12250,11 +12250,11 @@ num_trn_c_8 = num_trn_c_8 + @num_credito ,
 num_trn_d_8 = num_trn_d_8 + @num_debito,
 saldo_credito_t = saldo_credito_t + _credito,
 saldo_debito_t = saldo_debito_t + _debito,
-saldo_total = saldo_total +( _debito - _credito)  , 
+saldo_total = saldo_total +( _debito - _credito)  ,
 num_trn_credito = num_trn_credito + @num_credito ,
 num_trn_debito = num_trn_debito  + @num_debito ,
 num_trn_total = num_trn_total + 1   ,
-saldo_8 = saldo_8 +( _debito - _credito) 
+saldo_8 = saldo_8 +( _debito - _credito)
 where cod_cuenta = _cuenta and  anio =  _anio;
 
 update cnt_saldo_grupo
@@ -12264,27 +12264,27 @@ num_trn_c_8 = num_trn_c_8 + @num_credito ,
 num_trn_d_8 = num_trn_d_8 + @num_debito,
 saldo_credito_t = saldo_credito_t + _credito,
 saldo_debito_t = saldo_debito_t + _debito,
-saldo_total = saldo_total +( _debito - _credito)  , 
+saldo_total = saldo_total +( _debito - _credito)  ,
 num_trn_credito = num_trn_credito + @num_credito ,
 num_trn_debito = num_trn_debito  + @num_debito ,
 num_trn_total = num_trn_total + 1  ,
-saldo_8 = saldo_8 +( _debito - _credito) 
+saldo_8 = saldo_8 +( _debito - _credito)
 where cod_grupo = _grupo and  anio =  _anio;
 
-update cnt_saldo_clases 
+update cnt_saldo_clases
 set debito_8 = debito_8 + _debito ,
 credito_8 = credito_8 + _credito,
 num_trn_c_8 = num_trn_c_8 + @num_credito ,
 num_trn_d_8 = num_trn_d_8 + @num_debito,
 saldo_credito_t = saldo_credito_t + _credito,
 saldo_debito_t = saldo_debito_t + _debito,
-saldo_total = saldo_total +( _debito - _credito)  , 
+saldo_total = saldo_total +( _debito - _credito)  ,
 num_trn_credito = num_trn_credito + @num_credito ,
 num_trn_debito = num_trn_debito  + @num_debito ,
 num_trn_total = num_trn_total + 1  ,
-saldo_8 = saldo_8 +( _debito - _credito) 
+saldo_8 = saldo_8 +( _debito - _credito)
 where cod_clase = _clase and  anio =  _anio;
- 
+
 when 9 then
 update cnt_saldo_cuenta
 set debito_9 = debito_9 + _debito ,
@@ -12293,11 +12293,11 @@ num_trn_c_9 = num_trn_c_9 + @num_credito ,
 num_trn_d_9 = num_trn_d_9 + @num_debito,
 saldo_credito_t = saldo_credito_t + _credito,
 saldo_debito_t = saldo_debito_t + _debito,
-saldo_total = saldo_total +( _debito - _credito)  , 
+saldo_total = saldo_total +( _debito - _credito)  ,
 num_trn_credito = num_trn_credito + @num_credito ,
 num_trn_debito = num_trn_debito  + @num_debito ,
 num_trn_total = num_trn_total + 1   ,
-saldo_9 = saldo_9 +( _debito - _credito) 
+saldo_9 = saldo_9 +( _debito - _credito)
 where cod_cuenta = _cuenta and  anio =  _anio;
 
 update cnt_saldo_grupo
@@ -12307,25 +12307,25 @@ num_trn_c_9 = num_trn_c_9 + @num_credito ,
 num_trn_d_9 = num_trn_d_9 + @num_debito,
 saldo_credito_t = saldo_credito_t + _credito,
 saldo_debito_t = saldo_debito_t + _debito,
-saldo_total = saldo_total +( _debito - _credito)  , 
+saldo_total = saldo_total +( _debito - _credito)  ,
 num_trn_credito = num_trn_credito + @num_credito ,
 num_trn_debito = num_trn_debito  + @num_debito ,
 num_trn_total = num_trn_total + 1  ,
-saldo_9 = saldo_9 +( _debito - _credito) 
+saldo_9 = saldo_9 +( _debito - _credito)
 where cod_grupo = _grupo and  anio =  _anio;
 
-update cnt_saldo_clases 
+update cnt_saldo_clases
 set debito_9 = debito_9 + _debito ,
 credito_9 = credito_9 + _credito,
 num_trn_c_9 = num_trn_c_9 + @num_credito ,
 num_trn_d_9 = num_trn_d_9 + @num_debito,
 saldo_credito_t = saldo_credito_t + _credito,
 saldo_debito_t = saldo_debito_t + _debito,
-saldo_total = saldo_total +( _debito - _credito)  , 
+saldo_total = saldo_total +( _debito - _credito)  ,
 num_trn_credito = num_trn_credito + @num_credito ,
 num_trn_debito = num_trn_debito  + @num_debito ,
 num_trn_total = num_trn_total + 1  ,
-saldo_9 = saldo_9 +( _debito - _credito) 
+saldo_9 = saldo_9 +( _debito - _credito)
 where cod_clase = _clase and  anio =  _anio;
 
 when 10 then
@@ -12336,11 +12336,11 @@ num_trn_c_10 = num_trn_c_10 + @num_credito ,
 num_trn_d_10 = num_trn_d_10 + @num_debito,
 saldo_credito_t = saldo_credito_t + _credito,
 saldo_debito_t = saldo_debito_t + _debito,
-saldo_total = saldo_total +( _debito - _credito)  , 
+saldo_total = saldo_total +( _debito - _credito)  ,
 num_trn_credito = num_trn_credito + @num_credito ,
 num_trn_debito = num_trn_debito  + @num_debito ,
 num_trn_total = num_trn_total + 1   ,
-saldo_10 = saldo_10 +( _debito - _credito) 
+saldo_10 = saldo_10 +( _debito - _credito)
 where cod_cuenta = _cuenta and  anio =  _anio;
 
 update cnt_saldo_grupo
@@ -12350,27 +12350,27 @@ num_trn_c_10 = num_trn_c_10 + @num_credito ,
 num_trn_d_10 = num_trn_d_10 + @num_debito,
 saldo_credito_t = saldo_credito_t + _credito,
 saldo_debito_t = saldo_debito_t + _debito,
-saldo_total = saldo_total +( _debito - _credito)  , 
+saldo_total = saldo_total +( _debito - _credito)  ,
 num_trn_credito = num_trn_credito + @num_credito ,
 num_trn_debito = num_trn_debito  + @num_debito ,
 num_trn_total = num_trn_total + 1  ,
-saldo_10 = saldo_10 +( _debito - _credito) 
+saldo_10 = saldo_10 +( _debito - _credito)
 where cod_grupo = _grupo and  anio =  _anio;
 
-update cnt_saldo_clases 
+update cnt_saldo_clases
 set debito_10 = debito_10 + _debito ,
 credito_10 = credito_10 + _credito,
 num_trn_c_10 = num_trn_c_10 + @num_credito ,
 num_trn_d_10 = num_trn_d_10 + @num_debito,
 saldo_credito_t = saldo_credito_t + _credito,
 saldo_debito_t = saldo_debito_t + _debito,
-saldo_total = saldo_total +( _debito - _credito)  , 
+saldo_total = saldo_total +( _debito - _credito)  ,
 num_trn_credito = num_trn_credito + @num_credito ,
 num_trn_debito = num_trn_debito  + @num_debito ,
 num_trn_total = num_trn_total + 1  ,
-saldo_10 = saldo_10 +( _debito - _credito) 
+saldo_10 = saldo_10 +( _debito - _credito)
 where cod_clase = _clase and  anio =  _anio;
- 
+
 when 11 then
 update cnt_saldo_cuenta
 set debito_11 = debito_11 + _debito ,
@@ -12379,11 +12379,11 @@ num_trn_c_11 = num_trn_c_11 + @num_credito ,
 num_trn_d_11 = num_trn_d_11 + @num_debito,
 saldo_credito_t = saldo_credito_t + _credito,
 saldo_debito_t = saldo_debito_t + _debito,
-saldo_total = saldo_total +( _debito - _credito)  , 
+saldo_total = saldo_total +( _debito - _credito)  ,
 num_trn_credito = num_trn_credito + @num_credito ,
 num_trn_debito = num_trn_debito  + @num_debito ,
 num_trn_total = num_trn_total + 1  ,
-saldo_11 = saldo_11 +( _debito - _credito) 
+saldo_11 = saldo_11 +( _debito - _credito)
 where cod_cuenta = _cuenta and  anio =  _anio;
 
 update cnt_saldo_grupo
@@ -12393,25 +12393,25 @@ num_trn_c_11 = num_trn_c_11 + @num_credito ,
 num_trn_d_11 = num_trn_d_11 + @num_debito,
 saldo_credito_t = saldo_credito_t + _credito,
 saldo_debito_t = saldo_debito_t + _debito,
-saldo_total = saldo_total +( _debito - _credito)  , 
+saldo_total = saldo_total +( _debito - _credito)  ,
 num_trn_credito = num_trn_credito + @num_credito ,
 num_trn_debito = num_trn_debito  + @num_debito ,
 num_trn_total = num_trn_total + 1 ,
-saldo_11 = saldo_11 +( _debito - _credito) 
+saldo_11 = saldo_11 +( _debito - _credito)
 where cod_grupo = _grupo and  anio =  _anio;
 
-update cnt_saldo_clases 
+update cnt_saldo_clases
 set debito_11 = debito_11 + _debito ,
 credito_11 = credito_11 + _credito,
 num_trn_c_11 = num_trn_c_11 + @num_credito ,
 num_trn_d_11 = num_trn_d_11 + @num_debito,
 saldo_credito_t = saldo_credito_t + _credito,
 saldo_debito_t = saldo_debito_t + _debito,
-saldo_total = saldo_total +( _debito - _credito)  , 
+saldo_total = saldo_total +( _debito - _credito)  ,
 num_trn_credito = num_trn_credito + @num_credito ,
 num_trn_debito = num_trn_debito  + @num_debito ,
 num_trn_total = num_trn_total + 1 ,
-saldo_11 = saldo_11 +( _debito - _credito) 
+saldo_11 = saldo_11 +( _debito - _credito)
 where cod_clase = _clase and  anio =  _anio;
 
 when 12 then
@@ -12423,11 +12423,11 @@ num_trn_c_12 = num_trn_c_12 + @num_credito ,
 num_trn_d_12 = num_trn_d_12 + @num_debito,
 saldo_credito_t = saldo_credito_t + _credito,
 saldo_debito_t = saldo_debito_t + _debito,
-saldo_total = saldo_total +( _debito - _credito)  , 
+saldo_total = saldo_total +( _debito - _credito)  ,
 num_trn_credito = num_trn_credito + @num_credito ,
 num_trn_debito = num_trn_debito  + @num_debito ,
 num_trn_total = num_trn_total + 1   ,
-saldo_12 = saldo_12 +( _debito - _credito) 
+saldo_12 = saldo_12 +( _debito - _credito)
 where cod_cuenta = _cuenta and  anio =  _anio;
 
 update cnt_saldo_grupo
@@ -12437,30 +12437,30 @@ num_trn_c_12 = num_trn_c_12 + @num_credito ,
 num_trn_d_12 = num_trn_d_12 + @num_debito,
 saldo_credito_t = saldo_credito_t + _credito,
 saldo_debito_t = saldo_debito_t + _debito,
-saldo_total = saldo_total +( _debito - _credito)  , 
+saldo_total = saldo_total +( _debito - _credito)  ,
 num_trn_credito = num_trn_credito + @num_credito ,
 num_trn_debito = num_trn_debito  + @num_debito ,
 num_trn_total = num_trn_total + 1 ,
-saldo_12 = saldo_12 +( _debito - _credito) 
+saldo_12 = saldo_12 +( _debito - _credito)
 where cod_grupo = _grupo and  anio =  _anio;
 
-update cnt_saldo_clases 
+update cnt_saldo_clases
 set debito_12 = debito_12 + _debito ,
 credito_12 = credito_12 + _credito,
 num_trn_c_12 = num_trn_c_12 + @num_credito ,
 num_trn_d_12 = num_trn_d_12 + @num_debito,
 saldo_credito_t = saldo_credito_t + _credito,
 saldo_debito_t = saldo_debito_t + _debito,
-saldo_total = saldo_total +( _debito - _credito)  , 
+saldo_total = saldo_total +( _debito - _credito)  ,
 num_trn_credito = num_trn_credito + @num_credito ,
 num_trn_debito = num_trn_debito  + @num_debito ,
 num_trn_total = num_trn_total + 1 ,
-saldo_12 = saldo_12 +( _debito - _credito) 
+saldo_12 = saldo_12 +( _debito - _credito)
 where cod_clase = _clase and  anio =  _anio;
 
 end case;
  SET SQL_SAFE_UPDATES = 1;
- 
+
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -12520,8 +12520,8 @@ BEGIN
         -- Formatear el mensaje de error en JSON
         SET resultado = CONCAT('{ "estado" : "error", "codigo" : ', errorCode, ', "mensaje" : "', errorMessage, '" }');
         -- Devolver el mensaje de error
-        SELECT resultado AS obj; 
-    END; 
+        SELECT resultado AS obj;
+    END;
     -- Inicializar variables
     SET tempID = categoriaID;
     SET resultado = '';
@@ -12531,14 +12531,14 @@ BEGIN
         -- Obtener la letra de la categoría actual
         SELECT concat(  UPPER(letra) , trim(letras) ) as letra, idPadreCategoria  INTO letras, tempID
         FROM inv_categorias
-        WHERE id = tempID; 
+        WHERE id = tempID;
     END WHILE;
 
     -- Devolver el resultado
     SET resultado = letras;
-    
+
      -- Iniciar una transacción
-   
+
 
     -- Bloquear la fila para evitar concurrencia
     SELECT contador INTO _contador
@@ -12554,7 +12554,7 @@ BEGIN
     SET contador = _contador
     WHERE id = categoriaID;
     -- Confirmar la transacción
-    
+
  -- Formatear el resultado final
     SET resultado = CONCAT(' { "estado" : "ok" ,  "idProducto" : "', CONCAT(letras, LPAD(_contador, 4, '0')), '"  , "letras" : "', letras, '" , "contador" : ', _contador, ' } ');
     -- Devolver el resultado
@@ -12579,9 +12579,9 @@ CREATE DEFINER=`jdpsoluc_l_monrroy`@`%` PROCEDURE `rectificaCantidades`()
 BEGIN
 declare vidProducto varchar(12) ;
 declare cant int ;
-DECLARE recorrerVentas CURSOR FOR SELECT    idProducto , ifnull(sum(cantidad),0)  
+DECLARE recorrerVentas CURSOR FOR SELECT    idProducto , ifnull(sum(cantidad),0)
   FROM listacompra group by  idProducto ;
-DECLARE CONTINUE HANDLER FOR NOT FOUND SET @hecho = TRUE; 
+DECLARE CONTINUE HANDLER FOR NOT FOUND SET @hecho = TRUE;
  OPEN recorrerVentas;
 loop1: LOOP
 
@@ -12613,7 +12613,7 @@ DELIMITER ;;
 CREATE DEFINER=`jdpsoluc_l_monrroy`@`%` PROCEDURE `resumenCaja`(IN `_idCaja` INT)
 BEGIN
 	declare idCajaResumen int;
-    if _idCaja > 0 then 
+    if _idCaja > 0 then
 	select max(id) into idCajaResumen from corte_de_caja where id_Caja = _idCaja;
     -- select idCajaResumen ;
     select * from  vwcorte_de_caja where id = idCajaResumen;
@@ -12639,7 +12639,7 @@ DELIMITER ;;
 CREATE DEFINER=`jdpsoluc_l_monrroy`@`%` PROCEDURE `resumenCajaParcial`(IN `_idCaja` INT)
 BEGIN
 	declare idCajaResumen int;
-    if _idCaja > 0 then 
+    if _idCaja > 0 then
 	select max(id) into idCajaResumen from corte_de_caja_parcial where id_Caja = _idCaja;
     -- select idCajaResumen ;
     select * from  vwcorte_de_caja_parcial where id = idCajaResumen;
@@ -12666,15 +12666,15 @@ CREATE DEFINER=`jdpsoluc_l_monrroy`@`%` PROCEDURE `setPerfilAUsuario`(IN `_idPer
 BEGIN
 DECLARE EXIT HANDLER FOR SQLEXCEPTION
 	BEGIN
-		select 'error al ingresar a la base de datos' as msg , '-1' AS _result LIMIT 1; 
-	END; 
+		select 'error al ingresar a la base de datos' as msg , '-1' AS _result LIMIT 1;
+	END;
 	DECLARE EXIT HANDLER FOR SQLWARNING
 	BEGIN
-		select  WARNINGS  as msg , '-1' AS _result LIMIT 1; 
+		select  WARNINGS  as msg , '-1' AS _result LIMIT 1;
 	END;
 delete from perfil_usuario where id_usuario = _idUsuario;
 
-  
+
 insert into perfil_usuario (  id_usuario , id_perfil) values
 (_idUsuario, _idPerfil);
 
@@ -12701,24 +12701,24 @@ BEGIN
 SET SQL_SAFE_UPDATES = 0;
     UPDATE mst_mov_cartera_cuotas
     SET estadoCuota = 'OUTTIME'
-    WHERE fechaPago IS NULL 
+    WHERE fechaPago IS NULL
     AND fecha_max_pago < CURRENT_DATE ;
-    
+
     UPDATE mst_mov_cartera_cuotas
     SET estadoCuota = 'OUTTIME_ABONADO'
     WHERE  fecha_max_pago < CURRENT_DATE
     AND totalPagado > 0 and  valorCuota > totalPagado;
-    
+
      UPDATE mst_mov_credito_cuotas
     SET estadoCuota = 'OUTTIME'
-    WHERE fechaPago IS NULL 
+    WHERE fechaPago IS NULL
     AND fecha_max_pago < CURRENT_DATE ;
-    
+
     UPDATE mst_mov_credito_cuotas
     SET estadoCuota = 'OUTTIME_ABONADO'
     WHERE  fecha_max_pago < CURRENT_DATE
     AND totalPagado > 0 and  valorCuota > totalPagado;
-    
+
 SET SQL_SAFE_UPDATES = 1;
 END ;;
 DELIMITER ;
@@ -12738,40 +12738,40 @@ DELIMITER ;
 DELIMITER ;;
 CREATE DEFINER=`jdpsoluc_l_monrroy`@`%` PROCEDURE `sp_actualizar_saldo_bonos`(IN p_idDocumento INT)
 BEGIN
-    DECLARE done INT DEFAULT FALSE;   
+    DECLARE done INT DEFAULT FALSE;
     DECLARE v_idMedioDePago INT;
-    DECLARE v_valorPagado DECIMAL(10,2);  
-    DECLARE v_referencia VARCHAR(50); 
-    DECLARE v_nombre VARCHAR(50);    
-    DECLARE v_cuentaContable INT ;   
-    declare  _documento_bono int ;  
-    DECLARE cur CURSOR FOR 
-    SELECT documentos_pagos.idMedioDePago , valorPagado , referencia, 
+    DECLARE v_valorPagado DECIMAL(10,2);
+    DECLARE v_referencia VARCHAR(50);
+    DECLARE v_nombre VARCHAR(50);
+    DECLARE v_cuentaContable INT ;
+    declare  _documento_bono int ;
+    DECLARE cur CURSOR FOR
+    SELECT documentos_pagos.idMedioDePago , valorPagado , referencia,
     UPPER(vw_medios.nombre) ,  cuentaContable FROM  documentos_pagos
 		inner join vw_medios on vw_medios.id = idMedioDePago
-		  where documentos_pagos.idDocumento = p_idDocumento  ; 
+		  where documentos_pagos.idDocumento = p_idDocumento  ;
 
     DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
-    SET done = false;  
+    SET done = false;
     OPEN cur;
 
     read_loop: LOOP
         FETCH cur INTO   v_idMedioDePago , v_valorPagado , v_referencia, v_nombre ,  v_cuentaContable;
         IF done THEN
             LEAVE read_loop;
-        END IF; 
-        -- select v_idMedioDePago , v_valorPagado , v_referencia, v_nombre ,  v_cuentaContable; 
-        if v_nombre = 'BONOS' THEN
-			select orden into _documento_bono from documentos where  
-			idDocumentoFinal = v_referencia ; 
-            
-            UPDATE documentos SET campo_auxiliar_6 =  campo_auxiliar_6 + v_valorPagado WHERE orden = 
-            _documento_bono ; 
-            
         END IF;
-    END LOOP; 
+        -- select v_idMedioDePago , v_valorPagado , v_referencia, v_nombre ,  v_cuentaContable;
+        if v_nombre = 'BONOS' THEN
+			select orden into _documento_bono from documentos where
+			idDocumentoFinal = v_referencia ;
+
+            UPDATE documentos SET campo_auxiliar_6 =  campo_auxiliar_6 + v_valorPagado WHERE orden =
+            _documento_bono ;
+
+        END IF;
+    END LOOP;
     -- Close the cursor
-    CLOSE cur; 
+    CLOSE cur;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -12794,35 +12794,35 @@ BEGIN
     declare _cont_codigo int;
     select count(*) from consecutivos_factura where estado = 'ACTIVO'
     AND modulo_factura = _modulo AND cod_usuario = _usuario  INTO  _cont_codigo ;
-    
-    
-    IF _cont_codigo <= 0 THEN	     
+
+
+    IF _cont_codigo <= 0 THEN
 		select count(*) from consecutivos_factura where estado = 'noAsignado'  INTO  _cont_codigo ;
         IF _cont_codigo > 0 THEN
-			UPDATE consecutivos_factura 
+			UPDATE consecutivos_factura
 			SET	modulo_factura = _modulo , cod_usuario = _usuario , estado = 'ACTIVO'
             where estado = 'noAsignado'   ;
         ELSE
 			SELECT IFNULL(MAX(cod_factura),0) FROM consecutivos_factura INTO _cod_generado;
-            
+
 			INSERT INTO consecutivos_factura
-            (  cod_factura, modulo_factura, cod_usuario, estado) 
+            (  cod_factura, modulo_factura, cod_usuario, estado)
             VALUES(_cod_generado + 1 , _modulo , _usuario, 'ACTIVO') ,
             (_cod_generado + 2 , 'NN' , 0 , 'noAsignado') ;
-            
-            
-            
+
+
+
         END IF;
-        
-        
-        
-        
+
+
+
+
     END IF;
-    
-    
+
+
     select cod_factura , CONCAT(_modulo,'_',cod_factura) AS id_venta_generado from consecutivos_factura where estado = 'ACTIVO'
 		AND modulo_factura = _modulo AND cod_usuario = _usuario into _id_venta , s_id_venta    ;
-    
+
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -12847,7 +12847,7 @@ set @like_sh = '';
 set @cantidad = 0;
 set @cantBarcode = 0;
 set @sql_exe='select * from allproductplustotalsales';
- 
+
 if COALESCE(_dato_busqueda,'') != '' then
 
 select COUNT(*) from allproductplustotalsales WHERE idProducto = _dato_busqueda INTO @cantidad;
@@ -12875,7 +12875,7 @@ PREPARE stmt FROM @SQL ;
 execute stmt;
 deallocate prepare stmt;
 
-else 
+else
 set @SQL = 'select * from allproductplustotalsales';
 
 PREPARE stmt FROM @SQL ;
@@ -12914,17 +12914,17 @@ BEGIN
     if count <= 0 then
 		select -1 as _result , 'La caja no se encuentra abierta - Valide por favor' as msg;
 	else
-     update cajas set 
+     update cajas set
 	   estadoCaja = 3 ,
-	   usuarioEstadoCaja = usuarioId where id = idCaja ; 
-       
+	   usuarioEstadoCaja = usuarioId where id = idCaja ;
+
        select getIdCierreDeCajaParcialActivo(usuarioId) into _id_corte_caja  ;
-        
-       if _id_corte_caja > 0 then 
-        update corte_de_caja_parcial set usuario_cierre =  usuarioId , fecha_cierre = now()  where 
-        id  = _id_corte_caja; 
+
+       if _id_corte_caja > 0 then
+        update corte_de_caja_parcial set usuario_cierre =  usuarioId , fecha_cierre = now()  where
+        id  = _id_corte_caja;
 		select 100 as _result , 'Caja cerrada con exito' as msg;
-        else 
+        else
         select -1 as _result , 'Error al cerrar la caja' as msg;
         end if;
     end if;
@@ -12962,7 +12962,7 @@ BEGIN
     DECLARE v_ajuste DECIMAL(10,2);
     DECLARE v_existencia INT;
     DECLARE v_count INT;
-    Declare _ult_mov text ; 
+    Declare _ult_mov text ;
 
     DECLARE cur CURSOR FOR
         SELECT cod_producto, cantidad, referencia
@@ -12996,7 +12996,7 @@ BEGIN
         -- Obtener el ID del inventario recién creado
         SET v_id_inventario = LAST_INSERT_ID();
 
-    set _ult_mov = concat("inventario # " , v_id_inventario , " por el usuario :  " , _id_usuario ) ; 
+    set _ult_mov = concat("inventario # " , v_id_inventario , " por el usuario :  " , _id_usuario ) ;
         -- Abrir el cursor
         OPEN cur;
 
@@ -13017,7 +13017,7 @@ BEGIN
                 SELECT cant_actual
                 INTO v_cantidad_anterior
                 FROM inv_mst_producto_existencias
-                WHERE id_producto = v_id_producto AND id_bodega = _id_bodega; 
+                WHERE id_producto = v_id_producto AND id_bodega = _id_bodega;
                 IF tipo_inventario = 2 THEN
                     -- Suma a la cantidad actual
                     SET v_ajuste = v_cantidad;
@@ -13030,8 +13030,8 @@ BEGIN
 
                 -- Actualizar en la tabla de existencias
                 UPDATE inv_mst_producto_existencias
-                SET cant_actual = v_cantidad_anterior, 
-					ajustes = ajustes + v_ajuste , 
+                SET cant_actual = v_cantidad_anterior,
+					ajustes = ajustes + v_ajuste ,
                     usuario_edicion = _id_usuario,
                     fecha_actualizacion = NOW() ,
                     ult_mov =  _ult_mov
@@ -13088,20 +13088,20 @@ declare _presioVenta decimal(12,2);
 declare _valorTotal decimal(12,2);
 declare _total_valores int;
 
-select count(*)  FROM remision_detalle 
+select count(*)  FROM remision_detalle
 where id_remision = _id_remision and id_orden_compra = _id_orden_compra into _total_valores ;
 
-if (_total_valores > 0 )THEN 
- 
- select 
+if (_total_valores > 0 )THEN
+
+ select
 sum(cantidadVendida) as cantidadVendida ,
 SUM(CAST( ( presioSinIVa * cantidadVendida ) AS DECIMAL(16,2) ) ) as presioSinIVa,
 sum(CAST( ( IVA * cantidadVendida ) AS DECIMAL(16,2) ) ) as IVA,
 sum(presioVenta) as presioVenta,
-sum(valorTotal) as valorTotal 
- FROM remision_detalle 
+sum(valorTotal) as valorTotal
+ FROM remision_detalle
 where id_remision = _id_remision and id_orden_compra = _id_orden_compra
-group by 
+group by
 id_orden_compra, id_remision into _cantidadVendida , _presioSinIVa ,_valorIVA ,_presioVenta , _valorTotal
  ;
 
@@ -13115,7 +13115,7 @@ INSERT INTO `remision_cabeza`
 `valorTotal`,
 `fecha`,
 `hora`,
-`usuario`,  
+`usuario`,
 `fecha_entrega`)
 VALUES
 (_id_remision,
@@ -13131,10 +13131,10 @@ _usuario  ,
 curdate());
 
 
-	SELECT '100' as result; 
- 
-else  
-	SELECT 'No existen datos para ingresar en el cierre.' as result; 
+	SELECT '100' as result;
+
+else
+	SELECT 'No existen datos para ingresar en el cierre.' as result;
 end if;
 
 END ;;
@@ -13154,20 +13154,20 @@ DELIMITER ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 DELIMITER ;;
 CREATE DEFINER=`jdpsoluc_l_monrroy`@`%` PROCEDURE `sp_change_pass`(IN `_ID` VARCHAR(20), IN `_usr_registro` VARCHAR(150), IN `_pass` BLOB)
-BEGIN 
+BEGIN
 set @usuarioIngresado = _usr_registro;
 IF _ID is null or _ID = ''  THEN
- 
+
      	SELECT '-1' as result;
-	 
+
 else
-	    
+
 				UPDATE `usuarios`
-					SET					 
+					SET
 					`pass` = _pass ,
-                    `change` = '1'  
-					WHERE `ID` =  CAST(_ID AS UNSIGNED) ;       
-        
+                    `change` = '1'
+					WHERE `ID` =  CAST(_ID AS UNSIGNED) ;
+
         SELECT '101' as result;
 END if;
 
@@ -13189,24 +13189,24 @@ DELIMITER ;
 /*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
 CREATE DEFINER=`jdpsoluc_l_monrroy`@`%` PROCEDURE `SP_CREAR_DOCUMENTO_COTIZACION`(IN `_usuario` INT, IN `_documento` INT)
-BEGIN 
+BEGIN
 declare CONTADOR int;
     select count(*) into contador from documentos where  usuario  = _usuario
     and orden = _documento ;
-    if CONTADOR = 0 then 
+    if CONTADOR = 0 then
     select -1 as _result , 'Documento no existe o no pertenece al usuario' as msg;
-    else 
+    else
     SET SQL_SAFE_UPDATES = 0;
     update documentos set estado = 2 ,
     tipoDocumentoFinal = (SELECT id FROM tipos_de_documentos where nombre = 'cotizacion'),
     usuario  = _usuario
-    where orden = _documento ; 
-    
+    where orden = _documento ;
+
     update documentos_listado_productos set estado_linea_venta = 'C' ,
     usuario  = _usuario
-    where orden = _documento ; 
-    
-    
+    where orden = _documento ;
+
+
     	select 100 as _result , 'Cotizacion generada con exito' as msg;
    end if;
 
@@ -13231,28 +13231,28 @@ BEGIN
 
 DECLARE EXIT HANDLER FOR SQLEXCEPTION
 	BEGIN
-		select 'error al ingresar los valores a la base de datos'  AS result LIMIT 1; 
-	END; 
+		select 'error al ingresar los valores a la base de datos'  AS result LIMIT 1;
+	END;
 	DECLARE EXIT HANDLER FOR SQLWARNING
 	BEGIN
-		select  WARNINGS  AS result LIMIT 1; 
+		select  WARNINGS  AS result LIMIT 1;
 	END;
-    
+
 set @usuarioIngresado = _usuario;
 
 set @cont_datos = 0;
 SELECT COUNT(*) INTO @cont_datos FROM pedidos_proceso WHERE id_pedido_SAP = _id_pedido_SAP;
- 
+
 if @cont_datos = 0 then
 
-	insert into  pedidos_proceso (id_pedido_SAP, cod_generado_sistema, estado, usuario) 
+	insert into  pedidos_proceso (id_pedido_SAP, cod_generado_sistema, estado, usuario)
 	value (_id_pedido_SAP, _cod_generado_sistema, _estado, _usuario);
-    
+
 
 	SELECT '100' as result;
 else
  SET SQL_SAFE_UPDATES = 0;
-	UPDATE pedidos_proceso SET estado = _estado;  
+	UPDATE pedidos_proceso SET estado = _estado;
 
 	SELECT '101' as result;
 end if;
@@ -13275,7 +13275,7 @@ DELIMITER ;
 DELIMITER ;;
 CREATE DEFINER=`jdpsoluc_l_monrroy`@`%` PROCEDURE `sp_crear_editar_perfil`(IN `_Perf_ID` VARCHAR(12), IN `_Perf_Nombre` VARCHAR(150), IN `_estado` CHAR(1), IN `_usuario` VARCHAR(100))
 BEGIN
-set @usuarioIngresado = _usuario;   
+set @usuarioIngresado = _usuario;
 
 IF _Perf_ID is null or _Perf_ID = ''  THEN
 
@@ -13289,17 +13289,17 @@ INSERT INTO `Perfiles`
 	_estado );
 
 	SELECT '100' as result;
-else     
+else
 	UPDATE `Perfiles`
 	SET
 	`Perf_ID` = _Perf_ID,
 	`Perf_Nombre` =_Perf_Nombre,
 	`estado` = _estado
-	WHERE `Perf_ID` = CAST(_Perf_ID AS UNSIGNED) ;    
-        
+	WHERE `Perf_ID` = CAST(_Perf_ID AS UNSIGNED) ;
+
         SELECT '101' as result;
-	   
-	
+
+
 END if;
 
 
@@ -13323,16 +13323,16 @@ CREATE DEFINER=`jdpsoluc_l_monrroy`@`%` PROCEDURE `sp_crear_editar_recurso`(IN `
 BEGIN
 
 
-declare _cont_menu int; 
+declare _cont_menu int;
 set @usuarioIngresado = _usuario;
-  
- 
+
+
 
 -- idrecurso, id_menu, tipo_recurso, nombre_recurso, id_recurso_sistema, estado
- 
+
 if _idrecurso = '' then
 	INSERT INTO `recurso`
-( 
+(
 `id_menu`,
 `tipo_recurso`,
 `nombre_recurso`,
@@ -13350,7 +13350,7 @@ _estado );
      select '100' as result;
 else
 	if _idrecurso = '' then
-		select '-1' as result; 		
+		select '-1' as result;
     else
 		UPDATE `recurso`
 SET
@@ -13360,7 +13360,7 @@ SET
 `nombre_recurso` =_nombre_recurso,
 `id_recurso_sistema` = _id_recurso_sistema,
 `estado` = _estado
-WHERE `idrecurso` = _idrecurso;            
+WHERE `idrecurso` = _idrecurso;
             select '101' as result;
     end if;
 end if;
@@ -13422,58 +13422,58 @@ end if;
 if _Apellido2 != '' then
 set _nombreCompleto = CONCAT_WS(" ", trim(_nombreCompleto) ,  trim(_Apellido2));
 end if;
- 
+
 
 
 IF _ID is null or _ID = ''  THEN
-  
+
 	SELECT count(*) into _numusuario FROM  `usuarios` where Login = _Login;
- 	IF _numusuario = 0 THEN   
-    
-     while CLAVE_OK > 0 do     
-     
-		  while _cod_3 > 0 and LT1 is  null do      
+ 	IF _numusuario = 0 THEN
+
+     while CLAVE_OK > 0 do
+
+		  while _cod_3 > 0 and LT1 is  null do
 				SELECT letras INTO LT1 FROM letras ORDER BY rand() LIMIT 1 ;
 				SET _cod_3 =  _cod_3 - 1;
 		  end while;
-		
-		 while _cod_1 > 0 and LT2 is null  do      
+
+		 while _cod_1 > 0 and LT2 is null  do
 				SELECT letras INTO LT2 FROM letras ORDER BY rand() LIMIT 1 ;
 				SET _cod_1 =  _cod_1 - 1;
 		  end while;
-		  
-		 while _cod_2 > 0 and LT3 is  null do      
+
+		 while _cod_2 > 0 and LT3 is  null do
 				SELECT letras INTO LT3 FROM letras ORDER BY rand() LIMIT 1 ;
 				SET _cod_2 =  _cod_2 - 1;
 		  end while;
 		-- select LT1,LT2,LT3;
-		SET _cod_remision = CONCAT(LT1,LT2,LT3); 
+		SET _cod_remision = CONCAT(LT1,LT2,LT3);
        -- select _cod_remision;
-        SELECT COUNT(*) INTO CLAVE_OK FROM usuarios WHERE convert(cod_remision using utf8 ) = convert(_cod_remision using utf8);  
-      
+        SELECT COUNT(*) INTO CLAVE_OK FROM usuarios WHERE convert(cod_remision using utf8 ) = convert(_cod_remision using utf8);
+
     end while;
     -- select _cod_remision;
 		INSERT INTO `usuarios`
 		(`Login`,`Nombre1`,`Nombre2`,`Apellido1`,`Apellido2`,`nombreCompleto`,`estado`,`usr_registro`,`Fecha_Registro`,`pass`,cod_remision,mail)
 		VALUES
 		( _Login,_Nombre1,_Nombre2,_Apellido1,_Apellido2,_nombreCompleto,_estado,_usr_registro,now(),_pass,_cod_remision , _mail);
-        
+
         set _lastIsertId = LAST_INSERT_ID();
-        
-       
-        
+
+
+
         SELECT '100' as result;
-	  
+
     ELSE
      	SELECT '-1' as result;
-	END if;  
+	END if;
 else
 
 	SELECT count(*) into _numusuario FROM  `usuarios` where ID = _ID;
-	IF _numusuario  >= 1 THEN 
-    
+	IF _numusuario  >= 1 THEN
+
 		IF _change =  'P' THEN
-           
+
 		   UPDATE `usuarios`
 					SET
 					`Login` = _Login,
@@ -13482,15 +13482,15 @@ else
 					`Apellido1` = _Apellido1,
 					`Apellido2` = _Apellido2,
 					`nombreCompleto` = _nombreCompleto,
-					`estado` = _estado, 
+					`estado` = _estado,
 					`Usr_Modif` = _usr_registro,
 					`Fecha_Modif` = now(),
 					`pass` = _pass ,
                     `change` = '0' ,
                     mail = _mail
-					WHERE `ID` =  CAST(_ID AS UNSIGNED) ;  
-			
-            
+					WHERE `ID` =  CAST(_ID AS UNSIGNED) ;
+
+
 		ELSE
 				UPDATE `usuarios`
 					SET
@@ -13500,20 +13500,20 @@ else
 					`Apellido1` = _Apellido1,
 					`Apellido2` = _Apellido2,
 					`nombreCompleto` = _nombreCompleto,
-					`estado` = _estado, 
+					`estado` = _estado,
 					`Usr_Modif` = _usr_registro,
-					`Fecha_Modif` = now(), 
+					`Fecha_Modif` = now(),
                     mail = _mail
-					WHERE `ID` =  CAST(_ID AS UNSIGNED) ;    	 
+					WHERE `ID` =  CAST(_ID AS UNSIGNED) ;
         END IF;
-				
-        
+
+
         SELECT '101' as result;
-	  
+
     ELSE
      	SELECT '-2' as result;
-	END if;  
-	
+	END if;
+
 END if;
 
 
@@ -13535,12 +13535,12 @@ DELIMITER ;
 DELIMITER ;;
 CREATE DEFINER=`jdpsoluc_l_monrroy`@`%` PROCEDURE `sp_crear_relacion_user_perfil`(IN `_idRelacion` VARCHAR(12), IN `_user_id` VARCHAR(12), IN `_perfil_id` VARCHAR(12), IN `_usuario` VARCHAR(100))
 BEGIN
- set @usuarioIngresado = _usuario;   
+ set @usuarioIngresado = _usuario;
 
 IF _idRelacion is null or _idRelacion = ''  THEN
 
 INSERT INTO  `relacion_user_perfiles`
-( 
+(
 `user_id`,
 `perfil_id`)
 VALUES
@@ -13549,15 +13549,15 @@ _perfil_id);
 
 
 	SELECT '100' as result;
-else     
+else
 	UPDATE  `relacion_user_perfiles`
 	SET
-	`perfil_id` = _perfil_id 
-	WHERE `idRelacion` = CAST(_idRelacion AS UNSIGNED) ;    
-        
+	`perfil_id` = _perfil_id
+	WHERE `idRelacion` = CAST(_idRelacion AS UNSIGNED) ;
+
         SELECT '101' as result;
-	   
-	
+
+
 END if;
 
 
@@ -13580,33 +13580,33 @@ DELIMITER ;;
 CREATE DEFINER=`jdpsoluc_l_monrroy`@`%` PROCEDURE `sp_devolver_producto`( in _id_linea_devolucion int)
 BEGIN
   declare existenciaId int ;
-  declare cntDevolucion decimal(10 , 2 );  
+  declare cntDevolucion decimal(10 , 2 );
      DECLARE errorCode INT;
-    DECLARE errorMessage VARCHAR(255); 
+    DECLARE errorMessage VARCHAR(255);
        -- Manejo de errores
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
         -- Obtener el código de error y el mensaje de error
         GET DIAGNOSTICS CONDITION 1 errorCode = MYSQL_ERRNO, errorMessage = MESSAGE_TEXT;
-        -- Formatear el mensaje de error en JSON 
-        select errorCode as _result , errorMessage as msg ; 
-    END;   
-    
-    
+        -- Formatear el mensaje de error en JSON
+        select errorCode as _result , errorMessage as msg ;
+    END;
+
+
   SELECT   cant_real_descontada , id_existencia
   into cntDevolucion , existenciaId
  FROM documentos_listado_productos where id  = _id_linea_devolucion ;
-  
-  
+
+
   update inv_mst_producto_existencias
-  set   cant_actual = cant_actual + cntDevolucion  , 
+  set   cant_actual = cant_actual + cntDevolucion  ,
   ventas = ventas - cntDevolucion
-      
-  where id = existenciaId ; 
-  
-  
+
+  where id = existenciaId ;
+
+
   delete  FROM documentos_listado_productos where id  = _id_linea_devolucion ;
-  
+
   select 100 as _result ,  'ok' as msg;
 END ;;
 DELIMITER ;
@@ -13627,30 +13627,30 @@ DELIMITER ;;
 CREATE DEFINER=`jdpsoluc_l_monrroy`@`%` PROCEDURE `sp_devolver_producto_cotizacion`( in _id_linea_devolucion int)
 BEGIN
   declare existenciaId int ;
-  declare cntDevolucion decimal(10 , 2 );  
+  declare cntDevolucion decimal(10 , 2 );
      DECLARE errorCode INT;
-    DECLARE errorMessage VARCHAR(255); 
+    DECLARE errorMessage VARCHAR(255);
        -- Manejo de errores
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
         -- Obtener el código de error y el mensaje de error
         GET DIAGNOSTICS CONDITION 1 errorCode = MYSQL_ERRNO, errorMessage = MESSAGE_TEXT;
-        -- Formatear el mensaje de error en JSON 
-        select errorCode as _result , errorMessage as msg ; 
-    END;   
-    
-    
+        -- Formatear el mensaje de error en JSON
+        select errorCode as _result , errorMessage as msg ;
+    END;
+
+
   SELECT   cant_real_descontada , id_existencia
   into cntDevolucion , existenciaId
  FROM documentos_listado_productos where id  = _id_linea_devolucion ;
-  
-  
+
+
   update inv_mst_producto_existencias
-  set   cant_actual = cant_actual + cntDevolucion  , 
-  ventas = ventas - cntDevolucion 
-  where id = existenciaId ; 
-   
-  
+  set   cant_actual = cant_actual + cntDevolucion  ,
+  ventas = ventas - cntDevolucion
+  where id = existenciaId ;
+
+
   select 100 as _result ,  'ok' as msg;
 END ;;
 DELIMITER ;
@@ -13671,34 +13671,34 @@ DELIMITER ;;
 CREATE DEFINER=`jdpsoluc_l_monrroy`@`%` PROCEDURE `sp_devolver_producto_devolucion`( in _id_linea_devolucion int , in _cnt  DECIMAL(16,2) )
 BEGIN
   declare existenciaId int ;
-  declare cntDevolucion decimal(10 , 2 );  
+  declare cntDevolucion decimal(10 , 2 );
      DECLARE errorCode INT;
-    DECLARE errorMessage VARCHAR(255); 
+    DECLARE errorMessage VARCHAR(255);
        -- Manejo de errores
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
         -- Obtener el código de error y el mensaje de error
         GET DIAGNOSTICS CONDITION 1 errorCode = MYSQL_ERRNO, errorMessage = MESSAGE_TEXT;
-        -- Formatear el mensaje de error en JSON 
-        select errorCode as _result , errorMessage as msg ; 
-    END;   
-    
-    
+        -- Formatear el mensaje de error en JSON
+        select errorCode as _result , errorMessage as msg ;
+    END;
+
+
   SELECT   cant_real_descontada , id_existencia
   into cntDevolucion , existenciaId
  FROM documentos_listado_productos where id  = _id_linea_devolucion ;
-  
-  update documentos_listado_productos 
+
+  update documentos_listado_productos
   set cant_real_descontada = cant_real_descontada - _cnt
    where id  = _id_linea_devolucion ;
-  
+
   update inv_mst_producto_existencias
-  set   cant_actual = cant_actual + _cnt  , 
+  set   cant_actual = cant_actual + _cnt  ,
   ventas = ventas - _cnt ,
   devoluciones = devoluciones + _cnt
-  where id = existenciaId ; 
-   
-  
+  where id = existenciaId ;
+
+
   select 100 as _result ,  'ok' as msg;
 END ;;
 DELIMITER ;
@@ -13719,102 +13719,102 @@ DELIMITER ;;
 CREATE DEFINER=`jdpsoluc_l_monrroy`@`%` PROCEDURE `sp_devolver_producto_nota_debito`( in _id_linea_devolucion int , in _cnt  DECIMAL(16,2) )
 BEGIN
   declare existenciaId , _movimiento int ;
-  declare cntDevolucion decimal(10 , 2 );  
+  declare cntDevolucion decimal(10 , 2 );
      DECLARE errorCode INT;
    declare  _nombre_esta ,  _descripcion_esta ,  _idDocumentoFinal text;
     declare    v_idCCntCxPagar, v_idCCnttIvaCompra,  v_idCCntCajaGeneral ,  v_idCCntCompra , _idTercero , p_idDocumento, _idUsuario int;
-              
-    DECLARE errorMessage VARCHAR(255); 
+
+    DECLARE errorMessage VARCHAR(255);
     declare _total , _iva , _total_S_iva decimal(16,2) ;
        -- Manejo de errores
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
         -- Obtener el código de error y el mensaje de error
         GET DIAGNOSTICS CONDITION 1 errorCode = MYSQL_ERRNO, errorMessage = MESSAGE_TEXT;
-        -- Formatear el mensaje de error en JSON 
-        select errorCode as _result , errorMessage as msg ; 
-    END;   
-    
-   
-    
-   SELECT ( (presioVenta - IVA ) *  _cnt  ) as total_sin_iva , 
-   ( ( IVA ) *   _cnt   ) as total_iva , 
+        -- Formatear el mensaje de error en JSON
+        select errorCode as _result , errorMessage as msg ;
+    END;
+
+
+
+   SELECT ( (presioVenta - IVA ) *  _cnt  ) as total_sin_iva ,
+   ( ( IVA ) *   _cnt   ) as total_iva ,
    ( (presioVenta ) *  _cnt   )  total  , cant_real_descontada , id_existencia , orden
   into   _total_S_iva , _iva , _total ,
   cntDevolucion , existenciaId , p_idDocumento
  FROM documentos_listado_productos where id  = _id_linea_devolucion ;
-  
+
     select  idCCntCPagar,  idCCntIvaCompra, idCCntCajaGeneral, idCCntCompras ,
-                cliente  , nombre , descripcion ,idDocumentoFinal , usuario  
+                cliente  , nombre , descripcion ,idDocumentoFinal , usuario
         into  v_idCCntCxPagar, v_idCCnttIvaCompra,  v_idCCntCajaGeneral ,  v_idCCntCompra ,
         _idTercero ,
          _nombre_esta ,  _descripcion_esta ,  _idDocumentoFinal , _idUsuario
-    FROM vw_documentos where orden = p_idDocumento;  
-    
-    
-          select coalesce(max(id), 0 )  into _movimiento  
+    FROM vw_documentos where orden = p_idDocumento;
+
+
+          select coalesce(max(id), 0 )  into _movimiento
           from cnt_operaciones where idDocumento =p_idDocumento and nombre like '%Nota Debito%';
           select _movimiento;
           if _movimiento = 0 then
             -- select 'operacion cuenta por pagar'
-				insert into cnt_operaciones ( 
+				insert into cnt_operaciones (
 					   usuario, fechaOperacion, fechaCreacion, nombre, descripcion, idDocumento , idPersona)
-				values ( _idUsuario ,now() , now(), 
+				values ( _idUsuario ,now() , now(),
 				   concat( 'Opr. auto. POS - Mov. inventario Nota Debito','-Doc => ',_idDocumentoFinal ) ,
 				   concat('Documento creado desde Nota Debito : ', _nombre_esta , '-', _descripcion_esta , '- Compra => ',_idDocumentoFinal)
-				   ,p_idDocumento , _idTercero ) ;  
-                     select max(id)  into _movimiento  
+				   ,p_idDocumento , _idTercero ) ;
+                     select max(id)  into _movimiento
 					from cnt_operaciones where idDocumento =p_idDocumento and nombre like '%Nota Debito%';
-           
+
            end if;
-           
-           	insert into cnt_transacciones 
+
+           	insert into cnt_transacciones
 			(  id_cuenta,  valor_debito,valor_credito, fecha_transaccion,
-			relacion_tabla,   usuario, fecha_ingreso,  cod_comprobante, origen_comprobante , cod_tercero) 
+			relacion_tabla,   usuario, fecha_ingreso,  cod_comprobante, origen_comprobante , cod_tercero)
 			values
-			( v_idCCntCxPagar , _total ,  0 , now()  , 
+			( v_idCCntCxPagar , _total ,  0 , now()  ,
 			'documentos',   _idUsuario ,  now() , _movimiento ,'venta' , _idTercero);
-            
-           
-        --  _total_S_iva , _iva , _total     
-			insert into cnt_transacciones 
+
+
+        --  _total_S_iva , _iva , _total
+			insert into cnt_transacciones
 			(  id_cuenta,  valor_debito,valor_credito, fecha_transaccion,
-			relacion_tabla,   usuario, fecha_ingreso,  cod_comprobante, origen_comprobante  , cod_tercero) 
+			relacion_tabla,   usuario, fecha_ingreso,  cod_comprobante, origen_comprobante  , cod_tercero)
 			values
-			( v_idCCnttIvaCompra  , 0, _iva , now()  , 
-			'documentos',   _idUsuario ,  now() , _movimiento ,'nota_credito' , _idTercero );  
-            
-         /*   insert into cnt_transacciones 
+			( v_idCCnttIvaCompra  , 0, _iva , now()  ,
+			'documentos',   _idUsuario ,  now() , _movimiento ,'nota_credito' , _idTercero );
+
+         /*   insert into cnt_transacciones
 			(  id_cuenta,  valor_debito,valor_credito, fecha_transaccion,
-			relacion_tabla,   usuario, fecha_ingreso,  cod_comprobante, origen_comprobante , cod_tercero) 
+			relacion_tabla,   usuario, fecha_ingreso,  cod_comprobante, origen_comprobante , cod_tercero)
 			values
-			( v_idCCntCompra  ,0, _total_S_iva  , now()  , 
+			( v_idCCntCompra  ,0, _total_S_iva  , now()  ,
 			'documentos',   _idUsuario ,  now() , _movimiento ,'venta' , _idTercero );  */
-           insert into cnt_transacciones 
+           insert into cnt_transacciones
 			(  id_cuenta,  valor_debito,valor_credito, fecha_transaccion,
-			relacion_tabla,   usuario, fecha_ingreso,  cod_comprobante, origen_comprobante , cod_tercero) 
-			SELECT idCuentaContable , 0 , (     presioSinIVa * cant_real_descontada )  , now() 
+			relacion_tabla,   usuario, fecha_ingreso,  cod_comprobante, origen_comprobante , cod_tercero)
+			SELECT idCuentaContable , 0 , (     presioSinIVa * cant_real_descontada )  , now()
             , 'documentos',   _idUsuario ,  now() , _movimiento ,'nota_credito' , _idTercero
-				FROM  documentos_listado_productos 
-				  left join vw_inv_mst_producto_existencias_resumen 
+				FROM  documentos_listado_productos
+				  left join vw_inv_mst_producto_existencias_resumen
 				  on vw_inv_mst_producto_existencias_resumen.id = documentos_listado_productos.idProducto
 			  WHERE   orden = p_idDocumento   and estado_linea_venta = 'D' ;
-  
-  update documentos_listado_productos 
+
+  update documentos_listado_productos
   set cant_real_descontada = cant_real_descontada - _cnt
-   where id  = _id_linea_devolucion ; 
-  
-   select * from  documentos_listado_productos  
-   where id  = _id_linea_devolucion ; 
-   
-   
+   where id  = _id_linea_devolucion ;
+
+   select * from  documentos_listado_productos
+   where id  = _id_linea_devolucion ;
+
+
   update inv_mst_producto_existencias
-  set   cant_actual = cant_actual - _cnt  , 
+  set   cant_actual = cant_actual - _cnt  ,
   compras = compras - _cnt ,
   reversiones = reversiones + _cnt
-  where id = existenciaId ; 
-   
-  
+  where id = existenciaId ;
+
+
   select 100 as _result ,  'ok' as msg;
 END ;;
 DELIMITER ;
@@ -13836,12 +13836,12 @@ CREATE DEFINER=`jdpsoluc_l_monrroy`@`%` PROCEDURE `sp_eliminar_elemento`(IN `_us
 BEGIN
 	DECLARE EXIT HANDLER FOR SQLEXCEPTION
 	BEGIN
-		select 'error al intentar eliminar' AS result LIMIT 1; 
-	END; 
+		select 'error al intentar eliminar' AS result LIMIT 1;
+	END;
 	DECLARE EXIT HANDLER FOR SQLWARNING
 	BEGIN
-		select  WARNINGS  AS result LIMIT 1; 
-	END; 
+		select  WARNINGS  AS result LIMIT 1;
+	END;
 	IF _TABLA = '' OR _TABLA IS NULL  then
 		SELECT '-1' AS RESULT;
     ELSE
@@ -13851,16 +13851,16 @@ BEGIN
 			IF _COLUMNA = '' OR _COLUMNA IS NULL  then
 				SELECT '-3' AS RESULT;
 			ELSE
-				set @usuarioIngresado = _user; 
+				set @usuarioIngresado = _user;
 				set @sqlExe = concat_ws(' ','delete from ',_TABLA,'WHERE',_COLUMNA,'=',concat('''',_DATO,''''));
 				-- select @sqlExe ;
-                PREPARE stmt1 FROM @sqlExe; 
+                PREPARE stmt1 FROM @sqlExe;
                 -- select @sqlExe;
 				SET SQL_SAFE_UPDATES = 0;
-                EXECUTE stmt1;                 
+                EXECUTE stmt1;
                 select '100' as result;
-			END IF; 
-        END IF; 
+			END IF;
+        END IF;
     END IF;
 END ;;
 DELIMITER ;
@@ -13880,56 +13880,56 @@ DELIMITER ;
 DELIMITER ;;
 CREATE DEFINER=`jdpsoluc_l_monrroy`@`%` PROCEDURE `sp_generar_abonos_cartera`(IN p_idDocumento INT)
 BEGIN
-    DECLARE done INT DEFAULT FALSE; 
+    DECLARE done INT DEFAULT FALSE;
     DECLARE _idUsuario INT;
     DECLARE _idPersona INT;
-    DECLARE v_nombreProducto VARCHAR(255); 
-    DECLARE v_total_IVA DECIMAL(10,2); 
-    DECLARE v_total_presioSinIVa DECIMAL(10,2); 
-    DECLARE v_cant_real_descontada DECIMAL(10,2); 
-    
-    DECLARE v_total_IVA_g DECIMAL(10,2); 
-    DECLARE v_total_presioSinIVa_g DECIMAL(10,2); 
-    DECLARE v_total_venta_g DECIMAL(10,2); 
-    
-    DECLARE v_costo DECIMAL(10,2); 
-    declare _movimiento int ; 
-    declare _idCuentaContable int ; 
-    
+    DECLARE v_nombreProducto VARCHAR(255);
+    DECLARE v_total_IVA DECIMAL(10,2);
+    DECLARE v_total_presioSinIVa DECIMAL(10,2);
+    DECLARE v_cant_real_descontada DECIMAL(10,2);
+
+    DECLARE v_total_IVA_g DECIMAL(10,2);
+    DECLARE v_total_presioSinIVa_g DECIMAL(10,2);
+    DECLARE v_total_venta_g DECIMAL(10,2);
+
+    DECLARE v_costo DECIMAL(10,2);
+    declare _movimiento int ;
+    declare _idCuentaContable int ;
+
     declare   v_idCCntCCobrar,
               v_idCCntCPagar,
               v_idCCntIvaCompra,
               v_idCCnttIvaVenta,
               v_idCCntCostoVenta ,
               v_idCCntVenta int;
-    
-    declare _idTercero int ; 
-    declare _NombreCaja varchar(50) ; 
-    declare _tipoDocumento int ; 
-    declare _idDocumentoFinal text ; 
-    declare _caja int ; 
-    
-    DECLARE cur CURSOR FOR 
-    SELECT nombreProducto,  total_IVA, total_presioSinIVa  , cant_real_descontada ,id_externo_auxiliar  , 0
-    FROM  documentos_listado_productos  
-    WHERE 
-        orden = p_idDocumento 
-        and estado_linea_venta = 'C'
-        ; 
 
-    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;    
+    declare _idTercero int ;
+    declare _NombreCaja varchar(50) ;
+    declare _tipoDocumento int ;
+    declare _idDocumentoFinal text ;
+    declare _caja int ;
+
+    DECLARE cur CURSOR FOR
+    SELECT nombreProducto,  total_IVA, total_presioSinIVa  , cant_real_descontada ,id_externo_auxiliar  , 0
+    FROM  documentos_listado_productos
+    WHERE
+        orden = p_idDocumento
+        and estado_linea_venta = 'C'
+        ;
+
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
     SET done = false;
-    
+
       select  idCCntCCobrar,  idCCnttIvaVenta, idCCntCostoVenta, idCCntVenta ,
-            tipoDocumentoFinal , nombreCaja , cliente ,  
+            tipoDocumentoFinal , nombreCaja , cliente ,
              valorParcial , valorIVA , totalFactura , usuario , idDocumentoFinal , caja
-        into  v_idCCntCCobrar, v_idCCnttIvaVenta,  v_idCCntCostoVenta ,  v_idCCntVenta , 
+        into  v_idCCntCCobrar, v_idCCnttIvaVenta,  v_idCCntCostoVenta ,  v_idCCntVenta ,
              _tipoDocumento , _NombreCaja , _idTercero ,
 			  v_total_presioSinIVa_g , v_total_IVA_g, v_total_venta_g  , _idUsuario , _idDocumentoFinal , _caja
-    FROM vw_documentos where orden = p_idDocumento;  
-    -- Open the cursor  
+    FROM vw_documentos where orden = p_idDocumento;
+    -- Open the cursor
      set _movimiento = 0;
-    
+
     OPEN cur;
 
     read_loop: LOOP
@@ -13938,16 +13938,16 @@ BEGIN
             LEAVE read_loop;
         END IF;  -- total_presioSinIVa
      --   select  v_nombreProducto,  v_total_IVA, v_total_presioSinIVa  , v_cant_real_descontada , _idCuentaContable , v_costo ;
-        if _idCuentaContable > 0 then  
-		-- id, 
+        if _idCuentaContable > 0 then
+		-- id,
 			insert into   mst_mov_cartera_abonos
-			( usuario_creacion,  totalAbonos, id_cartera , comprobante 
-            )  
+			( usuario_creacion,  totalAbonos, id_cartera , comprobante
+            )
 			values
 			(   _idUsuario , v_total_presioSinIVa , _idCuentaContable  , p_idDocumento  );
-			 
-        end if; 
-        
+
+        end if;
+
     END LOOP;
 
     -- Close the cursor
@@ -13970,26 +13970,26 @@ DELIMITER ;
 DELIMITER ;;
 CREATE DEFINER=`jdpsoluc_l_monrroy`@`%` PROCEDURE `sp_generar_abonos_credito`(IN p_idDocumento INT)
 BEGIN
-    DECLARE done INT DEFAULT FALSE; 
+    DECLARE done INT DEFAULT FALSE;
     DECLARE _idUsuario INT;
     DECLARE _idPersona INT;
-    DECLARE v_nombreProducto VARCHAR(255); 
-    DECLARE v_total_IVA DECIMAL(10,2); 
-    DECLARE v_total_presioSinIVa DECIMAL(10,2); 
-    DECLARE v_cant_real_descontada   , v_valorPagado     DECIMAL(10,2); 
+    DECLARE v_nombreProducto VARCHAR(255);
+    DECLARE v_total_IVA DECIMAL(10,2);
+    DECLARE v_total_presioSinIVa DECIMAL(10,2);
+    DECLARE v_cant_real_descontada   , v_valorPagado     DECIMAL(10,2);
     DECLARE  v_idMedioDePago  ,     v_cuentaContable int;
-    
-    
-    DECLARE v_referencia VARCHAR(50); 
-    DECLARE v_nombre VARCHAR(50);  
-    
-    DECLARE v_total_IVA_g DECIMAL(10,2); 
-    DECLARE v_total_presioSinIVa_g DECIMAL(10,2); 
-    DECLARE v_total_venta_g DECIMAL(10,2); 
-    
-    DECLARE v_costo DECIMAL(10,2); 
-    declare _movimiento int ; 
-    declare _idCuentaContable int ; 
+
+
+    DECLARE v_referencia VARCHAR(50);
+    DECLARE v_nombre VARCHAR(50);
+
+    DECLARE v_total_IVA_g DECIMAL(10,2);
+    DECLARE v_total_presioSinIVa_g DECIMAL(10,2);
+    DECLARE v_total_venta_g DECIMAL(10,2);
+
+    DECLARE v_costo DECIMAL(10,2);
+    declare _movimiento int ;
+    declare _idCuentaContable int ;
     declare _nombre_esta , _descripcion_esta text;
     declare   v_idCCntCCobrar,
               v_idCCntCPagar,
@@ -13997,89 +13997,89 @@ BEGIN
               v_idCCnttIvaVenta,
               v_idCCntCostoVenta ,
               v_idCCntVenta ,
-              v_idCCntCxPagar, 
+              v_idCCntCxPagar,
               v_idCCnttIvaCompra,
               v_idCCntCajaGeneral ,
               v_idCCntCompra int;
-    
-    declare _idTercero int ; 
-    declare _NombreCaja varchar(50) ; 
-    declare _tipoDocumento int ; 
-    declare _idDocumentoFinal text ; 
-    declare _caja int ; 
-     
-    DECLARE curMediosPago CURSOR FOR 
-    SELECT documentos_pagos.idMedioDePago , valorPagado , referencia, 
+
+    declare _idTercero int ;
+    declare _NombreCaja varchar(50) ;
+    declare _tipoDocumento int ;
+    declare _idDocumentoFinal text ;
+    declare _caja int ;
+
+    DECLARE curMediosPago CURSOR FOR
+    SELECT documentos_pagos.idMedioDePago , valorPagado , referencia,
     UPPER(vw_medios.nombre) ,  cuentaContable FROM  documentos_pagos
 		inner join vw_medios on vw_medios.id = idMedioDePago
-		  where documentos_pagos.idDocumento = p_idDocumento  ;   
-    
-    DECLARE cur CURSOR FOR 
-    SELECT nombreProducto,  total_IVA, total_presioSinIVa  , cant_real_descontada ,id_externo_auxiliar  , 0
-    FROM  documentos_listado_productos  
-    WHERE 
-        orden = p_idDocumento 
-        and estado_linea_venta = 'C'
-        ; 
+		  where documentos_pagos.idDocumento = p_idDocumento  ;
 
-    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;    
+    DECLARE cur CURSOR FOR
+    SELECT nombreProducto,  total_IVA, total_presioSinIVa  , cant_real_descontada ,id_externo_auxiliar  , 0
+    FROM  documentos_listado_productos
+    WHERE
+        orden = p_idDocumento
+        and estado_linea_venta = 'C'
+        ;
+
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
     SET done = false;
-     
-        
-        
+
+
+
       select  idCCntCCobrar,  idCCnttIvaVenta, idCCntCostoVenta, idCCntVenta ,
-            tipoDocumentoFinal , nombreCaja , cliente ,  
+            tipoDocumentoFinal , nombreCaja , cliente ,
              valorParcial , valorIVA , totalFactura , usuario , idDocumentoFinal , caja
-        into  v_idCCntCCobrar, v_idCCnttIvaVenta,  v_idCCntCostoVenta ,  v_idCCntVenta , 
+        into  v_idCCntCCobrar, v_idCCnttIvaVenta,  v_idCCntCostoVenta ,  v_idCCntVenta ,
              _tipoDocumento , _NombreCaja , _idTercero ,
 			  v_total_presioSinIVa_g , v_total_IVA_g, v_total_venta_g  , _idUsuario , _idDocumentoFinal , _caja
-    FROM vw_documentos where orden = p_idDocumento;  
-    
-     select  idCCntCPagar,  idCCntIvaCompra, idCCntCajaGeneral, 
-             nombre , descripcion   into  v_idCCntCxPagar, v_idCCnttIvaCompra,  v_idCCntCajaGeneral ,  
-            _nombre_esta , _descripcion_esta 
-    FROM vw_documentos where orden = p_idDocumento;  
-    -- Open the cursor  
+    FROM vw_documentos where orden = p_idDocumento;
+
+     select  idCCntCPagar,  idCCntIvaCompra, idCCntCajaGeneral,
+             nombre , descripcion   into  v_idCCntCxPagar, v_idCCnttIvaCompra,  v_idCCntCajaGeneral ,
+            _nombre_esta , _descripcion_esta
+    FROM vw_documentos where orden = p_idDocumento;
+    -- Open the cursor
      set _movimiento = 0;
-     insert into cnt_operaciones ( 
+     insert into cnt_operaciones (
 		   usuario, fechaOperacion, fechaCreacion, nombre, descripcion, idDocumento , idPersona)
-		   values ( _idUsuario ,now() , now(), 
+		   values ( _idUsuario ,now() , now(),
 		   concat( 'Opr. auto. POS  - Mov. pagos cxp','-Doc => ',_idDocumentoFinal ) ,
 		   concat('Documento creado compra => establecimiento : ', _nombre_esta , '-',_descripcion_esta , '-compra=> ',_idDocumentoFinal)
-		   ,p_idDocumento , _idTercero ) ;  
-	
-       select max(id)  into _movimiento  
-	   from cnt_operaciones where idDocumento =p_idDocumento;  
-       
-       
+		   ,p_idDocumento , _idTercero ) ;
+
+       select max(id)  into _movimiento
+	   from cnt_operaciones where idDocumento =p_idDocumento;
+
+
     -- v_total_venta_g
     OPEN curMediosPago;
     read_loop_mp: LOOP
     FETCH curMediosPago INTO   v_idMedioDePago , v_valorPagado , v_referencia, v_nombre ,  v_cuentaContable;
         IF done THEN
             LEAVE read_loop_mp;
-        END IF; 
+        END IF;
         if v_cuentaContable = 0 then
           set v_cuentaContable = v_idCCntCajaGeneral;
         end if ;
-		insert into cnt_transacciones 
+		insert into cnt_transacciones
 		(  id_cuenta,  valor_debito,
                        valor_credito, fecha_transaccion,
-		relacion_tabla,   usuario, fecha_ingreso,  cod_comprobante, origen_comprobante ,cod_tercero) 
+		relacion_tabla,   usuario, fecha_ingreso,  cod_comprobante, origen_comprobante ,cod_tercero)
 		values
-		( v_cuentaContable ,  0  , v_valorPagado , now()  , 
-		'documentos',   _idUsuario ,  now() , _movimiento ,'Cuenta por Cobrar' , _idTercero); 
+		( v_cuentaContable ,  0  , v_valorPagado , now()  ,
+		'documentos',   _idUsuario ,  now() , _movimiento ,'Cuenta por Cobrar' , _idTercero);
     END LOOP;
     -- Close the cursor
     CLOSE curMediosPago;
       SET done = false;
-    insert into cnt_transacciones 
+    insert into cnt_transacciones
 		(  id_cuenta,  valor_debito,
                        valor_credito, fecha_transaccion,
-		relacion_tabla,   usuario, fecha_ingreso,  cod_comprobante, origen_comprobante ,cod_tercero) 
+		relacion_tabla,   usuario, fecha_ingreso,  cod_comprobante, origen_comprobante ,cod_tercero)
 		values
-		( v_idCCntCxPagar ,  v_total_venta_g  , 0 , now()  , 
-		'documentos',   _idUsuario ,  now() , _movimiento ,'Cuenta por Cobrar' , _idTercero); 
+		( v_idCCntCxPagar ,  v_total_venta_g  , 0 , now()  ,
+		'documentos',   _idUsuario ,  now() , _movimiento ,'Cuenta por Cobrar' , _idTercero);
     -- ------------------------------------------------------------------------------------------------
     OPEN cur;
 
@@ -14089,16 +14089,16 @@ BEGIN
             LEAVE read_loop;
         END IF;  -- total_presioSinIVa
    --  select  v_nombreProducto,  v_total_IVA, v_total_presioSinIVa  , v_cant_real_descontada , _idCuentaContable , v_costo ;
-         if _idCuentaContable > 0 then  
-		-- id, 
+         if _idCuentaContable > 0 then
+		-- id,
 			insert into  mst_mov_credito_abonos
-			( usuario_creacion,  totalAbonos, id_cartera , comprobante 
-            )  
+			( usuario_creacion,  totalAbonos, id_cartera , comprobante
+            )
 			values
 			(   _idUsuario , v_total_presioSinIVa , _idCuentaContable  , p_idDocumento  );
-			 
-        end if; 
-        
+
+        end if;
+
     END LOOP;
 
     -- Close the cursor
@@ -14121,162 +14121,162 @@ DELIMITER ;
 DELIMITER ;;
 CREATE DEFINER=`jdpsoluc_l_monrroy`@`%` PROCEDURE `sp_generar_movimientos_cuenta_inventario`(IN p_idDocumento INT)
 BEGIN
-    DECLARE done INT DEFAULT FALSE; 
+    DECLARE done INT DEFAULT FALSE;
     DECLARE _idUsuario INT;
     DECLARE _idPersona , id_resumen_iva INT;
-    DECLARE v_nombreProducto VARCHAR(255); 
-    DECLARE v_total_IVA DECIMAL(10,2); 
-    DECLARE v_total_presioSinIVa , _descuento DECIMAL(16,2); 
-    DECLARE v_cant_real_descontada DECIMAL(10,2); 
-    
-    DECLARE v_total_IVA_g DECIMAL(10,2); 
-    DECLARE v_total_presioSinIVa_g DECIMAL(10,2); 
-    DECLARE v_total_venta_g DECIMAL(10,2); 
-    
-    DECLARE v_costo DECIMAL(10,2); 
-    declare _movimiento int ; 
-    declare _idCuentaContable int ; 
-    
+    DECLARE v_nombreProducto VARCHAR(255);
+    DECLARE v_total_IVA DECIMAL(10,2);
+    DECLARE v_total_presioSinIVa , _descuento DECIMAL(16,2);
+    DECLARE v_cant_real_descontada DECIMAL(10,2);
+
+    DECLARE v_total_IVA_g DECIMAL(10,2);
+    DECLARE v_total_presioSinIVa_g DECIMAL(10,2);
+    DECLARE v_total_venta_g DECIMAL(10,2);
+
+    DECLARE v_costo DECIMAL(10,2);
+    declare _movimiento int ;
+    declare _idCuentaContable int ;
+
     declare   v_idCCntCCobrar,
               v_idCCntCPagar,
               v_idCCntIvaCompra,
               v_idCCnttIvaVenta,
               v_idCCntCostoVenta ,
-              v_idCCntVenta ,  
-                cuentaRetefuente  , 
+              v_idCCntVenta ,
+                cuentaRetefuente  ,
               cuentaDescuento int;
     declare fechaDocumento date;
-    declare _idTercero int ; 
-    declare _NombreCaja varchar(50) ; 
-    declare _tipoDocumento int ; 
-    declare _idDocumentoFinal text ; 
-    declare _caja int ; 
-    
-    DECLARE cur CURSOR FOR 
+    declare _idTercero int ;
+    declare _NombreCaja varchar(50) ;
+    declare _tipoDocumento int ;
+    declare _idDocumentoFinal text ;
+    declare _caja int ;
+
+    DECLARE cur CURSOR FOR
     SELECT nombreProducto,  total_IVA, (total_presioSinIVa - total_descuento)  , cant_real_descontada , (vw_inv_mst_producto.idCuentaContable) ,
     (precioCompra * cant_real_descontada)
-    FROM  documentos_listado_productos 
+    FROM  documentos_listado_productos
       inner join vw_inv_mst_producto on vw_inv_mst_producto.id = documentos_listado_productos.idProducto
-    WHERE 
-        orden = p_idDocumento 
+    WHERE
+        orden = p_idDocumento
         and estado_linea_venta = 'A'
-        ; 
-    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE; 
+        ;
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
     SET done = false;
-    
+
       select  idCCntCCobrar,  idCCnttIvaVenta, idCCntCostoVenta, idCCntVenta ,
-            tipoDocumentoFinal , nombreCaja , cliente ,  
-             valorParcial  , valorIVA , totalFactura , usuario , idDocumentoFinal , caja , fecha , 
+            tipoDocumentoFinal , nombreCaja , cliente ,
+             valorParcial  , valorIVA , totalFactura , usuario , idDocumentoFinal , caja , fecha ,
               idRetefuenteVenta ,  idDescuentoVenta , descuento
-        into  v_idCCntCCobrar, v_idCCnttIvaVenta,  v_idCCntCostoVenta ,  v_idCCntVenta , 
+        into  v_idCCntCCobrar, v_idCCnttIvaVenta,  v_idCCntCostoVenta ,  v_idCCntVenta ,
              _tipoDocumento , _NombreCaja , _idTercero ,
 			  v_total_presioSinIVa_g , v_total_IVA_g, v_total_venta_g  , _idUsuario , _idDocumentoFinal , _caja , fechaDocumento ,
                 cuentaRetefuente  , cuentaDescuento ,_descuento
-    FROM vw_documentos where orden = p_idDocumento; 
-     
-   
-        insert into cnt_operaciones ( 
+    FROM vw_documentos where orden = p_idDocumento;
+
+
+        insert into cnt_operaciones (
                usuario, fechaOperacion, fechaCreacion, nombre, descripcion, idDocumento , idPersona)
-        values ( _idUsuario ,now() , now(), 
+        values ( _idUsuario ,now() , now(),
            concat( 'Opr. auto. POS - Mov. Cnt. por cobrar venta','-Doc => ',_idDocumentoFinal ) ,
            concat('Documento creado desde punto de venta => caja : ', _caja , '-',_NombreCaja , '-fact=> ',_idDocumentoFinal)
-           ,p_idDocumento , _idTercero ) ;  
-           
-          select max(id)  into _movimiento  
+           ,p_idDocumento , _idTercero ) ;
+
+          select max(id)  into _movimiento
           from cnt_operaciones where idDocumento =p_idDocumento;
-     
-    --   v_total_presioSinIVa_g , v_total_IVA_g, v_total_venta_g 
-    -- genera cuenta por cobrar  
-			insert into cnt_transacciones 
+
+    --   v_total_presioSinIVa_g , v_total_IVA_g, v_total_venta_g
+    -- genera cuenta por cobrar
+			insert into cnt_transacciones
 			(  id_cuenta,  valor_debito,valor_credito, fecha_transaccion,
-			relacion_tabla,   usuario, fecha_ingreso,  cod_comprobante, origen_comprobante , cod_tercero) 
+			relacion_tabla,   usuario, fecha_ingreso,  cod_comprobante, origen_comprobante , cod_tercero)
 			values
-			( v_idCCntCCobrar ,  v_total_venta_g , 0 , now()  , 
+			( v_idCCntCCobrar ,  v_total_venta_g , 0 , now()  ,
 			'documentos',   _idUsuario ,  now() , _movimiento ,'venta' , _idTercero);
-		if _descuento > 0 then 
+		if _descuento > 0 then
        --  cuentaDescuento
-        	insert into cnt_transacciones 
+        	insert into cnt_transacciones
 			(  id_cuenta,  valor_debito,valor_credito, fecha_transaccion,
-			relacion_tabla,   usuario, fecha_ingreso,  cod_comprobante, origen_comprobante , cod_tercero) 
+			relacion_tabla,   usuario, fecha_ingreso,  cod_comprobante, origen_comprobante , cod_tercero)
 			values
-			( cuentaDescuento ,  _descuento , 0 , now()  , 
+			( cuentaDescuento ,  _descuento , 0 , now()  ,
 			'documentos',   _idUsuario ,  now() , _movimiento ,'venta' , _idTercero);
         end if;
-         -- genera iva  
-         if v_total_IVA_g > 0 then 
-			insert into cnt_transacciones 
+         -- genera iva
+         if v_total_IVA_g > 0 then
+			insert into cnt_transacciones
 			(  id_cuenta,  valor_debito,valor_credito, fecha_transaccion,
-			relacion_tabla,   usuario, fecha_ingreso,  cod_comprobante, origen_comprobante  , cod_tercero) 
+			relacion_tabla,   usuario, fecha_ingreso,  cod_comprobante, origen_comprobante  , cod_tercero)
 			values
-			( v_idCCnttIvaVenta  , 0,  v_total_IVA_g , now()  , 
-			'documentos',   _idUsuario ,  now() , _movimiento ,'venta' , _idTercero );  
-					
-					select count(0) into id_resumen_iva from 
-					resumen_iva_en_compra_y_venta where 
-					mes = month(fechaDocumento)  and  
+			( v_idCCnttIvaVenta  , 0,  v_total_IVA_g , now()  ,
+			'documentos',   _idUsuario ,  now() , _movimiento ,'venta' , _idTercero );
+
+					select count(0) into id_resumen_iva from
+					resumen_iva_en_compra_y_venta where
+					mes = month(fechaDocumento)  and
 					anio  =   year(fechaDocumento) ;
                     if id_resumen_iva  = 0 then
                        insert into resumen_iva_en_compra_y_venta (valor_iva_venta ,valor_iva_compra,fecha_creacion,mes ,anio) values (
                        0,0, fechaDocumento , month(fechaDocumento)  ,   year(fechaDocumento)               );
                     end if;
-                    select id into id_resumen_iva from 
-					resumen_iva_en_compra_y_venta where 
-					mes = month(fechaDocumento)  and  
+                    select id into id_resumen_iva from
+					resumen_iva_en_compra_y_venta where
+					mes = month(fechaDocumento)  and
 					anio  =   year(fechaDocumento) ;
-                    
+
                     update resumen_iva_en_compra_y_venta set valor_iva_venta = valor_iva_venta + v_total_IVA_g ,
                     fecha_ultimo_insert_venta = fechaDocumento
                     where id = id_resumen_iva;
             end if;
-              -- genera venta  
-			insert into cnt_transacciones 
+              -- genera venta
+			insert into cnt_transacciones
 			(  id_cuenta,  valor_debito,valor_credito, fecha_transaccion,
-			relacion_tabla,   usuario, fecha_ingreso,  cod_comprobante, origen_comprobante , cod_tercero) 
+			relacion_tabla,   usuario, fecha_ingreso,  cod_comprobante, origen_comprobante , cod_tercero)
 			values
-			( v_idCCntVenta  , 0,  v_total_presioSinIVa_g , now()  , 
-			'documentos',   _idUsuario ,  now() , _movimiento ,'venta' , _idTercero );  
-            
-           --   v_idCCntCostoVenta ,  
-			
-    -- Open the cursor 
+			( v_idCCntVenta  , 0,  v_total_presioSinIVa_g , now()  ,
+			'documentos',   _idUsuario ,  now() , _movimiento ,'venta' , _idTercero );
+
+           --   v_idCCntCostoVenta ,
+
+    -- Open the cursor
 
      set _movimiento = 0;
-    
+
     OPEN cur;
 
     read_loop: LOOP
         FETCH cur INTO   v_nombreProducto,  v_total_IVA, v_total_presioSinIVa  , v_cant_real_descontada , _idCuentaContable , v_costo ;
         IF done THEN
             LEAVE read_loop;
-        END IF;  
-        if _idCuentaContable > 0 then  
+        END IF;
+        if _idCuentaContable > 0 then
 			if _movimiento = 0 then
-				insert into cnt_operaciones ( 
+				insert into cnt_operaciones (
 					   usuario, fechaOperacion, fechaCreacion, nombre, descripcion, idDocumento , idPersona)
-				values ( _idUsuario ,now() , now(), 
+				values ( _idUsuario ,now() , now(),
 				   concat( 'Opr. auto. POS  - Mov. inventario','-Doc => ',_idDocumentoFinal ) ,
 				   concat('Documento creado desde punto de venta => caja : ', _caja , '-',_NombreCaja , '-fact=> ',_idDocumentoFinal)
-				   ,p_idDocumento , _idTercero ) ;   
-				  select max(id)  into _movimiento  
-				  from cnt_operaciones where idDocumento =p_idDocumento; 
+				   ,p_idDocumento , _idTercero ) ;
+				  select max(id)  into _movimiento
+				  from cnt_operaciones where idDocumento =p_idDocumento;
 			 end if;
 		-- movimiento valor inventario
-			insert into cnt_transacciones 
+			insert into cnt_transacciones
 			(  id_cuenta,  valor_debito,valor_credito, fecha_transaccion,
-			relacion_tabla,   usuario, fecha_ingreso,  cod_comprobante, origen_comprobante , cod_tercero)  
+			relacion_tabla,   usuario, fecha_ingreso,  cod_comprobante, origen_comprobante , cod_tercero)
 			values
-			( _idCuentaContable , 0 ,v_costo  , now()  , 
+			( _idCuentaContable , 0 ,v_costo  , now()  ,
 			'documentos',   _idUsuario ,  now() , _movimiento ,'venta', _idTercero );
-			
+
 		-- _movimiento costo en venta
-			insert into cnt_transacciones 
+			insert into cnt_transacciones
 			(  id_cuenta,  valor_debito,valor_credito, fecha_transaccion,
-			relacion_tabla,   usuario, fecha_ingreso,  cod_comprobante, origen_comprobante , cod_tercero)  
+			relacion_tabla,   usuario, fecha_ingreso,  cod_comprobante, origen_comprobante , cod_tercero)
 			values
-			( v_idCCntCostoVenta , v_costo, 0, now()  , 
+			( v_idCCntCostoVenta , v_costo, 0, now()  ,
 			'documentos',   _idUsuario ,  now() , _movimiento ,'venta', _idTercero );
-        end if; 
-        
+        end if;
+
     END LOOP;
 
     -- Close the cursor
@@ -14299,239 +14299,239 @@ DELIMITER ;
 DELIMITER ;;
 CREATE DEFINER=`jdpsoluc_l_monrroy`@`%` PROCEDURE `sp_generar_movimientos_cuenta_inventario_compra`(IN p_idDocumento INT)
 BEGIN
-    DECLARE done INT DEFAULT FALSE; 
+    DECLARE done INT DEFAULT FALSE;
     DECLARE _idUsuario, id_resumen_iva , _idPersona , _id_hst_iva_rete INT;
-    DECLARE  _idProducto VARCHAR(10);  
-    DECLARE  _cant_real_descontada DECIMAL(10,2);  
-    
-    DECLARE _descuento_antes,  _iva_antes ,  _retencion_Antes DECIMAL(16,2); 
-    DECLARE v_total_IVA_g , _presioVenta , _existencia , _precioCompra, _nuevo_costo , _porc_retefuente , totalDescuentoCompra  , _retefuente DECIMAL(16,2); 
-    DECLARE v_total_presioSinIVa_g , v_total_venta_g DECIMAL(10,2); 
-    
-    DECLARE v_costo , _abono_inicial , _cant_actual DECIMAL(10,2); 
-    declare _movimiento , _idCuentaContable ,   _id_existencia int ; 
+    DECLARE  _idProducto VARCHAR(10);
+    DECLARE  _cant_real_descontada DECIMAL(10,2);
+
+    DECLARE _descuento_antes,  _iva_antes ,  _retencion_Antes DECIMAL(16,2);
+    DECLARE v_total_IVA_g , _presioVenta , _existencia , _precioCompra, _nuevo_costo , _porc_retefuente , totalDescuentoCompra  , _retefuente DECIMAL(16,2);
+    DECLARE v_total_presioSinIVa_g , v_total_venta_g DECIMAL(10,2);
+
+    DECLARE v_costo , _abono_inicial , _cant_actual DECIMAL(10,2);
+    declare _movimiento , _idCuentaContable ,   _id_existencia int ;
     declare fechaDocumento date;
     declare   v_idCCntCxPagar,
-              v_idCCntCPagar, 
+              v_idCCntCPagar,
               v_idCCnttIvaCompra,
               v_idCCntCajaGeneral ,
               v_idCuentaReteF ,
               v_id_cuenta_inventario ,
-              cuentaRetefuente  , 
+              cuentaRetefuente  ,
               cuentaDescuento int;
-    
-    declare _idTercero int ; 
-    declare _nombre_esta varchar(50) ; 
-    declare _tipoDocumento , _id_bodega bigint ; 
-     
-    declare _idDocumentoFinal , _descripcion_esta , _nombre_producto   text ; 
-    declare _caja int ; 
-    
-    
-    DECLARE cur CURSOR FOR 
+
+    declare _idTercero int ;
+    declare _nombre_esta varchar(50) ;
+    declare _tipoDocumento , _id_bodega bigint ;
+
+    declare _idDocumentoFinal , _descripcion_esta , _nombre_producto   text ;
+    declare _caja int ;
+
+
+    DECLARE cur CURSOR FOR
     SELECT coalesce(`cant_actual` , 0 ) , (presioSinIVa * cant_real_descontada ) , idProducto, nombre ,   cant_real_descontada , presioVenta , coalesce(`cant_actual` , 0 )    , precioCompra ,
        case when  coalesce(`cant_actual` , 0 )  <= 0 then presioVenta else
-      cast( (( ( presioVenta * cant_real_descontada ) + (coalesce(`cant_actual` , 0 )  * precioCompra ) ) / ( coalesce(`cant_actual` , 0 )  + cant_real_descontada ))   
-            AS DECIMAL(16, 2)) end 
+      cast( (( ( presioVenta * cant_real_descontada ) + (coalesce(`cant_actual` , 0 )  * precioCompra ) ) / ( coalesce(`cant_actual` , 0 )  + cant_real_descontada ))
+            AS DECIMAL(16, 2)) end
             , idCuentaContable
-    FROM  documentos_listado_productos 
+    FROM  documentos_listado_productos
       inner join vw_inv_mst_producto_existencias_resumen on vw_inv_mst_producto_existencias_resumen.id = documentos_listado_productos.idProducto
-    WHERE   orden = p_idDocumento  and estado_linea_venta = 'A' ; 
+    WHERE   orden = p_idDocumento  and estado_linea_venta = 'A' ;
 
     DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
-    
-    
-    
+
+
+
     SET done = false;
       SET SQL_SAFE_UPDATES = 0;
       select porc_retefuente  , retefuente ,
-      idCCntCPagar,  idCCntIvaCompra, idCCntCajaGeneral,  
-            tipoDocumentoFinal , nombre , descripcion , idBodegaStock , 
-                cliente ,  
+      idCCntCPagar,  idCCntIvaCompra, idCCntCajaGeneral,
+            tipoDocumentoFinal , nombre , descripcion , idBodegaStock ,
+                cliente ,
              (totalFactura - valorIVA ) , valorIVA , totalFactura , usuario , idDocumentoFinal , caja , fecha ,
              idRetefuenteCompra , idDescuentoCompra , descuento
-        into _porc_retefuente  , _retefuente , v_idCCntCxPagar, v_idCCnttIvaCompra,  v_idCCntCajaGeneral ,  
+        into _porc_retefuente  , _retefuente , v_idCCntCxPagar, v_idCCnttIvaCompra,  v_idCCntCajaGeneral ,
              _tipoDocumento , _nombre_esta , _descripcion_esta , _id_bodega , _idTercero ,
 			  v_total_presioSinIVa_g , v_total_IVA_g, v_total_venta_g  , _idUsuario , _idDocumentoFinal , _caja , fechaDocumento ,
                 cuentaRetefuente  , cuentaDescuento , totalDescuentoCompra
-    FROM vw_documentos where orden = p_idDocumento;  
-    
-     
+    FROM vw_documentos where orden = p_idDocumento;
+
+
     -- operacion cuenta por pagar
-        insert into cnt_operaciones ( 
+        insert into cnt_operaciones (
                usuario, fechaOperacion, fechaCreacion, nombre, descripcion, idDocumento , idPersona)
-        values ( _idUsuario ,now() , now(), 
+        values ( _idUsuario ,now() , now(),
            concat( 'Opr. auto. POS - Mov. Cnt. por pagar compra','-Doc => ',_idDocumentoFinal ) ,
            concat('Documento creado desde Compras : ', _nombre_esta , '-', _descripcion_esta , '- Compra => ',_idDocumentoFinal)
-           ,p_idDocumento , _idTercero ) ;  
-           
-          select max(id)  into _movimiento  
+           ,p_idDocumento , _idTercero ) ;
+
+          select max(id)  into _movimiento
           from cnt_operaciones where idDocumento =p_idDocumento;
-      
-    -- genera cuenta por pagar   
-			insert into cnt_transacciones 
+
+    -- genera cuenta por pagar
+			insert into cnt_transacciones
 			( descripcion, id_cuenta,  valor_debito,valor_credito, fecha_transaccion,
-			relacion_tabla,   usuario, fecha_ingreso,  cod_comprobante, origen_comprobante , cod_tercero) 
+			relacion_tabla,   usuario, fecha_ingreso,  cod_comprobante, origen_comprobante , cod_tercero)
 			values
-			( 'Cuentas por pagar' , v_idCCntCxPagar , 0 ,  v_total_venta_g , now()  , 
+			( 'Cuentas por pagar' , v_idCCntCxPagar , 0 ,  v_total_venta_g , now()  ,
 			'documentos',   _idUsuario ,  now() , _movimiento ,'venta' , _idTercero);
-            
+
           if   totalDescuentoCompra  > 0 then
           -- cuentaDescuento , totalDescuentoCompra
-            insert into cnt_transacciones 
+            insert into cnt_transacciones
 			( descripcion, id_cuenta,  valor_debito,valor_credito, fecha_transaccion,
-			relacion_tabla,   usuario, fecha_ingreso,  cod_comprobante, origen_comprobante , cod_tercero) 
+			relacion_tabla,   usuario, fecha_ingreso,  cod_comprobante, origen_comprobante , cod_tercero)
 			values
-			( 'Descuento en compra' , cuentaDescuento , 0 ,  totalDescuentoCompra , now()  , 
+			( 'Descuento en compra' , cuentaDescuento , 0 ,  totalDescuentoCompra , now()  ,
 			'documentos',   _idUsuario ,  now() , _movimiento ,'venta' , _idTercero);
             end if     ;
-         -- genera iva  
+         -- genera iva
          /*
     DECLARE _descuento_antes,  _iva_antes ,  _retencion_Antes DECIMAL(16,2); _id_hst_iva_rete*/
-         select count(0) into _id_hst_iva_rete from 
+         select count(0) into _id_hst_iva_rete from
          documento_IVA_retenciones where orden = p_idDocumento;
          if _id_hst_iva_rete = 0 then
-            insert into documento_IVA_retenciones (orden) values (p_idDocumento) ; 
+            insert into documento_IVA_retenciones (orden) values (p_idDocumento) ;
          end if;
-         select id , IVA , retencion into _id_hst_iva_rete , _iva_antes ,  _retencion_Antes from 
+         select id , IVA , retencion into _id_hst_iva_rete , _iva_antes ,  _retencion_Antes from
          documento_IVA_retenciones where orden = p_idDocumento;
-         
-         if v_total_IVA_g > 0 then 
-         
- /*   select 'genera iva  ' ,   v_idCCnttIvaCompra  ,  v_total_IVA_g, 0 , now()  , 
+
+         if v_total_IVA_g > 0 then
+
+ /*   select 'genera iva  ' ,   v_idCCnttIvaCompra  ,  v_total_IVA_g, 0 , now()  ,
 			'documentos',   _idUsuario ,  now() , _movimiento ,'venta' , _idTercero;*/
-            
-			insert into cnt_transacciones 
+
+			insert into cnt_transacciones
 			(descripcion,  id_cuenta,  valor_debito,valor_credito, fecha_transaccion,
-			relacion_tabla,   usuario, fecha_ingreso,  cod_comprobante, origen_comprobante  , cod_tercero) 
+			relacion_tabla,   usuario, fecha_ingreso,  cod_comprobante, origen_comprobante  , cod_tercero)
 			values
-			('Iva descontable', v_idCCnttIvaCompra  ,  v_total_IVA_g , 0 , now()  , 
-			'documentos',   _idUsuario ,  now() , _movimiento ,'venta' , _idTercero );  
+			('Iva descontable', v_idCCnttIvaCompra  ,  v_total_IVA_g , 0 , now()  ,
+			'documentos',   _idUsuario ,  now() , _movimiento ,'venta' , _idTercero );
             -- -----------------------------------------------------------------------------------
-            
-					select count(0) into id_resumen_iva from 
-					resumen_iva_en_compra_y_venta where 
-					mes = month(fechaDocumento)  and  
+
+					select count(0) into id_resumen_iva from
+					resumen_iva_en_compra_y_venta where
+					mes = month(fechaDocumento)  and
 					anio  =   year(fechaDocumento) ;
                     if id_resumen_iva  = 0 then
                        insert into resumen_iva_en_compra_y_venta (valor_iva_venta ,valor_iva_compra,fecha_creacion,mes ,anio) values (
                        0,0, fechaDocumento , month(fechaDocumento)  ,   year(fechaDocumento)               );
                     end if;
-                    select id into id_resumen_iva from 
-					resumen_iva_en_compra_y_venta where 
-					mes = month(fechaDocumento)  and  
+                    select id into id_resumen_iva from
+					resumen_iva_en_compra_y_venta where
+					mes = month(fechaDocumento)  and
 					anio  =   year(fechaDocumento) ;
-                    
+
                     update resumen_iva_en_compra_y_venta set valor_iva_compra =   valor_iva_compra + v_total_IVA_g - _iva_antes ,
                     fecha_ultimo_insert_venta = fechaDocumento
                     where id = id_resumen_iva;
             -- -----------------------------------------------------------------------------------
             end if;
-              -- genera compra (inventario) 
-     /*     select 'genera compra  ' , v_idCuentaReteF  ,v_total_presioSinIVa_g , 0   , now()  , 
-			'documentos',   _idUsuario ,  now() , _movimiento ,'venta' , _idTercero ;    */ 
+              -- genera compra (inventario)
+     /*     select 'genera compra  ' , v_idCuentaReteF  ,v_total_presioSinIVa_g , 0   , now()  ,
+			'documentos',   _idUsuario ,  now() , _movimiento ,'venta' , _idTercero ;    */
 		-- validar si el cliente tiene activo el cobro de retefuente en compra y si la base supera la minima
         -- _porc_retefuente  , _retefuente
         if _retefuente > 0 then
-           insert into cnt_transacciones 
+           insert into cnt_transacciones
 			( descripcion, id_cuenta,  valor_debito,valor_credito, fecha_transaccion,
-			relacion_tabla,   usuario, fecha_ingreso,  cod_comprobante, origen_comprobante , cod_tercero) 
+			relacion_tabla,   usuario, fecha_ingreso,  cod_comprobante, origen_comprobante , cod_tercero)
 			values
-			(concat('Retefuente ',_porc_retefuente , '%' ) , cuentaRetefuente , 0   ,_retefuente  , now()  , 
-			'documentos',   _idUsuario ,  now() , _movimiento ,'venta' , _idTercero );  
+			(concat('Retefuente ',_porc_retefuente , '%' ) , cuentaRetefuente , 0   ,_retefuente  , now()  ,
+			'documentos',   _idUsuario ,  now() , _movimiento ,'venta' , _idTercero );
        end if     ;
-           --   v_idCCntCajaGeneral ,  
-        --    abono inicial 
-            SELECT coalesce(sum(valorPagado),0)  into _abono_inicial FROM documentos_pagos where idDocumento = p_idDocumento; 
-             -- genera cuenta por pagar  
+           --   v_idCCntCajaGeneral ,
+        --    abono inicial
+            SELECT coalesce(sum(valorPagado),0)  into _abono_inicial FROM documentos_pagos where idDocumento = p_idDocumento;
+             -- genera cuenta por pagar
            --   select 'abono inicial ' ,_abono_inicial;
              if _abono_inicial > 0 then
-             
+
                -- operacion cuenta por pagar
-				insert into cnt_operaciones ( 
+				insert into cnt_operaciones (
 					   usuario, fechaOperacion, fechaCreacion, nombre, descripcion, idDocumento , idPersona)
-				values ( _idUsuario ,now() , now(), 
+				values ( _idUsuario ,now() , now(),
 				   concat( 'Opr. auto. POS - Mov. abono cuenta por pagar','-Doc => ',_idDocumentoFinal ) ,
 				   concat('Documento creado desde Compras : ', _nombre_esta , '-', _descripcion_esta , '- Compra => ',_idDocumentoFinal)
-				   ,p_idDocumento , _idTercero ) ;  
-				   
-				  select max(id)  into _movimiento  
+				   ,p_idDocumento , _idTercero ) ;
+
+				  select max(id)  into _movimiento
 				  from cnt_operaciones where idDocumento =p_idDocumento;
-             
-				insert into cnt_transacciones 
+
+				insert into cnt_transacciones
 				(descripcion,  id_cuenta,  valor_debito,valor_credito, fecha_transaccion,
-				relacion_tabla,   usuario, fecha_ingreso,  cod_comprobante, origen_comprobante , cod_tercero) 
+				relacion_tabla,   usuario, fecha_ingreso,  cod_comprobante, origen_comprobante , cod_tercero)
 				values
-				('Abono inicial a cxp', v_idCCntCxPagar ,_abono_inicial ,  0 , now()  , 
-				'documentos',   _idUsuario ,  now() , _movimiento ,'venta' , _idTercero); 
-                
-                
-       -- debes crear la cuenta por pagar en la tabla de cuentas por pagar y generar tambien los pagos iniciales, 
-                insert into cnt_transacciones 
+				('Abono inicial a cxp', v_idCCntCxPagar ,_abono_inicial ,  0 , now()  ,
+				'documentos',   _idUsuario ,  now() , _movimiento ,'venta' , _idTercero);
+
+
+       -- debes crear la cuenta por pagar en la tabla de cuentas por pagar y generar tambien los pagos iniciales,
+                insert into cnt_transacciones
 				( descripcion ,  id_cuenta,  valor_debito,valor_credito, fecha_transaccion,
-				relacion_tabla,   usuario, fecha_ingreso,  cod_comprobante, origen_comprobante , cod_tercero)   
+				relacion_tabla,   usuario, fecha_ingreso,  cod_comprobante, origen_comprobante , cod_tercero)
                 SELECT concat('Abono por ',nombreMedioDePago ) , case cuentaContable when 0 then v_idCCntCajaGeneral else cuentaContable end ,0 ,
                  _abono_inicial  ,  curdate() , 'documentos' ,   _idUsuario  , curdate() ,   _movimiento
-                 , 'COMPRA' ,   _idTercero  
-                FROM vw_documentos_pagos    where idDocumento = p_idDocumento ;  
+                 , 'COMPRA' ,   _idTercero
+                FROM vw_documentos_pagos    where idDocumento = p_idDocumento ;
             end if;
-            
-    -- Open the cursor  
+
+    -- Open the cursor
                  delete from documentos_compra_datos_productos_aux where orden =  p_idDocumento;
     OPEN cur;
 
     read_loop: LOOP
-        FETCH cur INTO _cant_actual , v_total_presioSinIVa_g ,  _idProducto,_nombre_producto , _cant_real_descontada , 
+        FETCH cur INTO _cant_actual , v_total_presioSinIVa_g ,  _idProducto,_nombre_producto , _cant_real_descontada ,
         _presioVenta , _existencia   , _precioCompra , _nuevo_costo , v_id_cuenta_inventario;
         IF done THEN
             LEAVE read_loop;
-        END IF;  
-        
+        END IF;
+
         -- documentos_compra_datos_productos_aux tabla donde se guardan los valores iniciales antes de ingresar el producto
         -- para que si mas adelante estos se modifican el producto regresa a sus valores iniciales y se le agregan los nuevos
-       set _id_existencia = 0; 
+       set _id_existencia = 0;
        -- _id_bodega _id_existencia
-       select count(0) into _id_existencia from  inv_mst_producto_existencias where  id_producto = _idProducto and 
-       id_bodega  = _id_bodega ; 
+       select count(0) into _id_existencia from  inv_mst_producto_existencias where  id_producto = _idProducto and
+       id_bodega  = _id_bodega ;
         -- debes validar que exista existencia en la bodega a la que estas apuntando, esta debe ser extraida utilizando el establecimiento
-       -- si no existe debes crear el registro en existencia  
+       -- si no existe debes crear el registro en existencia
        if _id_existencia = 0 then
 	       insert into inv_mst_producto_existencias(id_producto , id_bodega  ,ult_mov , usuario_creacion ,
            cant_inicial , compras , cant_actual) values ( _idProducto ,
-           _id_bodega , 'Compra inicial' , _idUsuario , _cant_actual ,_cant_real_descontada , _cant_real_descontada 
+           _id_bodega , 'Compra inicial' , _idUsuario , _cant_actual ,_cant_real_descontada , _cant_real_descontada
            );
-		else         
-      -- debes actualizar la existencia del nuevo producto 
-         select id into _id_existencia from  inv_mst_producto_existencias where  id_producto = _idProducto and 
-        id_bodega  = _id_bodega ; 
-          update inv_mst_producto_existencias set 
-          compras = compras + _cant_real_descontada , 
-          cant_actual= cant_actual + _cant_real_descontada 
-          where id = _id_existencia ;  
+		else
+      -- debes actualizar la existencia del nuevo producto
+         select id into _id_existencia from  inv_mst_producto_existencias where  id_producto = _idProducto and
+        id_bodega  = _id_bodega ;
+          update inv_mst_producto_existencias set
+          compras = compras + _cant_real_descontada ,
+          cant_actual= cant_actual + _cant_real_descontada
+          where id = _id_existencia ;
 	   end if;
-       
-       
+
+
        insert into documentos_compra_datos_productos_aux
        (producto, precioCompraInicial, cantidadInicial, cantInsertada, precioFinal, orden, bodega)
        values (_idProducto , _precioCompra , 0 , _cant_real_descontada , _nuevo_costo, p_idDocumento , _id_bodega   );
-       
-       
-       
-       insert into cnt_transacciones 
+
+
+
+       insert into cnt_transacciones
 			( descripcion ,  id_cuenta,  valor_debito,valor_credito, fecha_transaccion,
-			relacion_tabla,   usuario, fecha_ingreso,  cod_comprobante, origen_comprobante , cod_tercero) 
+			relacion_tabla,   usuario, fecha_ingreso,  cod_comprobante, origen_comprobante , cod_tercero)
 			values
-			( _nombre_producto ,  v_id_cuenta_inventario  ,v_total_presioSinIVa_g , 0   , now()  , 
-			'documentos',   _idUsuario ,  now() , _movimiento ,'venta' , _idTercero );  
-      
-       update inv_mst_producto set precioCompra = _nuevo_costo 
-       where id = _idProducto; 
-    
+			( _nombre_producto ,  v_id_cuenta_inventario  ,v_total_presioSinIVa_g , 0   , now()  ,
+			'documentos',   _idUsuario ,  now() , _movimiento ,'venta' , _idTercero );
+
+       update inv_mst_producto set precioCompra = _nuevo_costo
+       where id = _idProducto;
+
     END LOOP;
 
     -- Close the cursor
-    CLOSE cur;  
-    SET SQL_SAFE_UPDATES = 1; 
+    CLOSE cur;
+    SET SQL_SAFE_UPDATES = 1;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -14550,63 +14550,63 @@ DELIMITER ;
 DELIMITER ;;
 CREATE DEFINER=`jdpsoluc_l_monrroy`@`%` PROCEDURE `sp_generar_movimientos_cuenta_pagos`(IN p_idDocumento INT)
 BEGIN
-    DECLARE done INT DEFAULT FALSE; 
+    DECLARE done INT DEFAULT FALSE;
     DECLARE _idUsuario INT;
     DECLARE _idPersona INT;
     DECLARE v_idMedioDePago INT;
-    DECLARE v_valorPagado DECIMAL(10,2); 
-    DECLARE v_sumTrc DECIMAL(10,2); 
-    DECLARE v_referencia VARCHAR(50); 
-    DECLARE v_nombre VARCHAR(50);  
-    DECLARE v_debito VARCHAR(50);  
-    DECLARE v_credito VARCHAR(50);  
-    DECLARE v_cuentaContable INT ; 
-    declare _movimiento int ;  
-    declare _idCuentaContable int ; 
-    declare _idCuentaContableGasto int ; 
-    declare _idTercero int ; 
-    declare _NombreCaja varchar(50) ; 
-    declare _tipoDocumento , 
-          _idCCntCCobrar , 
+    DECLARE v_valorPagado DECIMAL(10,2);
+    DECLARE v_sumTrc DECIMAL(10,2);
+    DECLARE v_referencia VARCHAR(50);
+    DECLARE v_nombre VARCHAR(50);
+    DECLARE v_debito VARCHAR(50);
+    DECLARE v_credito VARCHAR(50);
+    DECLARE v_cuentaContable INT ;
+    declare _movimiento int ;
+    declare _idCuentaContable int ;
+    declare _idCuentaContableGasto int ;
+    declare _idTercero int ;
+    declare _NombreCaja varchar(50) ;
+    declare _tipoDocumento ,
+          _idCCntCCobrar ,
 		   _idCCntCPagar ,
-		   _caja ,_cantidadPagos , _cuentaBonos int ; 
-    declare   _idDocumentoFinal text; 
-    DECLARE cur CURSOR FOR 
-    SELECT documentos_pagos.idMedioDePago , valorPagado , referencia, 
+		   _caja ,_cantidadPagos , _cuentaBonos int ;
+    declare   _idDocumentoFinal text;
+    DECLARE cur CURSOR FOR
+    SELECT documentos_pagos.idMedioDePago , valorPagado , referencia,
     UPPER(vw_medios.nombre) ,  cuentaContable FROM  documentos_pagos
 		inner join vw_medios on vw_medios.id = idMedioDePago
-		  where documentos_pagos.idDocumento = p_idDocumento  ;  
+		  where documentos_pagos.idDocumento = p_idDocumento  ;
     DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
-    SET done = false; 
+    SET done = false;
     set v_sumTrc = 0;
      SELECT  count(0) into _cantidadPagos FROM  documentos_pagos
 		inner join vw_medios on vw_medios.id = idMedioDePago
-		  where documentos_pagos.idDocumento = p_idDocumento  ;   
-          
-    select cuentaContableGastos, cuentaContableEfectivo , tipoDocumentoFinal , nombreCaja , cliente ,  idCCntCCobrar , 
-       idCCntCPagar, usuario , idDocumentoFinal , caja into 
-    _idCuentaContableGasto ,_idCuentaContable , _tipoDocumento , _NombreCaja , _idTercero,  _idCCntCCobrar , 
-       _idCCntCPagar , 
+		  where documentos_pagos.idDocumento = p_idDocumento  ;
+
+    select cuentaContableGastos, cuentaContableEfectivo , tipoDocumentoFinal , nombreCaja , cliente ,  idCCntCCobrar ,
+       idCCntCPagar, usuario , idDocumentoFinal , caja into
+    _idCuentaContableGasto ,_idCuentaContable , _tipoDocumento , _NombreCaja , _idTercero,  _idCCntCCobrar ,
+       _idCCntCPagar ,
        _idUsuario , _idDocumentoFinal , _caja
-    FROM vw_documentos where orden = p_idDocumento;  
+    FROM vw_documentos where orden = p_idDocumento;
      if _tipoDocumento = getIdContadorByName('gastos') then
-          insert into cnt_operaciones ( 
+          insert into cnt_operaciones (
 		   usuario, fechaOperacion, fechaCreacion, nombre, descripcion, idDocumento , idPersona)
-		   values ( _idUsuario ,now() , now(), 
+		   values ( _idUsuario ,now() , now(),
 		   concat( 'Opr. auto. POS  - Mov. Gasto','-Doc => ',_idDocumentoFinal ) ,
 		   concat('Documento creado desde punto de venta => caja : ', _caja , '-',_NombreCaja , '-fact=> ',_idDocumentoFinal)
-		   ,p_idDocumento , _idTercero ) ;  
+		   ,p_idDocumento , _idTercero ) ;
      else
-		insert into cnt_operaciones ( 
+		insert into cnt_operaciones (
 		   usuario, fechaOperacion, fechaCreacion, nombre, descripcion, idDocumento , idPersona)
-		   values ( _idUsuario ,now() , now(), 
+		   values ( _idUsuario ,now() , now(),
 		   concat( 'Opr. auto. POS  - Mov. pagos','-Doc => ',_idDocumentoFinal ) ,
 		   concat('Documento creado desde punto de venta => caja : ', _caja , '-',_NombreCaja , '-fact=> ',_idDocumentoFinal)
-		   ,p_idDocumento , _idTercero ) ;     
+		   ,p_idDocumento , _idTercero ) ;
      end if;
-       select max(id)  into _movimiento  
-	   from cnt_operaciones where idDocumento =p_idDocumento;  
-       
+       select max(id)  into _movimiento
+	   from cnt_operaciones where idDocumento =p_idDocumento;
+
     -- Open the cursor
     if _cantidadPagos > 0 then
      SELECT par_id into _cuentaBonos FROM parametros
@@ -14617,8 +14617,8 @@ BEGIN
         FETCH cur INTO   v_idMedioDePago , v_valorPagado , v_referencia, v_nombre ,  v_cuentaContable;
         IF done THEN
             LEAVE read_loop;
-        END IF; 
-        
+        END IF;
+
         if v_nombre = 'EFECTIVO' then
           set v_cuentaContable = _idCuentaContable;
         end if;
@@ -14626,72 +14626,72 @@ BEGIN
           set v_cuentaContable = _cuentaBonos;
         end if;
         if v_cuentaContable > 0 then
-      
+
       -- _idCuentaContableGasto
-      
+
            if _tipoDocumento = getIdContadorByName('gastos') then
            -- Gastos
-           -- sale de efectivo 
-				insert into cnt_transacciones 
+           -- sale de efectivo
+				insert into cnt_transacciones
 				(  id_cuenta,  valor_debito,valor_credito, fecha_transaccion,
-				relacion_tabla,   usuario, fecha_ingreso,  cod_comprobante, origen_comprobante, cod_tercero) 
+				relacion_tabla,   usuario, fecha_ingreso,  cod_comprobante, origen_comprobante, cod_tercero)
 				values
-				( v_cuentaContable , 0 , v_valorPagado  , now()  , 
+				( v_cuentaContable , 0 , v_valorPagado  , now()  ,
 				'documentos',   _idUsuario ,  now() , _movimiento ,'gasto' ,_idTercero );
             -- -----------------------------------------------------------------------
             -- entra en gasto
-				insert into cnt_transacciones 
+				insert into cnt_transacciones
 				(  id_cuenta,  valor_debito,valor_credito, fecha_transaccion,
-				relacion_tabla,   usuario, fecha_ingreso,  cod_comprobante, origen_comprobante ,cod_tercero) 
+				relacion_tabla,   usuario, fecha_ingreso,  cod_comprobante, origen_comprobante ,cod_tercero)
 				values
-				( _idCuentaContableGasto , v_valorPagado , 0  , now()  , 
+				( _idCuentaContableGasto , v_valorPagado , 0  , now()  ,
 				'documentos',   _idUsuario ,  now() , _movimiento ,'gasto' , _idTercero );
            else
-           -- entra el dinero  
+           -- entra el dinero
                if _tipoDocumento = getIdContadorByName('Pagos') then
                  -- sale el dinero del pago
-                    insert into cnt_transacciones 
+                    insert into cnt_transacciones
 					(  id_cuenta,  valor_debito, valor_credito, fecha_transaccion,
-					relacion_tabla,   usuario, fecha_ingreso,  cod_comprobante, origen_comprobante ,cod_tercero) 
+					relacion_tabla,   usuario, fecha_ingreso,  cod_comprobante, origen_comprobante ,cod_tercero)
 					values
-					( v_cuentaContable , 0, v_valorPagado   , now()  , 
+					( v_cuentaContable , 0, v_valorPagado   , now()  ,
 					'documentos',   _idUsuario ,  now() , _movimiento ,'venta' , _idTercero);
 				else
                    -- entra el dinero del pago
-					insert into cnt_transacciones 
+					insert into cnt_transacciones
 					(  id_cuenta,  valor_debito, valor_credito, fecha_transaccion,
-					relacion_tabla,   usuario, fecha_ingreso,  cod_comprobante, origen_comprobante ,cod_tercero) 
+					relacion_tabla,   usuario, fecha_ingreso,  cod_comprobante, origen_comprobante ,cod_tercero)
 					values
-					( v_cuentaContable , v_valorPagado , 0  , now()  , 
+					( v_cuentaContable , v_valorPagado , 0  , now()  ,
 					'documentos',   _idUsuario ,  now() , _movimiento ,'venta' , _idTercero);
 				end if;
                 set v_sumTrc = v_sumTrc + v_valorPagado;
             end if;
         end if;
-        
+
     END LOOP;
- 
+
     -- Close the cursor
     CLOSE cur;
      end if;
      if v_sumTrc > 0 then
-     -- saco de la cuenta por cobrar  
+     -- saco de la cuenta por cobrar
 	 if _tipoDocumento = getIdContadorByName('Pagos') then
         set v_cuentaContable = _idCCntCPagar;
         set v_debito = v_sumTrc ;
-        set v_credito   = 0 ; 
+        set v_credito   = 0 ;
      else
-        set v_cuentaContable = _idCCntCCobrar ; 
+        set v_cuentaContable = _idCCntCCobrar ;
         set v_debito = 0 ;
-        set v_credito   = v_sumTrc ; 
+        set v_credito   = v_sumTrc ;
      end if;
-	 insert into cnt_transacciones 
+	 insert into cnt_transacciones
 		(  id_cuenta,  valor_debito,
                        valor_credito, fecha_transaccion,
-		relacion_tabla,   usuario, fecha_ingreso,  cod_comprobante, origen_comprobante ,cod_tercero) 
+		relacion_tabla,   usuario, fecha_ingreso,  cod_comprobante, origen_comprobante ,cod_tercero)
 		values
-		( v_cuentaContable ,  v_debito  , v_credito  , now()  , 
-		'documentos',   _idUsuario ,  now() , _movimiento ,'venta' , _idTercero); 
+		( v_cuentaContable ,  v_debito  , v_credito  , now()  ,
+		'documentos',   _idUsuario ,  now() , _movimiento ,'venta' , _idTercero);
   end if;
 END ;;
 DELIMITER ;
@@ -14711,146 +14711,146 @@ DELIMITER ;
 DELIMITER ;;
 CREATE DEFINER=`jdpsoluc_l_monrroy`@`%` PROCEDURE `sp_generar_movimientos_devolucion`(IN p_idDocumento INT)
 BEGIN
-    DECLARE done INT DEFAULT FALSE; 
+    DECLARE done INT DEFAULT FALSE;
     DECLARE _idUsuario INT;
     DECLARE _idPersona INT;
-    DECLARE v_nombreProducto VARCHAR(255); 
-    DECLARE v_total_IVA DECIMAL(10,2); 
-    DECLARE v_total_presioSinIVa DECIMAL(10,2); 
-    DECLARE v_cant_real_descontada DECIMAL(10,2); 
-    
-    DECLARE v_total_IVA_g DECIMAL(10,2); 
-    DECLARE v_total_presioSinIVa_g DECIMAL(10,2); 
-    DECLARE v_total_venta_g DECIMAL(10,2); 
-    
-    DECLARE v_costo DECIMAL(10,2); 
-    declare _movimiento int ; 
-    declare _idCuentaContable int ; 
-    
+    DECLARE v_nombreProducto VARCHAR(255);
+    DECLARE v_total_IVA DECIMAL(10,2);
+    DECLARE v_total_presioSinIVa DECIMAL(10,2);
+    DECLARE v_cant_real_descontada DECIMAL(10,2);
+
+    DECLARE v_total_IVA_g DECIMAL(10,2);
+    DECLARE v_total_presioSinIVa_g DECIMAL(10,2);
+    DECLARE v_total_venta_g DECIMAL(10,2);
+
+    DECLARE v_costo DECIMAL(10,2);
+    declare _movimiento int ;
+    declare _idCuentaContable int ;
+
     declare   v_idCCntCCobrar,
               v_idCCntCPagar,
               v_idCCntIvaCompra,
               v_idCCnttIvaVenta,
               v_idCCntCostoVenta ,
-              v_idCCntVenta, _cuentaBonos int ;  
-    
-    declare _idTercero int ; 
-    declare _NombreCaja varchar(50) ; 
-    declare _tipoDocumento int ; 
-    declare _idDocumentoFinal text ; 
-    declare _caja int ; 
-    
-    DECLARE cur CURSOR FOR 
+              v_idCCntVenta, _cuentaBonos int ;
+
+    declare _idTercero int ;
+    declare _NombreCaja varchar(50) ;
+    declare _tipoDocumento int ;
+    declare _idDocumentoFinal text ;
+    declare _caja int ;
+
+    DECLARE cur CURSOR FOR
     SELECT nombreProducto,  total_IVA, total_presioSinIVa  , cant_real_descontada , (vw_inv_mst_producto.idCuentaContable) ,
    costo
-    FROM  documentos_listado_productos 
+    FROM  documentos_listado_productos
       inner join vw_inv_mst_producto on vw_inv_mst_producto.id = documentos_listado_productos.idProducto
-    WHERE 
-        orden = p_idDocumento 
+    WHERE
+        orden = p_idDocumento
         and estado_linea_venta = 'A'
-        ; 
+        ;
 
     DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
-    
-    
-    
+
+
+
     SELECT par_id into _cuentaBonos FROM parametros
-	where cod_parametro = 
+	where cod_parametro =
 	'ID_CUENTA_BONOS_EMITIDOS';
     SET done = false;
-    
+
       select  idCCntCCobrar,  idCCnttIvaVenta, idCCntCostoVenta, idCCntVenta ,
-            tipoDocumentoFinal , nombreCaja , cliente ,  
+            tipoDocumentoFinal , nombreCaja , cliente ,
              valorParcial , valorIVA , totalFactura , usuario , idDocumentoFinal , caja
-        into  v_idCCntCCobrar, v_idCCnttIvaVenta,  v_idCCntCostoVenta ,  v_idCCntVenta , 
+        into  v_idCCntCCobrar, v_idCCnttIvaVenta,  v_idCCntCostoVenta ,  v_idCCntVenta ,
              _tipoDocumento , _NombreCaja , _idTercero ,
 			  v_total_presioSinIVa_g , v_total_IVA_g, v_total_venta_g  , _idUsuario , _idDocumentoFinal , _caja
-    FROM vw_documentos where orden = p_idDocumento; 
-     
-   
-        insert into cnt_operaciones ( 
+    FROM vw_documentos where orden = p_idDocumento;
+
+
+        insert into cnt_operaciones (
                usuario, fechaOperacion, fechaCreacion, nombre, descripcion, idDocumento , idPersona)
-        values ( _idUsuario ,now() , now(), 
+        values ( _idUsuario ,now() , now(),
            concat( 'Opr. auto. DEV - Mov. Bono Devolucion en venta','-Doc => ',_idDocumentoFinal ) ,
            concat('Documento creado desde devolucion de venta => caja : ', _caja , '-',_NombreCaja , '-fact=> ',_idDocumentoFinal)
-           ,p_idDocumento , _idTercero ) ;  
-           
-          select max(id)  into _movimiento  
+           ,p_idDocumento , _idTercero ) ;
+
+          select max(id)  into _movimiento
           from cnt_operaciones where idDocumento =p_idDocumento;
-     
-    --   v_total_presioSinIVa_g , v_total_IVA_g, v_total_venta_g 
-    
+
+    --   v_total_presioSinIVa_g , v_total_IVA_g, v_total_venta_g
+
     -- genero bono del cliente
-    	insert into cnt_transacciones 
+    	insert into cnt_transacciones
 			(  id_cuenta,  valor_debito,valor_credito, fecha_transaccion,
-			relacion_tabla,   usuario, fecha_ingreso,  cod_comprobante, origen_comprobante , cod_tercero) 
+			relacion_tabla,   usuario, fecha_ingreso,  cod_comprobante, origen_comprobante , cod_tercero)
 			values
-			( _cuentaBonos  , 0 ,  v_total_venta_g, now()  , 
+			( _cuentaBonos  , 0 ,  v_total_venta_g, now()  ,
 			'documentos',   _idUsuario ,  now() , _movimiento ,'devolucion' , _idTercero);
-    -- genera cuenta por cobrar  
-		/*	insert into cnt_transacciones 
+    -- genera cuenta por cobrar
+		/*	insert into cnt_transacciones
 			(  id_cuenta,  valor_debito,valor_credito, fecha_transaccion,
-			relacion_tabla,   usuario, fecha_ingreso,  cod_comprobante, origen_comprobante , cod_tercero) 
+			relacion_tabla,   usuario, fecha_ingreso,  cod_comprobante, origen_comprobante , cod_tercero)
 			values
-			( v_idCCntCCobrar , 0 , v_total_venta_g , now()  , 
+			( v_idCCntCCobrar , 0 , v_total_venta_g , now()  ,
 			'documentos',   _idUsuario ,  now() , _movimiento ,'venta' , _idTercero); */
-            
-         -- genera iva  
-			insert into cnt_transacciones 
+
+         -- genera iva
+			insert into cnt_transacciones
 			(  id_cuenta,  valor_debito,valor_credito, fecha_transaccion,
-			relacion_tabla,   usuario, fecha_ingreso,  cod_comprobante, origen_comprobante  , cod_tercero) 
+			relacion_tabla,   usuario, fecha_ingreso,  cod_comprobante, origen_comprobante  , cod_tercero)
 			values
-			( v_idCCnttIvaVenta  , v_total_IVA_g , 0,  now()  , 
-			'documentos',   _idUsuario ,  now() , _movimiento ,'venta' , _idTercero );  
-              -- genera venta  
-			insert into cnt_transacciones 
+			( v_idCCnttIvaVenta  , v_total_IVA_g , 0,  now()  ,
+			'documentos',   _idUsuario ,  now() , _movimiento ,'venta' , _idTercero );
+              -- genera venta
+			insert into cnt_transacciones
 			(  id_cuenta,  valor_debito,valor_credito, fecha_transaccion,
-			relacion_tabla,   usuario, fecha_ingreso,  cod_comprobante, origen_comprobante , cod_tercero) 
+			relacion_tabla,   usuario, fecha_ingreso,  cod_comprobante, origen_comprobante , cod_tercero)
 			values
-			( v_idCCntVenta , v_total_presioSinIVa_g , 0    , now()  , 
-			'documentos',   _idUsuario ,  now() , _movimiento ,'venta' , _idTercero );  
-            
-           --   v_idCCntCostoVenta ,  
-			
-    -- Open the cursor 
+			( v_idCCntVenta , v_total_presioSinIVa_g , 0    , now()  ,
+			'documentos',   _idUsuario ,  now() , _movimiento ,'venta' , _idTercero );
+
+           --   v_idCCntCostoVenta ,
+
+    -- Open the cursor
 
      set _movimiento = 0;
-    
+
     OPEN cur;
 
     read_loop: LOOP
         FETCH cur INTO   v_nombreProducto,  v_total_IVA, v_total_presioSinIVa  , v_cant_real_descontada , _idCuentaContable , v_costo ;
         IF done THEN
             LEAVE read_loop;
-        END IF;  
-        if _idCuentaContable > 0 then  
+        END IF;
+        if _idCuentaContable > 0 then
 			if _movimiento = 0 then
-				insert into cnt_operaciones ( 
+				insert into cnt_operaciones (
 					   usuario, fechaOperacion, fechaCreacion, nombre, descripcion, idDocumento , idPersona)
-				values ( _idUsuario ,now() , now(), 
+				values ( _idUsuario ,now() , now(),
 				   concat( 'Opr. auto. DEV  - Mov. inventario','-Doc => ',_idDocumentoFinal ) ,
 				   concat('Documento creado desde punto de venta => caja : ', _caja , '-',_NombreCaja , '-fact=> ',_idDocumentoFinal)
-				   ,p_idDocumento , _idTercero ) ;   
-				  select max(id)  into _movimiento  
-				  from cnt_operaciones where idDocumento =p_idDocumento; 
+				   ,p_idDocumento , _idTercero ) ;
+				  select max(id)  into _movimiento
+				  from cnt_operaciones where idDocumento =p_idDocumento;
 			 end if;
 		-- movimiento valor inventario
-			insert into cnt_transacciones 
+			insert into cnt_transacciones
 			(  id_cuenta,  valor_debito,valor_credito, fecha_transaccion,
-			relacion_tabla,   usuario, fecha_ingreso,  cod_comprobante, origen_comprobante , cod_tercero)  
+			relacion_tabla,   usuario, fecha_ingreso,  cod_comprobante, origen_comprobante , cod_tercero)
 			values
-			( _idCuentaContable  ,v_costo , 0 , now()  , 
+			( _idCuentaContable  ,v_costo , 0 , now()  ,
 			'documentos',   _idUsuario ,  now() , _movimiento ,'venta', _idTercero );
-			
+
 		-- _movimiento costo en venta
-			insert into cnt_transacciones 
+			insert into cnt_transacciones
 			(  id_cuenta,  valor_debito,valor_credito, fecha_transaccion,
-			relacion_tabla,   usuario, fecha_ingreso,  cod_comprobante, origen_comprobante , cod_tercero)  
+			relacion_tabla,   usuario, fecha_ingreso,  cod_comprobante, origen_comprobante , cod_tercero)
 			values
-			( v_idCCntCostoVenta, 0 , v_costo, now()  , 
+			( v_idCCntCostoVenta, 0 , v_costo, now()  ,
 			'documentos',   _idUsuario ,  now() , _movimiento ,'venta', _idTercero );
-        end if; 
-        
+        end if;
+
     END LOOP;
 
     -- Close the cursor
@@ -14873,146 +14873,146 @@ DELIMITER ;
 DELIMITER ;;
 CREATE DEFINER=`jdpsoluc_l_monrroy`@`%` PROCEDURE `sp_generar_movimientos_nota_debito`(IN p_idDocumento INT)
 BEGIN
-    DECLARE done INT DEFAULT FALSE; 
+    DECLARE done INT DEFAULT FALSE;
     DECLARE _idUsuario INT;
     DECLARE _idPersona INT;
-    DECLARE v_nombreProducto VARCHAR(255); 
-    DECLARE v_total_IVA DECIMAL(10,2); 
-    DECLARE v_total_presioSinIVa DECIMAL(10,2); 
-    DECLARE v_cant_real_descontada DECIMAL(10,2); 
-    
-    DECLARE v_total_IVA_g DECIMAL(10,2); 
-    DECLARE v_total_presioSinIVa_g DECIMAL(10,2); 
-    DECLARE v_total_venta_g DECIMAL(10,2); 
-    
-    DECLARE v_costo DECIMAL(10,2); 
-    declare _movimiento int ; 
-    declare _idCuentaContable int ; 
-    
+    DECLARE v_nombreProducto VARCHAR(255);
+    DECLARE v_total_IVA DECIMAL(10,2);
+    DECLARE v_total_presioSinIVa DECIMAL(10,2);
+    DECLARE v_cant_real_descontada DECIMAL(10,2);
+
+    DECLARE v_total_IVA_g DECIMAL(10,2);
+    DECLARE v_total_presioSinIVa_g DECIMAL(10,2);
+    DECLARE v_total_venta_g DECIMAL(10,2);
+
+    DECLARE v_costo DECIMAL(10,2);
+    declare _movimiento int ;
+    declare _idCuentaContable int ;
+
     declare   v_idCCntCCobrar,
               v_idCCntCPagar,
               v_idCCntIvaCompra,
               v_idCCnttIvaVenta,
               v_idCCntCostoVenta ,
-              v_idCCntVenta, _cuentaBonos int ;  
-    
-    declare _idTercero int ; 
-    declare _NombreCaja varchar(50) ; 
-    declare _tipoDocumento int ; 
-    declare _idDocumentoFinal text ; 
-    declare _caja int ; 
-    
-    DECLARE cur CURSOR FOR 
+              v_idCCntVenta, _cuentaBonos int ;
+
+    declare _idTercero int ;
+    declare _NombreCaja varchar(50) ;
+    declare _tipoDocumento int ;
+    declare _idDocumentoFinal text ;
+    declare _caja int ;
+
+    DECLARE cur CURSOR FOR
     SELECT nombreProducto,  total_IVA, total_presioSinIVa  , cant_real_descontada , (vw_inv_mst_producto.idCuentaContable) ,
    costo
-    FROM  documentos_listado_productos 
+    FROM  documentos_listado_productos
       inner join vw_inv_mst_producto on vw_inv_mst_producto.id = documentos_listado_productos.idProducto
-    WHERE 
-        orden = p_idDocumento 
+    WHERE
+        orden = p_idDocumento
         and estado_linea_venta = 'A'
-        ; 
+        ;
 
     DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
-    
-    
-    
+
+
+
     SELECT par_id into _cuentaBonos FROM parametros
-	where cod_parametro = 
+	where cod_parametro =
 	'ID_CUENTA_BONOS_EMITIDOS';
     SET done = false;
-    
+
       select  idCCntCCobrar,  idCCnttIvaVenta, idCCntCostoVenta, idCCntVenta ,
-            tipoDocumentoFinal , nombreCaja , cliente ,  
+            tipoDocumentoFinal , nombreCaja , cliente ,
              valorParcial , valorIVA , totalFactura , usuario , idDocumentoFinal , caja
-        into  v_idCCntCCobrar, v_idCCnttIvaVenta,  v_idCCntCostoVenta ,  v_idCCntVenta , 
+        into  v_idCCntCCobrar, v_idCCnttIvaVenta,  v_idCCntCostoVenta ,  v_idCCntVenta ,
              _tipoDocumento , _NombreCaja , _idTercero ,
 			  v_total_presioSinIVa_g , v_total_IVA_g, v_total_venta_g  , _idUsuario , _idDocumentoFinal , _caja
-    FROM vw_documentos where orden = p_idDocumento; 
-     
-   
-        insert into cnt_operaciones ( 
+    FROM vw_documentos where orden = p_idDocumento;
+
+
+        insert into cnt_operaciones (
                usuario, fechaOperacion, fechaCreacion, nombre, descripcion, idDocumento , idPersona)
-        values ( _idUsuario ,now() , now(), 
+        values ( _idUsuario ,now() , now(),
            concat( 'Opr. auto. DEV - Mov. Bono Devolucion en venta','-Doc => ',_idDocumentoFinal ) ,
            concat('Documento creado desde devolucion de venta => caja : ', _caja , '-',_NombreCaja , '-fact=> ',_idDocumentoFinal)
-           ,p_idDocumento , _idTercero ) ;  
-           
-          select max(id)  into _movimiento  
+           ,p_idDocumento , _idTercero ) ;
+
+          select max(id)  into _movimiento
           from cnt_operaciones where idDocumento =p_idDocumento;
-     
-    --   v_total_presioSinIVa_g , v_total_IVA_g, v_total_venta_g 
-    
+
+    --   v_total_presioSinIVa_g , v_total_IVA_g, v_total_venta_g
+
     -- genero bono del cliente
-    	insert into cnt_transacciones 
+    	insert into cnt_transacciones
 			(  id_cuenta,  valor_debito,valor_credito, fecha_transaccion,
-			relacion_tabla,   usuario, fecha_ingreso,  cod_comprobante, origen_comprobante , cod_tercero) 
+			relacion_tabla,   usuario, fecha_ingreso,  cod_comprobante, origen_comprobante , cod_tercero)
 			values
-			( _cuentaBonos  , 0 ,  v_total_venta_g, now()  , 
+			( _cuentaBonos  , 0 ,  v_total_venta_g, now()  ,
 			'documentos',   _idUsuario ,  now() , _movimiento ,'devolucion' , _idTercero);
-    -- genera cuenta por cobrar  
-		/*	insert into cnt_transacciones 
+    -- genera cuenta por cobrar
+		/*	insert into cnt_transacciones
 			(  id_cuenta,  valor_debito,valor_credito, fecha_transaccion,
-			relacion_tabla,   usuario, fecha_ingreso,  cod_comprobante, origen_comprobante , cod_tercero) 
+			relacion_tabla,   usuario, fecha_ingreso,  cod_comprobante, origen_comprobante , cod_tercero)
 			values
-			( v_idCCntCCobrar , 0 , v_total_venta_g , now()  , 
+			( v_idCCntCCobrar , 0 , v_total_venta_g , now()  ,
 			'documentos',   _idUsuario ,  now() , _movimiento ,'venta' , _idTercero); */
-            
-         -- genera iva  
-			insert into cnt_transacciones 
+
+         -- genera iva
+			insert into cnt_transacciones
 			(  id_cuenta,  valor_debito,valor_credito, fecha_transaccion,
-			relacion_tabla,   usuario, fecha_ingreso,  cod_comprobante, origen_comprobante  , cod_tercero) 
+			relacion_tabla,   usuario, fecha_ingreso,  cod_comprobante, origen_comprobante  , cod_tercero)
 			values
-			( v_idCCnttIvaVenta  , v_total_IVA_g , 0,  now()  , 
-			'documentos',   _idUsuario ,  now() , _movimiento ,'venta' , _idTercero );  
-              -- genera venta  
-			insert into cnt_transacciones 
+			( v_idCCnttIvaVenta  , v_total_IVA_g , 0,  now()  ,
+			'documentos',   _idUsuario ,  now() , _movimiento ,'venta' , _idTercero );
+              -- genera venta
+			insert into cnt_transacciones
 			(  id_cuenta,  valor_debito,valor_credito, fecha_transaccion,
-			relacion_tabla,   usuario, fecha_ingreso,  cod_comprobante, origen_comprobante , cod_tercero) 
+			relacion_tabla,   usuario, fecha_ingreso,  cod_comprobante, origen_comprobante , cod_tercero)
 			values
-			( v_idCCntVenta , v_total_presioSinIVa_g , 0    , now()  , 
-			'documentos',   _idUsuario ,  now() , _movimiento ,'venta' , _idTercero );  
-            
-           --   v_idCCntCostoVenta ,  
-			
-    -- Open the cursor 
+			( v_idCCntVenta , v_total_presioSinIVa_g , 0    , now()  ,
+			'documentos',   _idUsuario ,  now() , _movimiento ,'venta' , _idTercero );
+
+           --   v_idCCntCostoVenta ,
+
+    -- Open the cursor
 
      set _movimiento = 0;
-    
+
     OPEN cur;
 
     read_loop: LOOP
         FETCH cur INTO   v_nombreProducto,  v_total_IVA, v_total_presioSinIVa  , v_cant_real_descontada , _idCuentaContable , v_costo ;
         IF done THEN
             LEAVE read_loop;
-        END IF;  
-        if _idCuentaContable > 0 then  
+        END IF;
+        if _idCuentaContable > 0 then
 			if _movimiento = 0 then
-				insert into cnt_operaciones ( 
+				insert into cnt_operaciones (
 					   usuario, fechaOperacion, fechaCreacion, nombre, descripcion, idDocumento , idPersona)
-				values ( _idUsuario ,now() , now(), 
+				values ( _idUsuario ,now() , now(),
 				   concat( 'Opr. auto. DEV  - Mov. inventario','-Doc => ',_idDocumentoFinal ) ,
 				   concat('Documento creado desde punto de venta => caja : ', _caja , '-',_NombreCaja , '-fact=> ',_idDocumentoFinal)
-				   ,p_idDocumento , _idTercero ) ;   
-				  select max(id)  into _movimiento  
-				  from cnt_operaciones where idDocumento =p_idDocumento; 
+				   ,p_idDocumento , _idTercero ) ;
+				  select max(id)  into _movimiento
+				  from cnt_operaciones where idDocumento =p_idDocumento;
 			 end if;
 		-- movimiento valor inventario
-			insert into cnt_transacciones 
+			insert into cnt_transacciones
 			(  id_cuenta,  valor_debito,valor_credito, fecha_transaccion,
-			relacion_tabla,   usuario, fecha_ingreso,  cod_comprobante, origen_comprobante , cod_tercero)  
+			relacion_tabla,   usuario, fecha_ingreso,  cod_comprobante, origen_comprobante , cod_tercero)
 			values
-			( _idCuentaContable  ,v_costo , 0 , now()  , 
+			( _idCuentaContable  ,v_costo , 0 , now()  ,
 			'documentos',   _idUsuario ,  now() , _movimiento ,'venta', _idTercero );
-			
+
 		-- _movimiento costo en venta
-			insert into cnt_transacciones 
+			insert into cnt_transacciones
 			(  id_cuenta,  valor_debito,valor_credito, fecha_transaccion,
-			relacion_tabla,   usuario, fecha_ingreso,  cod_comprobante, origen_comprobante , cod_tercero)  
+			relacion_tabla,   usuario, fecha_ingreso,  cod_comprobante, origen_comprobante , cod_tercero)
 			values
-			( v_idCCntCostoVenta, 0 , v_costo, now()  , 
+			( v_idCCntCostoVenta, 0 , v_costo, now()  ,
 			'documentos',   _idUsuario ,  now() , _movimiento ,'venta', _idTercero );
-        end if; 
-        
+        end if;
+
     END LOOP;
 
     -- Close the cursor
@@ -15039,20 +15039,20 @@ declare _contador int;
 declare _fecha_pago date;
 set _contador = 0;
 set _fecha_pago = _fecha_obligacion;
-while  _cuotas > _contador do 
+while  _cuotas > _contador do
 
 set _contador = _contador +1;
 set _fecha_pago = DATE_ADD( CAST(_fecha_pago AS char), INTERVAL  _intervalo_pagos DAY);
- 
+
 INSERT INTO  `fecha_cuotas_creditos`
-( 
+(
 `usuario`,
 `id_compromiso`,
 `tipo_compromiso`,
 `fecha_max_pago`,
 `numero_cuota`)
 VALUES
-( 
+(
 _usuario,
 _compromiso,
 _tipo_compromiso,
@@ -15075,9 +15075,9 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE DEFINER=`jdpsoluc_l_monrroy`@`%` PROCEDURE `sp_inserta_nuevo_contador`(IN `_codContador` VARCHAR(45), IN `_establecimiento` INT, IN `_tipoContador` INT, 
-IN `_desde` INT, IN `_hasta` INT, 
-in _resolucion text , 
+CREATE DEFINER=`jdpsoluc_l_monrroy`@`%` PROCEDURE `sp_inserta_nuevo_contador`(IN `_codContador` VARCHAR(45), IN `_establecimiento` INT, IN `_tipoContador` INT,
+IN `_desde` INT, IN `_hasta` INT,
+in _resolucion text ,
 in _fechaInicio date,
 in _fechaFin date,
 IN `_usuario` INT
@@ -15089,19 +15089,19 @@ declare _id int;
 if _resolucion = '' then
 -- id, codContador, establecimiento, contador, contador_real_establecimiento, fecha, hora, estado, tipoContador, desde, hasta, usuario, resolucion, fechaInicioResolucion, fechaFinResolucion
      INSERT INTO  `contadores` (    estado,  codContador   , establecimiento   , tipoContador , desde, hasta, usuario , contador
-     ) VALUES(  getEstado('A')   ,  _codContador , _establecimiento , _tipoContador , _desde, _hasta , _usuario , _desde); 
- else  
+     ) VALUES(  getEstado('A')   ,  _codContador , _establecimiento , _tipoContador , _desde, _hasta , _usuario , _desde);
+ else
  -- id, codContador, establecimiento, contador, contador_real_establecimiento, fecha, hora, estado, tipoContador, desde, hasta, usuario, resolucion, fechaInicioResolucion, fechaFinResolucion
-     INSERT INTO  `contadores` (    estado,  codContador   , establecimiento   , tipoContador , desde, hasta, usuario , contador , 
+     INSERT INTO  `contadores` (    estado,  codContador   , establecimiento   , tipoContador , desde, hasta, usuario , contador ,
      resolucion, fechaInicioResolucion, fechaFinResolucion
-     ) VALUES(  getEstado('A')   ,  _codContador , _establecimiento , _tipoContador , _desde, _hasta , _usuario , 
+     ) VALUES(  getEstado('A')   ,  _codContador , _establecimiento , _tipoContador , _desde, _hasta , _usuario ,
      _desde , _resolucion , _fechaInicio , _fechaFin
-     ); 
+     );
 end if;
      select LAST_INSERT_ID() into _id;
      SET SQL_SAFE_UPDATES = 0;
-     update contadores set estado  = getEstado('I')   where 
-     establecimiento = _establecimiento and _tipoContador = tipoContador 
+     update contadores set estado  = getEstado('I')   where
+     establecimiento = _establecimiento and _tipoContador = tipoContador
      and id <> _id;
      SET SQL_SAFE_UPDATES = 1;
      select 100 as _result;
@@ -15125,10 +15125,10 @@ CREATE DEFINER=`jdpsoluc_l_monrroy`@`%` PROCEDURE `sp_inserta_tabla_auditoria`(I
     NO SQL
     SQL SECURITY INVOKER
     COMMENT 'Inserta en sat_auditoria array IN'
-BEGIN    
+BEGIN
 SET lc_time_names = 'es_MX';
 
- 
+
 
 INSERT INTO `auditoria`(`usuario`, `fecha_crea`, `tabla`, `campo`, `valor_anterior`, `valor_nuevo`, `accion`) VALUES (
    _usuario,
@@ -15155,7 +15155,7 @@ DELIMITER ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 DELIMITER ;;
 CREATE DEFINER=`jdpsoluc_l_monrroy`@`%` PROCEDURE `sp_insert_medida_grupo`(IN `_id_tipo_medida` INT, IN `_id_grupo` INT, IN `usuarioIngresado` VARCHAR(150))
-BEGIN	
+BEGIN
  declare exit handler for 1452
     begin
         select '-1' as result;
@@ -15182,7 +15182,7 @@ DELIMITER ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 DELIMITER ;;
 CREATE DEFINER=`jdpsoluc_l_monrroy`@`%` PROCEDURE `sp_insert_recurso_perfil`(IN `_id_perfil` VARCHAR(50), IN `_id_recurso` VARCHAR(50), IN `usuarioIngresado` VARCHAR(150))
-BEGIN	
+BEGIN
  declare exit handler for 1452
     begin
         select '-1' as result;
@@ -15212,63 +15212,63 @@ CREATE DEFINER=`jdpsoluc_l_monrroy`@`%` PROCEDURE `sp_login`(IN `_usuarios` VARC
 BEGIN
     declare _count int;
     declare _id_usuarios int;
-    
+
     set _count = 0;
-    
-    select count(*) , ID into _count , _id_usuarios  from usuarios where 
+
+    select count(*) , ID into _count , _id_usuarios  from usuarios where
     usuarios.estado =(select id from     estado_registro where estado = 'A')
     and Login = _usuarios and pass = _pass group by ID;
-    
-    
+
+
     if _count > 0 then
-       
+
 		SET autocommit=0;
-		START TRANSACTION;        
+		START TRANSACTION;
         SET SQL_SAFE_UPDATES = 0;
-		update `session` set estado = (select id from     estado_registro where estado = 'I')  , 
+		update `session` set estado = (select id from     estado_registro where estado = 'I')  ,
         fecha_hora_fin = now()
-        where usuario = _id_usuarios and  
-        estado = (select id from     estado_registro where estado_registro.estado = 'A')  ;  
-        
-        INSERT INTO  `session` ( `nombre`, `usuario`,`key`,`fecha_hora_ini` ) 
+        where usuario = _id_usuarios and
+        estado = (select id from     estado_registro where estado_registro.estado = 'A')  ;
+
+        INSERT INTO  `session` ( `nombre`, `usuario`,`key`,`fecha_hora_ini` )
         VALUES ( _usuarios,_id_usuarios, _key , now() );
-			
-        
-        COMMIT; 
+
+
+        COMMIT;
        set  _count = 0;
-	   select count(*) into _count from `session`   
-       where usuario = _id_usuarios 
-       and  estado = (select id from estado_registro where estado_registro.estado = 'A')  
+	   select count(*) into _count from `session`
+       where usuario = _id_usuarios
+       and  estado = (select id from estado_registro where estado_registro.estado = 'A')
        and  `key` = _key;
-       
+
        if _count = 0 then
-        select '-2' as '_result' ; 
+        select '-2' as '_result' ;
        else
-        
+
     select count(*)   into _count    from usuarios
     inner join perfil_usuario on usuarios.id =  perfil_usuario.id_usuario
-    where 
+    where
    usuarios.estado =(select id from estado_registro where estado_registro.estado = 'A')
     and Login = _usuarios and pass = _pass  ;
     -- select _count ;
         if _count = 0 then
-            select '-3' as '_result' ; 
-        else 
+            select '-3' as '_result' ;
+        else
           select '100' as '_result', _key as 'llave_session' ,
         usuarios.ID,  '' as Login, Nombre1, Nombre2, Apellido1, Apellido2, nombreCompleto,
-        usuarios.estado, usr_registro, Fecha_Registro, Usr_Modif, Fecha_Modif, '' as pass, change_pass, 
+        usuarios.estado, usr_registro, Fecha_Registro, Usr_Modif, Fecha_Modif, '' as pass, change_pass,
         ultimo_ingreso, email as mail ,  id_perfil  ,   Perf_Nombre , ifnull(descripcion , '' ) as descripcion, img
-        from usuarios 
+        from usuarios
          inner join perfil_usuario on usuarios.id =  perfil_usuario.id_usuario
          inner join perfiles on perfiles.id = perfil_usuario.id_perfil
-         left join documentos_clientes on documentos_clientes.id =   idPersona   
-        where usuarios.ID = _id_usuarios ; 
-        end if; 
+         left join documentos_clientes on documentos_clientes.id =   idPersona
+        where usuarios.ID = _id_usuarios ;
+        end if;
         end if;
 	else
-        select '-1' as '_result' ; 
+        select '-1' as '_result' ;
     END IF;
-    
+
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -15292,21 +15292,21 @@ DECLARE EXIT HANDLER FOR SQLEXCEPTION
 	BEGIN
 		delete from clientes_cabeza_remision where cod_remitente_conse = _id_cabecera;
         delete from clientes_detalle_remision where id_cabecera = _id_cabecera;
-		select 'error al ingresar valores a la base de datos clientes_detalle_remision'  AS result LIMIT 1; 
-	END; 
+		select 'error al ingresar valores a la base de datos clientes_detalle_remision'  AS result LIMIT 1;
+	END;
 	DECLARE EXIT HANDLER FOR SQLWARNING
 	BEGIN
 		delete from clientes_cabeza_remision where cod_remitente_conse = _id_cabecera;
         delete from clientes_detalle_remision where id_cabecera = _id_cabecera;
 
-		select  WARNINGS  AS result LIMIT 1; 
+		select  WARNINGS  AS result LIMIT 1;
 	END;
 set @usuarioIngresado = _cod_usuario_registro;
 set _RETORNO = -1 ;
 	INSERT INTO `clientes_detalle_remision` (`id_cabecera`,`pedido`,`id_centro`,`centro`,`id_puesto_exp`,`puesto_exp`,`posicion`,`id_material`,`material`,`cantidad`)
 		VALUES( _id_cabecera ,_pedido ,_id_centro ,_centro ,_id_puesto_exp ,_puesto_exp ,_posicion ,_id_material ,_material ,_cantidad );
 	set _RETORNO = 100 ;
-    
+
 	SELECT _RETORNO as result;
 END ;;
 DELIMITER ;
@@ -15326,28 +15326,28 @@ DELIMITER ;
 DELIMITER ;;
 CREATE DEFINER=`jdpsoluc_l_monrroy`@`%` PROCEDURE `sp_procesar_ordenes_de_carga`(`_cod_cliente` VARCHAR(10), `_cod_remitente_conse` INT(10), `_ref_externa` VARCHAR(50), `_cod_ciudad` VARCHAR(45), `_ciudad_destino` VARCHAR(45), `_cod_destinataio` VARCHAR(20), `_destinatario` VARCHAR(45), `_placa` VARCHAR(6), `_cod_cedula` VARCHAR(45), `_cedula` VARCHAR(45), `_cod_transportador` VARCHAR(45), `_transportador` VARCHAR(150), `_fecha_estimada` VARCHAR(10), `_cod_usuario_registro` INT(11), `_estado` VARCHAR(2), `_cod_remision_sap` VARCHAR(45), `_fecha_remisioin_sap` VARCHAR(10), `_proceso` VARCHAR(10))
 BEGIN
--- COLLATE utf8_unicode_ci 
+-- COLLATE utf8_unicode_ci
 DECLARE _RETORNO INT;
 DECLARE EXIT HANDLER FOR SQLEXCEPTION
 	BEGIN
-		select 'error  al ingresar las cabecera de ordenes de carga a la base de datos -clientes_cabeza_remision :'  AS result LIMIT 1; 
-	END; 
+		select 'error  al ingresar las cabecera de ordenes de carga a la base de datos -clientes_cabeza_remision :'  AS result LIMIT 1;
+	END;
 	DECLARE EXIT HANDLER FOR SQLWARNING
 	BEGIN
-		select  WARNINGS  AS result LIMIT 1; 
-	END; 
+		select  WARNINGS  AS result LIMIT 1;
+	END;
 set @usuarioIngresado = _cod_usuario_registro;
 -- select _cod_cliente ,_ref_externa , _cod_ciudad ,_ciudad_destino ,_cod_destinataio ,_destinatario ,_placa ,_cod_cedula ,_cedula ,_cod_transportador ,_transportador ,_fecha_estimada ,NOW() ,_cod_usuario_registro , 'ER'  ;
- 
-case _proceso 
+
+case _proceso
  when 'INICIO'
  THEN
  set _RETORNO = 0;
  -- select _cod_cliente ,_ref_externa , _cod_ciudad ,_ciudad_destino ,_cod_destinataio ,_destinatario ,_placa ,_cod_cedula ,_cedula ,_cod_transportador ,_transportador ,_fecha_estimada ,NOW() ,_cod_usuario_registro , 'ER'  ;
 
  INSERT INTO  `clientes_cabeza_remision`
-(`cod_cliente`, 
-`ref_externa`, 
+(`cod_cliente`,
+`ref_externa`,
 `cod_ciudad`,
 `ciudad_destino`,
 `cod_destinataio`,
@@ -15363,29 +15363,29 @@ case _proceso
 `estado` )
 VALUES
 (_cod_cliente ,_ref_externa , _cod_ciudad ,_ciudad_destino ,_cod_destinataio ,_destinatario ,_placa ,_cod_cedula ,_cedula ,_cod_transportador ,_transportador ,_fecha_estimada ,NOW() ,_cod_usuario_registro , 'PR'  );
- 
+
 -- select _cod_destinataio ,_destinatario ,_placa ,_cod_cedula ,_cedula ,_cod_transportador ,_transportador ,_fecha_estimada ,NOW() ,_cod_usuario_registro ;
 
 SET _RETORNO = last_insert_id();
 
 WHEN 'RECHAZAR'
-THEN 
+THEN
  set _RETORNO = 0;
 	UPDATE clientes_cabeza_remision SET estado = 'RE' WHERE cod_remitente_conse = _cod_remitente_conse;
-  set _RETORNO = 1;   
-    
+  set _RETORNO = 1;
+
 WHEN 'APROBAR'
 THEN
 set _RETORNO = 0;
  -- select 'llego',_cod_remitente_conse as '_cod_remitente_conse',_cod_remision_sap as '_cod_remision_sap';
- 
-	UPDATE clientes_cabeza_remision SET 
-    estado = 'AR', 
-    cod_remision_sap = _cod_remision_sap , 
+
+	UPDATE clientes_cabeza_remision SET
+    estado = 'AR',
+    cod_remision_sap = _cod_remision_sap ,
     fecha_remisioin_sap = NOW() WHERE cod_remitente_conse = _cod_remitente_conse;
-set _RETORNO = 1;   
+set _RETORNO = 1;
 end CASE;
- 
+
 SELECT _RETORNO as result;
 
 END ;;
@@ -15423,13 +15423,13 @@ BEGIN
     DECLARE v_valorTotal DECIMAL(10,2);
     DECLARE v_usuario INT;
 
-    DECLARE cur CURSOR FOR 
-    SELECT 
-        id, orden, tipoDocumento, fecha, hora, idProducto, nombreProducto, presioVenta, porcent_iva, 
-        presioSinIVa, IVA, cantidadVendida, descuento, valorTotal, usuario 
-    FROM 
-        documentos_listado_productos 
-    WHERE 
+    DECLARE cur CURSOR FOR
+    SELECT
+        id, orden, tipoDocumento, fecha, hora, idProducto, nombreProducto, presioVenta, porcent_iva,
+        presioSinIVa, IVA, cantidadVendida, descuento, valorTotal, usuario
+    FROM
+        documentos_listado_productos
+    WHERE
         idDocumento = p_idDocumento;
 
     DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
@@ -15438,8 +15438,8 @@ BEGIN
     OPEN cur;
 
     read_loop: LOOP
-        FETCH cur INTO v_id, v_orden, v_tipoDocumento, v_fecha, v_hora, v_idProducto, v_nombreProducto, 
-                      v_presioVenta, v_porcent_iva, v_presioSinIVa, v_IVA, v_cantidadVendida, 
+        FETCH cur INTO v_id, v_orden, v_tipoDocumento, v_fecha, v_hora, v_idProducto, v_nombreProducto,
+                      v_presioVenta, v_porcent_iva, v_presioSinIVa, v_IVA, v_cantidadVendida,
                       v_descuento, v_valorTotal, v_usuario;
         IF done THEN
             LEAVE read_loop;
@@ -15447,9 +15447,9 @@ BEGIN
 
         -- Process each row
         -- You can add your processing logic here
-        SELECT 
-            v_id, v_orden, v_tipoDocumento, v_fecha, v_hora, v_idProducto, v_nombreProducto, 
-            v_presioVenta, v_porcent_iva, v_presioSinIVa, v_IVA, v_cantidadVendida, 
+        SELECT
+            v_id, v_orden, v_tipoDocumento, v_fecha, v_hora, v_idProducto, v_nombreProducto,
+            v_presioVenta, v_porcent_iva, v_presioSinIVa, v_IVA, v_cantidadVendida,
             v_descuento, v_valorTotal, v_usuario;
     END LOOP;
 
@@ -15496,22 +15496,22 @@ BEGIN
     declare nomUsu varchar(50);
     declare _f1 , _f2 datetime;
     SELECT id , estado , date(fechaInicio) , date(now()) , nombreCompleto INTO _id , EST , _f1 , _f2 ,nomUsu
-    FROM  vw_flags WHERE codigo = _COD_FLAG ;  
-    
-    if  _f1 < _f2 then 
-     update flags 
+    FROM  vw_flags WHERE codigo = _COD_FLAG ;
+
+    if  _f1 < _f2 then
+     update flags
     set estado = 2
     WHERE id = ( SELECT id   FROM  flags WHERE codigo = 'FLAG_INICIO_ACTUALIZACION' ) ;
     end if;
-    
-    IF EST = 2 or  EST = 0 then 
+
+    IF EST = 2 or  EST = 0 then
      SET EST = 3 ;
-     update flags 
+     update flags
      set estado = 1
      WHERE id = _id ;
     END IF;
-    
-    SELECT EST AS codEstado , nomUsu as nombreUsuario , 100 as _result; 
+
+    SELECT EST AS codEstado , nomUsu as nombreUsuario , 100 as _result;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -15592,7 +15592,7 @@ BEGIN
 
         -- Actualizar existencias en la bodega de origen (disminuir)
         UPDATE inv_mst_producto_existencias
-        SET 
+        SET
             cant_actual = cant_actual - p_cantidad,
             trasladoOut = trasladoOut + p_cantidad,
             fecha_actualizacion = NOW(),
@@ -15607,7 +15607,7 @@ BEGIN
         IF v_existe_producto_destino > 0 THEN
             -- Si el producto ya existe en la bodega de destino, actualizar las existencias
             UPDATE inv_mst_producto_existencias
-            SET 
+            SET
                 cant_actual = cant_actual + p_cantidad,
                 trasladoIn = trasladoIn + p_cantidad,
                 fecha_actualizacion = NOW(),
@@ -15664,7 +15664,7 @@ DELIMITER ;
 DELIMITER ;;
 CREATE DEFINER=`jdpsoluc_l_monrroy`@`%` PROCEDURE `sp_verificar_usuarios_permisos`(IN `_nickname` VARCHAR(150), IN `_pass` VARCHAR(150))
 BEGIN
-	select * from usuarios where Login = _nickname  and pass = _pass ; 
+	select * from usuarios where Login = _nickname  and pass = _pass ;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -15683,24 +15683,24 @@ DELIMITER ;
 DELIMITER ;;
 CREATE DEFINER=`jdpsoluc_l_monrroy`@`%` PROCEDURE `truncate_table`(IN `nomTable` VARCHAR(150))
 BEGIN
-	
+
 DECLARE EXIT HANDLER FOR SQLEXCEPTION
 	BEGIN
-		select 'error en la base de datos' AS result LIMIT 1; 
-	END; 
+		select 'error en la base de datos' AS result LIMIT 1;
+	END;
 DECLARE EXIT HANDLER FOR SQLWARNING
 	BEGIN
-		select  WARNINGS  AS result LIMIT 1; 
+		select  WARNINGS  AS result LIMIT 1;
 	END;
 	if nomTable = '' then
 		select '-1' as result;
-    else 
+    else
         set @sqlExe = concat_ws(' ','DELETE FROM ',nomTable);
-				PREPARE stmt1 FROM @sqlExe; 
+				PREPARE stmt1 FROM @sqlExe;
                 -- select @sqlExe;
 				SET SQL_SAFE_UPDATES = 0;
-                EXECUTE stmt1;              
-        
+                EXECUTE stmt1;
+
 		select '100' as result;
 	end if;
 END ;;

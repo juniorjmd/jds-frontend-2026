@@ -8,36 +8,19 @@ import { usuarioService } from 'src/app/services/usuario.services';
 
 @Component({
   selector: 'app-inicio-rep-ventas', 
-  template: `<div class="container-fluid  fondoGeneral confondoBrillante pt-3 pb-3 ">
-  <div class="row">
-      <!-- Menú lateral -->
-      <div class="col-md-3 col-lg-2 d-md-block sidebar collapse">
-          <div class="list-group"> 
-          <a class="list-group-item list-group-item-action" routerLinkActive="active" [routerLink]="['caja']">
-            <i class="bi bi-wallet2"></i> Movimientos de Caja
-          </a>
-          <a class="list-group-item list-group-item-action" routerLinkActive="active" [routerLink]="['gastos']">
-              <i class="bi bi-cash-stack"></i> Movimientos de Gastos
-          </a>
-          <a class="list-group-item list-group-item-action" routerLinkActive="active" [routerLink]="['movimientos']">
-              <i class="bi bi-arrow-left-right"></i> Movimientos en una o más cuentas
-          </a>
-          <a class="list-group-item list-group-item-action" routerLinkActive="active" [routerLink]="['cuentasPorPagar']">
-              <i class="bi bi-file-earmark-minus"></i> Cuentas por Pagar
-          </a>
-          <a class="list-group-item list-group-item-action" routerLinkActive="active" [routerLink]="['cuentasPorCobrar']">
-              <i class="bi bi-file-earmark-plus"></i> Cuentas por Cobrar
-          </a>
+  template: `<section class="module-shell">
+  <nav class="module-shell__tabs" aria-label="Secciones de reportes financieros">
+      <a class="module-shell__tab" routerLinkActive="is-active" [routerLink]="['caja']">Movimientos de Caja</a>
+      <a class="module-shell__tab" routerLinkActive="is-active" [routerLink]="['gastos']">Movimientos de Gastos</a>
+      <a class="module-shell__tab" routerLinkActive="is-active" [routerLink]="['movimientos']">Movimientos entre cuentas</a>
+      <a class="module-shell__tab" routerLinkActive="is-active" [routerLink]="['cuentasPorPagar']">Cuentas por Pagar</a>
+      <a class="module-shell__tab" routerLinkActive="is-active" [routerLink]="['cuentasPorCobrar']">Cuentas por Cobrar</a>
+  </nav>
 
-        </div>
-      </div>
-      <!-- Contenido principal -->
-      <div class="col-md-9 col-lg-10 ml-sm-auto px-md-4">
-          <h2>Reportes de Ventas:</h2>
-          <router-outlet></router-outlet><hr>
-      </div>
+  <div class="module-shell__content">
+      <router-outlet></router-outlet>
   </div>
-</div>
+</section>
 `,
   styleUrls: ['./inicioRepFinansas.component.css'], 
 })

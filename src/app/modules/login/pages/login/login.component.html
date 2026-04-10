@@ -1,74 +1,160 @@
-<body *ngIf="sucursal.length > 0">
-    <div class="container d-flex align-items-center justify-content-center min-vh-100">
-      <div class="w-100" style="max-width: 400px;">
-        <!-- Loading Indicator (oculto por defecto) -->
-        <div id="cont_Load_gif" class="text-center my-3" style="display: none;">
-          <span class="text-muted">Cargando&nbsp;</span>
-          <div class="spinner-border text-primary" role="status" style="width: 1.5rem; height: 1.5rem;">
-            <span class="visually-hidden">Cargando...</span>
+<section *ngIf="sucursal.length > 0; else loadingSucursal" class="login-page">
+  <div class="login-page__overlay"></div>
+
+  <div class="login-page__wrapper">
+    <!-- Panel izquierdo -->
+    <aside class="login-brand">
+      <div class="login-brand__top">
+        <div class="login-brand__badge">
+  {{ sucursalActual?.nombre_suc || 'Sucursal principal' }}
+</div>
+
+<h1 class="login-brand__title">
+  Sofdla POS
+</h1>
+
+        <p class="login-brand__subtitle">
+          Plataforma operativa para ventas, inventario, caja, clientes y servicios.
+        </p>
+      </div>
+
+      <div class="login-brand__features">
+        <div class="brand-feature">
+          <div class="brand-feature__icon">
+            <i class="bi bi-shield-check"></i>
+          </div>
+          <div>
+            <strong>Acceso seguro</strong>
+            <p>Ingresa con tus credenciales para operar dentro del sistema.</p>
           </div>
         </div>
-        
-        <!-- Título y Logo -->
-        <div class="text-center mb-4">
-          <h1>
-            {{ sucursal[0].nombre_suc }}
-            <img [src]="sucursal[0].logo" alt="Logo" width="50" height="50">
-          </h1>
-        </div>
-        
-        <!-- Tarjeta de Login -->
-        <div class="card shadow-sm">
-          <div class="card-body">
-            <form (ngSubmit)="login(f)" #f="ngForm">
-              <!-- Campo de Usuario/Email -->
-              <div class="mb-3">
-                <label for="username" class="form-label">
-                  <i class="fa fa-user"></i> Usuario o Email
-                </label>
-                <input type="text"
-                       id="username"
-                       name="name"
-                       [(ngModel)]="usuario.Login"
-                       class="form-control"
-                       placeholder="Ingrese su usuario o email"
-                       required>
-              </div>
-              
-              <!-- Campo de Contraseña -->
-              <div class="mb-3">
-                <label for="password" class="form-label">
-                  <i class="fa fa-lock"></i> Contraseña
-                </label>
-                <input type="password"
-                       id="password"
-                       name="password"
-                       [(ngModel)]="usuario.pass"
-                       class="form-control"
-                       placeholder="Ingrese su contraseña"
-                       required>
-              </div>
-              
-              
-              
-              <!-- Enlace para recuperar contraseña -->
-              <div class="mb-3 text-end">
-                <a [routerLink]="['forgotPassword']" class="text-decoration-none">¿Olvidaste tu contraseña?</a>
-              </div>
-              
-              <!-- Botón de Envío -->
-              <button id="btnIngresar" type="submit" class="btn btn-primary w-100">
-                Iniciar Sesión
-              </button>
-            </form>
+
+        <div class="brand-feature">
+          <div class="brand-feature__icon">
+            <i class="bi bi-grid-1x2"></i>
+          </div>
+          <div>
+            <strong>Operación centralizada</strong>
+            <p>Administra ventas, cajas, clientes, inventario y documentos desde un solo lugar.</p>
           </div>
         </div>
-        
-        <!-- Footer -->
-        <div class="text-center mt-3">
-          sofdla.com.co &#169;2025
+
+        <div class="brand-feature">
+          <div class="brand-feature__icon">
+            <i class="bi bi-lightning-charge"></i>
+          </div>
+          <div>
+            <strong>Ingreso rápido</strong>
+            <p>Diseñado para acceder rápido y continuar la operación diaria.</p>
+          </div>
         </div>
       </div>
+    </aside>
+
+    <!-- Panel derecho -->
+    <section class="login-panel app-panel">
+      <div class="login-panel__header">
+        <div class="login-panel__header-main">
+          <div class="login-panel__logo-wrap" *ngIf="sucursalActual?.logo">
+            <img [src]="sucursalActual?.logo" alt="Logo sucursal" class="login-panel__logo">
+          </div>
+
+          <div class="login-panel__header-text">
+            <h2 class="login-panel__title">Iniciar sesión</h2>
+            <p class="login-panel__copy">
+              Accede con tu usuario y contraseña para continuar.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <form (ngSubmit)="login(f)" #f="ngForm" class="login-form" novalidate>
+        <div class="mb-3">
+          <label for="username" class="form-label login-label">Usuario o email</label>
+          <input
+            id="username"
+            type="text"
+            name="name"
+            [(ngModel)]="usuario.Login"
+            #usernameModel="ngModel"
+            class="form-control app-input"
+            [class.is-invalid]="f.submitted && usernameModel.invalid"
+            placeholder="Ingrese su usuario"
+            autocomplete="username"
+            required
+          >
+
+          <div class="invalid-feedback" *ngIf="f.submitted && usernameModel.invalid">
+            Debes ingresar tu usuario o email.
+          </div>
+        </div>
+
+        <div class="mb-2">
+          <label for="password" class="form-label login-label">Contraseña</label>
+
+          <div class="password-wrap">
+            <input
+              id="password"
+              [type]="showPassword ? 'text' : 'password'"
+              name="password"
+              [(ngModel)]="usuario.pass"
+              #passwordModel="ngModel"
+              class="form-control app-input app-input--password"
+              [class.is-invalid]="f.submitted && passwordModel.invalid"
+              placeholder="Ingrese su contraseña"
+              autocomplete="current-password"
+              required
+            >
+
+            <button
+              type="button"
+              class="password-toggle"
+              (click)="togglePassword()"
+              [attr.aria-label]="showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+            >
+              <i class="bi" [ngClass]="showPassword ? 'bi-eye-slash' : 'bi-eye'"></i>
+            </button>
+          </div>
+
+          <div class="invalid-feedback d-block" *ngIf="f.submitted && passwordModel.invalid">
+            Debes ingresar tu contraseña.
+          </div>
+        </div>
+
+        <div class="login-form__meta">
+          <a [routerLink]="['forgotPassword']" class="login-form__link">
+            ¿Olvidaste tu contraseña?
+          </a>
+        </div>
+
+        <button
+          id="btnIngresar"
+          type="submit"
+          class="btn app-btn-primary w-100 login-form__submit"
+          [disabled]="isLoading"
+        >
+          <span *ngIf="!isLoading">Iniciar sesión</span>
+
+          <span *ngIf="isLoading" class="d-inline-flex align-items-center gap-2">
+            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+            Validando...
+          </span>
+        </button>
+      </form>
+
+      <div class="login-panel__footer">
+        <span>{{ sucursalActual?.nombre_suc || 'Sofdla POS' }}</span>
+        <span>sofdla.net © {{ anioActual }}</span>
+      </div>
+    </section>
+  </div>
+</section>
+
+<ng-template #loadingSucursal>
+  <section class="login-loading">
+    <div class="text-center">
+      <div class="spinner-border text-primary mb-3" role="status"></div>
+      <div class="text-muted">Cargando información inicial...</div>
     </div>
-  </body>
-  
+  </section>
+</ng-template>

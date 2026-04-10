@@ -1,17 +1,10 @@
-<div class="container-fluid  fondoGeneral confondoBrillante pt-3">
-    <div class="row">
-        <!-- Menú lateral -->
-        <div class="col-md-3 col-lg-2 d-md-block sidebar collapse">
-            <div class="list-group">
-                <a  [routerLink]="[ 'usuarios'] "  routerLinkActive="active"  class="list-group-item list-group-item-action ">Usuarios</a>
-             
-                <a  [routerLink]="[ 'perfiles'] "  routerLinkActive="active"  class="list-group-item list-group-item-action ">Perfiles</a>
-        <!--    <a  [routerLink]="[ 'recursos'] "  routerLinkActive="active"  class="list-group-item list-group-item-action">Recursos</a>-->
-            </div>
-        </div>
-        <!-- Contenido principal -->
-        <div class="col-md-9 col-lg-10 ml-sm-auto px-md-4"> 
-            <router-outlet></router-outlet>
-        </div>
+<section class="module-shell">
+    <nav class="module-shell__tabs" aria-label="Secciones de permisos">
+        <a [routerLink]="['usuarios']" routerLinkActive="is-active" class="module-shell__tab">Usuarios</a>
+        <a [routerLink]="['perfiles']" routerLinkActive="is-active" class="module-shell__tab">Perfiles</a>
+    </nav>
+
+    <div class="module-shell__content">
+        <router-outlet></router-outlet>
     </div>
-</div>
+</section>

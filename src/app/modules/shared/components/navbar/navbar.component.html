@@ -1,79 +1,107 @@
-<nav
-  *ngIf="sucursal.length > 0"
-  class="mb-3 navbar navbar-expand-lg navbar-light px-4 top-0 sticky-top d-flex  justify-content-between align-items-center text-light"
-  style="background-color: #c9a8a9"
->
+<div *ngIf="sucursal.length > 0" class="app-shell-nav">
+  <header class="app-topbar sticky-top">
+    <div class="app-topbar__surface">
+      <div class="app-topbar__brand" (click)="changeModule('vfff,inicio')">
+        <button
+          type="button"
+          class="btn app-topbar__menu-toggle"
+          [attr.aria-expanded]="isSidebarExpanded"
+          aria-label="Mostrar menu principal"
+          (click)="$event.stopPropagation(); toggleSidebar()"
+        >
+          <i class="bi" [ngClass]="isSidebarExpanded ? 'bi-x-lg' : 'bi-list'"></i>
+        </button>
+        <div class="app-topbar__logo-wrap">
+          <img
+            [src]="sucursal[0].logo"
+            width="40"
+            height="40"
+            alt="Logo"
+            loading="lazy"
+            class="app-topbar__logo"
+          />
+        </div>
+        <div class="app-topbar__brand-copy">
+          <strong>{{ sucursal[0].nombre_suc }}</strong>
+          <span class="app-topbar__eyebrow">POS unificado / operacion central</span>
+        </div>
+      </div>
 
-    <img
-    style="cursor: pointe;"
-    class=""
-    (click)="changeModule('vfff,inicio')"
-      [src]="sucursal[0].logo"
-      width="30"
-      height="30"
-      alt=""
-      loading="lazy"
-    />
-    <button class="btn  " (click)="goBack()">
-      ← Atrás
-    </button>
- 
+      <div class="app-topbar__search">
+        <ng-container *ngIf="moduleBanner(); else defaultModuleBanner">
+          <div class="app-topbar__module-banner">
+            <div class="app-topbar__module-main">
+              <strong>{{ moduleBanner()!.title }}</strong>
+              <button
+                *ngIf="moduleBanner()!.helpText"
+                type="button"
+                class="btn app-topbar__module-help"
+                [attr.title]="moduleBanner()!.helpText"
+                aria-label="Ayuda del modulo"
+              >
+                ?
+              </button>
+            </div>
 
-  <div
-    class=" d-flex justify-content-around align-items-center"
-    style="font-size: 10px; width: 80%;"
-    id="navbarText"
-  >
-     <div class="collapse navbar-collapse" id="navbarNavMenu">
-      <ul class="navbar-nav  ">
-        <ng-container *ngFor="let recurso of this.usuario?.permisos">
-          <shared-menu-item-li [recurso]="recurso"></shared-menu-item-li>
+            <div class="app-topbar__module-meta" *ngIf="moduleBanner()!.meta?.length">
+              <div class="app-topbar__module-chip" *ngFor="let item of moduleBanner()!.meta">
+                <span>{{ item.label }}</span>
+                <strong>{{ item.value }}</strong>
+              </div>
+            </div>
+          </div>
         </ng-container>
-      </ul>
+
+        <ng-template #defaultModuleBanner>
+          <div class="app-topbar__module-banner">
+            <div class="app-topbar__module-main">
+              <strong>{{ getCurrentModuleTitle() }}</strong>
+            </div>
+          </div>
+        </ng-template>
+      </div>
+
+      <div class="app-topbar__actions">
+        <div
+          class="app-topbar__user"
+        >
+          <button
+            class="app-topbar__user-button"
+            type="button"
+            [attr.aria-expanded]="isDropdownActive"
+            aria-haspopup="menu"
+            (click)="toggleDropdown($event)"
+          >
+            <span class="app-topbar__user-avatar">{{ usuario?.nombre?.charAt(0) || 'U' }}</span>
+            <span class="app-topbar__user-meta">
+              <small>Usuario activo</small>
+              <strong>{{ usuario?.nombre }}</strong>
+            </span>
+          </button>
+
+          <div class="app-topbar__user-menu" *ngIf="isDropdownActive" (click)="$event.stopPropagation()">
+            <a class="app-topbar__user-link" [routerLink]="['miUsuario']" (click)="hideDropdown()">Mi Usuario</a>
+            <button type="button" class="app-topbar__user-link is-danger" (click)="confirmLogout()">
+              Cerrar sesion
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <ul class="navbar-nav mr-auto" style="margin-right: 0px !important">
-      <li class="nav-item dropdown" 
-      (mouseenter)="showDropdown()" 
-      (mouseleave)="hideDropdown()"
-      [ngClass]="{ 'show': isDropdownActive }">
-        <a 
-          class="nav-link dropdown-toggle"
-          id="navbarDropdown"
-          role="button"
-          data-toggle="dropdown"
-          aria-haspopup="true"
-          aria-expanded="false"
-        > 
-          <i class="fas fa-users-cog"></i>
-          {{ usuario?.nombre }}
-        </a>
-        <div
-          [ngClass]="{ 'dropdown-menu': isDropdownActive }"
-          style="
-            background-color: lightslategray;
-            position: absolute;
-            width: 100%;
-          "
-          class="py-1 text-center"
-          aria-labelledby="navbarDropdown"
-        >
-          <a class="dropdown-item" [routerLink]="['miUsuario']">
-            <i class="fa fa-user-circle"></i> Mi Usuario</a
-          >
-          <div class="dropdown-divider"></div>
+  </header>
 
-          <span
-            style="cursor: pointer"
-            class="dropdown-item text-light"
-            (click)="confirmLogout()"
-            >Cerrar Sesión</span
-          >
-        </div>
+  <div class="app-sidebar-backdrop" *ngIf="isSidebarExpanded" (click)="closeSidebar()"></div>
 
-
-
-      </li>
-    </ul>
-  </div>
-</nav>
+  <aside class="app-sidebar" [ngClass]="{ 'is-expanded': isSidebarExpanded, 'app-sidebar-collapsed': !isSidebarExpanded }">
+    <div class="app-sidebar__surface" (click)="$event.stopPropagation()">
+      <nav class="app-sidebar__nav" aria-label="Menu principal" (click)="handleSidebarNavClick($event)">
+        <ul class="app-sidebar__menu">
+          <ng-container *ngFor="let recurso of this.usuario?.permisos">
+            <shared-menu-item-li [recurso]="recurso"></shared-menu-item-li>
+          </ng-container>
+        </ul>
+      </nav>
+    </div>
+  </aside>
+</div>

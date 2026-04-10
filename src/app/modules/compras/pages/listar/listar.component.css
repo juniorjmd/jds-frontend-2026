@@ -1,0 +1,36 @@
+.compras-list-page {
+    display: grid;
+    gap: 1rem;
+    width: 100%;
+}
+
+.compras-list-page__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.compras-list-page__title {
+    margin: 0;
+    color: var(--app-text);
+    font-size: 1.05rem;
+    font-weight: 800;
+}
+
+.compras-list-page__surface {
+    width: 100%;
+}
+
+.compras-list-page__table-wrap {
+    width: 100%;
+    padding: 0 !important;
+}
+
+.compras-list-page__table-wrap .table {
+    width: 100% !important;
+}
+
+.compras-list-page__empty {
+    padding: 1rem 0;
+    color: var(--app-text-soft);
+}

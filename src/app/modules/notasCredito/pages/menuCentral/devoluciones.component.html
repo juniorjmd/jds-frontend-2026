@@ -1,17 +1,11 @@
-<div class="container-fluid  fondoGeneral confondoBrillante pt-3">
-    <div class="row">
-        <!-- Menú lateral -->
-        <div class="col-md-3 col-lg-2 d-md-block sidebar collapse">
-            <div class="list-group">
-                <a  [routerLink]="[ 'listar'] "  routerLinkActive="active"  class="list-group-item list-group-item-action ">Listar</a>
-                <a  [routerLink]="[ 'crear'] "  routerLinkActive="active"  class="list-group-item list-group-item-action">Crear</a>
-                <a  [routerLink]="[ 'anular'] "  routerLinkActive="active"  class="list-group-item list-group-item-action">Anular</a> 
-            </div>
-        </div>
-        <!-- Contenido principal -->
-        <div class="col-md-9 col-lg-10 ml-sm-auto px-md-4">
-           
-            <router-outlet></router-outlet>
-        </div>
+<section class="module-shell">
+    <nav class="module-shell__tabs" aria-label="Secciones de devoluciones">
+        <a [routerLink]="['listar']" routerLinkActive="is-active" class="module-shell__tab">Listar</a>
+        <a [routerLink]="['crear']" routerLinkActive="is-active" class="module-shell__tab">Crear</a>
+        <a [routerLink]="['anular']" routerLinkActive="is-active" class="module-shell__tab">Anular</a>
+    </nav>
+
+    <div class="module-shell__content">
+        <router-outlet></router-outlet>
     </div>
-</div>
+</section>

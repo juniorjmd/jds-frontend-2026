@@ -763,7 +763,9 @@ getCuentasXPagarByfecha(_fechaInicio:string, _fechaFin:string): Observable<Credi
   cancelarDocumento(documento: number): Observable<ApiResponse<GenericMutationPayload>> {
     let datos = {"action": actions.actionCancelarDocumentos, "_documento": documento};
     CustomConsole.log('cancelarDocumento activo', this.configService.url.actionDocumentos, datos, httpOptions());
-    return this.http.post<ApiResponse<GenericMutationPayload>>(this.configService.url.actionDocumentos, datos, httpOptions());
+    return this.http
+      .post<ApiResponse<GenericMutationPayload> | any>(this.configService.url.actionDocumentos, datos, httpOptions())
+      .pipe(map((response) => this.normalizeLegacyMutationResponse(response)));
   }
 
   convertirDocumentoEnCotizacion(documento: number): Observable<ApiResponse<DocumentoActionPayload>> {
@@ -847,5 +849,41 @@ getCuentasXPagarByfecha(_fechaInicio:string, _fechaFin:string): Observable<Credi
     }
 
     return 'Error interno del servidor';
+  }
+
+  private normalizeLegacyMutationResponse(response: any): ApiResponse<GenericMutationPayload> {
+    if (typeof response?.ok === 'boolean' && 'data' in (response ?? {})) {
+      return response as ApiResponse<GenericMutationPayload>;
+    }
+
+    const legacyError = typeof response?.error === 'string' ? response.error.trim() : '';
+    const legacyMessage =
+      response?.data?.message ??
+      response?.datos?.[0]?.msg ??
+      response?.msg ??
+      '';
+
+    if (legacyError === 'ok') {
+      return {
+        ok: true,
+        data: {
+          message: legacyMessage || 'Operacion completada correctamente',
+          affected: 1,
+        },
+        error: null,
+      };
+    }
+
+    return {
+      ok: false,
+      data: {
+        message: legacyMessage || undefined,
+        affected: 0,
+      },
+      error: {
+        code: 'LEGACY_ERROR',
+        message: legacyError || 'Error interno del servidor',
+      },
+    };
   }
 }

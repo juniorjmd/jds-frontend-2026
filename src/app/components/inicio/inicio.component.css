@@ -1,1 +1,48 @@
- 
+ .inicio-dashboard {
+  background: #f8fafc;
+  min-height: 100%;
+}
+
+.welcome-card,
+.resumen-card,
+.card {
+  border-radius: 16px;
+}
+
+.welcome-card {
+  background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
+}
+
+.acceso-btn {
+  border-radius: 14px;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  padding: 1rem;
+  transition: all 0.2s ease-in-out;
+}
+
+.acceso-btn:hover {
+  transform: translateY(-2px);
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.icono-acceso {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: #eef2ff;
+  color: #2563eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.icono-acceso__img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: inherit;
+}

@@ -1,0 +1,44 @@
+.compras-shell {
+    display: grid;
+    gap: 1rem;
+}
+
+.compras-shell__tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    padding: 0.35rem;
+    border: 1px solid rgba(148, 163, 184, 0.22);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.78);
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
+}
+
+.compras-shell__tab {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 40px;
+    padding: 0.6rem 0.95rem;
+    border-radius: 10px;
+    color: #475569;
+    font-size: 0.9rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: background-color 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.compras-shell__tab:hover {
+    background: rgba(37, 99, 235, 0.08);
+    color: #1d4ed8;
+}
+
+.compras-shell__tab.is-active {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: #ffffff;
+    box-shadow: 0 10px 20px rgba(37, 99, 235, 0.22);
+}
+
+.compras-shell__content {
+    min-width: 0;
+}

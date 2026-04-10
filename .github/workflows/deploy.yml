@@ -24,10 +24,10 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H ssh.us.stackcp.com >> ~/.ssh/known_hosts
 
-      - name: Subir a carwash.sofdla.com.co
+      - name: Subir a carwash.sofdla.net
         run: |
-          scp -r dist/* sofdla.com.co@ssh.us.stackcp.com:/home/sites/36a/2/2d8ca11770/carwash.sofdla.com.co/
+          scp -r dist/* sofdla.net@ssh.us.stackcp.com:/home/sites/36a/2/2d8ca11770/carwash.sofdla.net/
 
-      - name: Subir a distrimedjl.sofdla.com.co
+      - name: Subir a distrimedjl.sofdla.net
         run: |
-          scp -r dist/* sofdla.com.co@ssh.us.stackcp.com:/home/sites/36a/2/2d8ca11770/distrimedjl.sofdla.com.co/
+          scp -r dist/* sofdla.net@ssh.us.stackcp.com:/home/sites/36a/2/2d8ca11770/distrimedjl.sofdla.net/

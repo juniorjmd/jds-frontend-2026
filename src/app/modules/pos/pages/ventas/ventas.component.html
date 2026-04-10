@@ -1,272 +1,268 @@
 
 <div *ngIf="continuar; else ErrorEstablecimiento">
-    
-<div *ngIf="documentoActivo != undefined" class="container-fluid borde_general mt-2" (click)='irbuscarProducto()' (keyup)='irbuscarProducto()'><br>
-    <div class="row  ">
-        <div class="col-sm-12">
-            <h3 class="centrado">Punto De Venta  </h3> 
-           
-        </div>
-    </div>
-    <div class="row borde">
-        <div class="col-lg-2 col-sm-12"><h3>Establecimiento :</h3>  </div>
-        <div class="col-lg-3 col-sm-12"><h4 class="subtitulosEspeciales"> {{documentoActivo!.nombreEsta}}  </h4></div>
-        <div class="col-lg-1 col-sm-12"><h3>Caja : </h3></div>
-        <div class="col-lg-3 col-sm-12"> <h4 class="subtitulosEspeciales"> {{documentoActivo!.nombreCaja}}</h4> </div> 
-    </div>
-    
+    <section
+        *ngIf="documentoActivo != undefined"
+        class="ventas-shell"
+        (click)="irbuscarProducto()"
+        (keyup)="irbuscarProducto()"
+    >
+        <header class="ventas-shell__header">
+            <div class="ventas-header-actions">
+                <div class="app-toolbar ventas-header-actions__primary">
+                    <div class="ventas-toolbar-search">
+                        <input
+                            class="form-control app-input ventas-search__input"
+                            (focus)="codigoProducto = ''"
+                            (keyup.enter)="buscarProducto()"
+                            #codProd
+                            type="text"
+                            [(ngModel)]="codigoProducto"
+                            placeholder="Buscar por codigo o barra"
+                            aria-label="Buscar producto"
+                        />
+                        <button (click)="buscarProducto()" class="btn ventas-search__button" type="button">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </div>
+                    <button type="button" class="btn app-chip-button app-chip-button--accent" title="Facturar" (click)="asignarPagosAVenta()">
+                        <i class="bi bi-check2-all"></i>
+                        Facturar
+                    </button>
+                    <button type="button" class="btn app-chip-button" title="Crear documento" (click)="crearDocumento()">
+                        <i class="bi bi-plus-lg"></i>
+                        Nuevo documento
+                    </button>
+                    <button type="button" class="btn app-chip-button app-chip-button--danger" title="Eliminar documento" (click)="cancelarDocumento()">
+                        <i class="bi bi-trash3"></i>
+                        Cancelar
+                    </button>
+                    <button type="button" class="btn app-chip-button" title="Busqueda producto" (click)="busquedaAuxiliarProducto()">
+                        <i class="bi bi-search"></i>
+                        Buscar producto
+                    </button>
+                    <button type="button" class="btn app-chip-button app-chip-button--soft" title="Mas operaciones" (click)="toggleQuickActions()">
+                        <i class="bi bi-grid-3x3-gap"></i>
+                        Mas operaciones
+                    </button>
+                </div>
+            </div>
+        </header>
 
-    <div class="row"> 
-        <div class="col-sm-12 col-lg-9 borde">
-            <div class="row">
-                <div class="col-sm-12 col-lg-12 py-2">
-                    <div class="btn-group" role="group" aria-label="Basic example" style="width: 100%;"> 
-                            <button type="button" class="btn btn-success" title="Facturar" (click)='asignarPagosAVenta()'><i class="bi bi-check2-all"></i></button>
-                            <button type="button" class="btn btn-primary" title="Crear Documento" (click)='crearDocumento()'><i class="bi bi-plus"></i>&nbsp;<i class="bi bi-file-earmark"></i></button>
-                            <button type="button" class="btn btn-danger" title="Eliminar Documento" (click)='cancelarDocumento()'><i class="bi bi-trash"></i>&nbsp;<i class="bi bi-file-earmark"></i></button>
-                            <button type="button" class="btn btn-warning" title="Busqueda Producto" (click)='busquedaAuxiliarProducto()'><i class="bi bi-search"></i>&nbsp;<i class="bi bi-file-earmark"></i></button>
-                            <button *ngIf="planSepare" type="button" class="btn btn-success" style="background-color: #67b4e0;" title="plan separe"><i class="bi bi-hand-index-thumb"></i>&nbsp;<i class="bi bi-shop"></i></button>
-                            <button *ngIf="pasaAotraCaja" type="button" title="Mover Documento a otra caja" (click)='moverDocumentoCaja()' class="btn btn-danger" style="background-color: #4d4444; border-color: #4d4444;"><i class="bi bi-arrow-left-right"></i>&nbsp;<i class="bi bi-cash"></i></button>
-                        
-                    <button type="button" class="btn btn-success" title="Remision" (click)='asignarPagosARemision()'><i class="bi bi-check2-all"></i>Rem</button> 
-                    <button *ngIf="CrtGasto" type="button" class="btn" (click)="generarGasto()" style="background-color: rgb(197, 174, 69);" 
-                    title="Ingresar Nuevo Gasto">
-                    <i class="bi bi-file-earmark-plus"></i> </button>
-                    <button *ngIf="cotiza" type="button" class="btn btn-info" (click)="crearCotizacion()" title="Guardar Como cotizacion"><i class="bi bi-hand-index-thumb"></i> Cotizacion</button>
-                     
-                    <button type="button" class="btn btn-primary" 
-                    (click)="generarAbonosCuentasXcobrar()" title="Generar abonos de cuentas por cobrar" >
-                        <i class="bi bi-receipt"></i> CxC
-                      </button>
-                
-               
-                            <button *ngIf="domicilio" type="button" class="btn" (click)="generarEnvio()" style="background-color: rgb(41, 39, 39);" title="Guardar como Envio"><img src="assets/img/img_menu_interno/deliveri_truck.png" style="width:30px;height:30px" /></button>
-                            <button *ngIf="libranza" type="button" class="btn btn-success" (click)="generarLibranza()" title="Libranza"><i class="bi bi-hand-index-thumb"></i> Libranza</button>
-                             <button *ngIf="ingresoServicio" (click)="ingresarServicio()"   type="button" class="btn btn-primary">
-                                <i class="bi bi-car-front-fill"></i> <i class="bi bi-wrench"></i>  
-                              </button>
-                    </div>       
-                </div> 
-              </div>
-            <div class="row pt-3"> 
-                <div class="col-sm-12 col-lg-3">
-                    <div class="row">
-                        <div class="col-sm-12 col-lg-12">
-                            <h5>Cliente</h5>
-                        </div>
+        <div *ngIf="showQuickActions" class="ventas-quick-actions-backdrop" (click)="closeQuickActions()">
+            <section class="ventas-quick-actions-modal" (click)="$event.stopPropagation()">
+                <div class="ventas-quick-actions-modal__head">
+                    <div>
+                        <h2 class="ventas-card__title">Operaciones adicionales</h2>
+                        <p class="ventas-card__subtitle">Acciones operativas secundarias del documento activo.</p>
                     </div>
-                    <div class="row"> 
-                        <div class="col-sm-12 col-lg-12">
-                            <div class="input-group mb-3">
-                                <div class="d-flex input-group">  
-                                    <div class="btn-group dropend">
-                                        <button type="button"class="btn btn-outline-success "> 
-                                                <span>{{documentoActivo!.clienteNombre!}}</span>
-                                        </button>
-                                        <button type="button" class="btn btn-info" 
-                                        title="Añadir cliente al Documento" 
-                                        (click)='buscarCliente()'><i class="bi bi-person"></i>&nbsp;
-                                   </button>
-                                </div>
-                            </div>
-                        
-                        </div>
-                    </div> 
-               </div>
+                    <button type="button" class="btn ventas-quick-actions-modal__close" (click)="closeQuickActions()">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
                 </div>
-                <div class="col-sm-7 col-lg-4 " >
-                    <div class="row"> 
-                        <div class="col-sm-12 col-lg-12"   >
-                            <h5>Vendedor</h5>
-                        </div>
-                    </div>
-                    <div class="row"> 
-                        <div class="col-sm-12 col-lg-12"   >
-                            <div class="input-group mb-3">
-                                <elemt-empDropdown   (selectionChange)="cambiarVendedor($event);"
-                               [selectedValue]="empleadoActivo" 
-                                ></elemt-empDropdown> </div>
-                        </div>
-                    </div> 
-                    
+
+                <div class="ventas-quick-actions-grid">
+                    <button type="button" class="btn app-chip-button app-chip-button--soft" title="Remision" (click)="closeQuickActions(); asignarPagosARemision()">
+                        <i class="bi bi-receipt"></i>
+                        Remision
+                    </button>
+                    <button *ngIf="CrtGasto" type="button" class="btn app-chip-button app-chip-button--soft" title="Ingresar nuevo gasto" (click)="closeQuickActions(); generarGasto()">
+                        <i class="bi bi-file-earmark-plus"></i>
+                        Gasto
+                    </button>
+                    <button *ngIf="cotiza" type="button" class="btn app-chip-button app-chip-button--soft" title="Guardar como cotizacion" (click)="closeQuickActions(); crearCotizacion()">
+                        <i class="bi bi-journal-check"></i>
+                        Cotizacion
+                    </button>
+                    <button type="button" class="btn app-chip-button app-chip-button--soft" title="Generar abonos de cuentas por cobrar" (click)="closeQuickActions(); generarAbonosCuentasXcobrar()">
+                        <i class="bi bi-credit-card-2-front"></i>
+                        CxC
+                    </button>
+                    <button *ngIf="planSepare" type="button" class="btn app-chip-button app-chip-button--soft" title="Plan separe" (click)="closeQuickActions()">
+                        <i class="bi bi-hand-index-thumb"></i>
+                        Plan separe
+                    </button>
+                    <button *ngIf="pasaAotraCaja" type="button" class="btn app-chip-button app-chip-button--soft" title="Mover documento a otra caja" (click)="closeQuickActions(); moverDocumentoCaja()">
+                        <i class="bi bi-arrow-left-right"></i>
+                        Mover caja
+                    </button>
+                    <button *ngIf="domicilio" type="button" class="btn app-chip-button app-chip-button--soft" title="Guardar como envio" (click)="closeQuickActions(); generarEnvio()">
+                        <img src="assets/img/img_menu_interno/deliveri_truck.png" alt="" class="ventas-shell__truck-icon">
+                        Envio
+                    </button>
+                    <button *ngIf="libranza" type="button" class="btn app-chip-button app-chip-button--soft" title="Libranza" (click)="closeQuickActions(); generarLibranza()">
+                        <i class="bi bi-wallet2"></i>
+                        Libranza
+                    </button>
+                    <button *ngIf="ingresoServicio" type="button" class="btn app-chip-button app-chip-button--soft" title="Ingreso de servicio" (click)="closeQuickActions(); ingresarServicio()">
+                        <i class="bi bi-car-front-fill"></i>
+                        Servicio
+                    </button>
                 </div>
-                <div class="col-sm-5 col-lg-3 " >
-                    <div class="row"> 
-                        <div class="col-sm-12 col-lg-12"   >
-                            <h5>Documentos</h5>
-                        </div>
-                    </div> 
-                    <div class="row"> 
-                        <div class="col-sm-12 col-lg-12"   >
-                            <div class="input-group mb-3">  
-                                <elemt-docDropdown [options] ="documentos" (clickBtnRefress)="getDocumentos()" (selectionChange)="cambiarDocumentoActivo($event);"
-                                [selectedValue]="documentoActivo" ></elemt-docDropdown> 
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-sm-12 col-lg-2">
-                    <div class="row"> 
-                        <div class="col-sm-12 col-lg-12"   >
-                            <h5>Cod producto</h5>
-                        </div>
-                    </div> 
-                    <div class="row"> 
-                        <div class="col-sm-12 col-lg-12"   >
-                            <div class="input-group mb-3">
-                                <input class="o_input form-control" (focus)="codigoProducto = ''" (keyup.enter)='buscarProducto()' #codProd type="text" [(ngModel)]="codigoProducto"  placeholder="Buscar" aria-label="Buscar"/>
-                           
-                                <button (click)='buscarProducto()' class="btn btn-outline-secondary" type="button">
-                                    <i class="bi bi-search"></i>
+            </section>
+        </div>
+
+        <div class="ventas-shell__grid">
+            <section class="ventas-shell__main">
+                <div class="app-panel ventas-card ventas-card--controls">
+                    <div class="ventas-form-grid">
+                        <div class="ventas-field ventas-field--client">
+                            <label class="ventas-field__label">Cliente</label>
+                            <div class="ventas-client-picker">
+                                <button type="button" class="btn ventas-client-picker__name" title="Seleccionar cliente" (click)="buscarCliente()">
+                                    <span>{{ documentoActivo!.clienteNombre || 'CLIENTE GENERICO' }}</span>
+                                    <i class="bi bi-person-plus ventas-client-picker__icon" aria-hidden="true"></i>
                                 </button>
                             </div>
                         </div>
-                    </div>
-                   
-                </div> 
-            </div>
-            <div class="row pt-3 ">
-                <div class="col-sm-12 tablaProductos" >
 
-                    <table class="table table-striped table-bordered">
-                        <thead class="thead-inverse">
-                            <tr  style="text-align: center;" >
-                                <th>&nbsp;</th>
-                                <th>Descripcion</th>
-                                <th>Precio</th>
-                                <th>Descuento</th>
-                                <th>IVA</th>
-                                <th>Cant</th>
-                                <th>Total</th> <th>&nbsp;</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr  *ngFor="let item of documentoActivo!.listado">
-                                <td class="centrado">
-                                    <i *ngIf="item.estado_linea_venta == 'A'" class="bi bi-x-circle" style="cursor:pointer" (click)="eliminarLinea(item)"></i>
-                                </td>
-                                <td>{{item.nombreProducto}}</td>
-                                <td style="text-align: right;" >{{item.presioSinIVa|currency}}</td>
-                                <td style="text-align: right;" >{{item.descuento|currency}}</td>
-                                <td style="text-align: right;" >{{item.IVA|currency}}</td>
-                                <td style="text-align: right;" >{{item.cantidadVendida}}</td>
-                                <td style="text-align: right;" >{{item.valorTotal|currency}}</td>
-                                <td class="centrado">
-                                    <i *ngIf="item.estado_linea_venta == 'A'" class="bi bi-pencil" style="cursor:pointer" (click)="editar(item)"></i>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                        <div class="ventas-field">
+                            <label class="ventas-field__label">Vendedor</label>
+                            <div class="ventas-select-wrap">
+                                <elemt-empDropdown (selectionChange)="cambiarVendedor($event);" [selectedValue]="empleadoActivo"></elemt-empDropdown>
+                            </div>
+                        </div>
+
+                        <div class="ventas-field">
+                            <label class="ventas-field__label">Documento</label>
+                            <div class="ventas-select-wrap">
+                                <elemt-docDropdown
+                                    [options]="documentos"
+                                    (clickBtnRefress)="getDocumentos()"
+                                    (selectionChange)="cambiarDocumentoActivo($event);"
+                                    [selectedValue]="documentoActivo"
+                                ></elemt-docDropdown>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-              
-            </div>            
+
+                <div class="app-panel ventas-card ventas-card--table">
+                    <div class="ventas-card__head">
+                        <div>
+                            <h2 class="ventas-card__title">Detalle del documento</h2>
+                            <p class="ventas-card__subtitle">
+                                {{ documentoActivo!.listado.length || 0 }} lineas cargadas en la venta actual.
+                            </p>
+                        </div>
+                        <span class="app-badge">Documento #{{ documentoActivo!.orden }}</span>
+                    </div>
+
+                    <div class="table-responsive tablaProductos">
+                        <table class="table table-striped table-bordered">
+                            <thead class="thead-inverse">
+                                <tr>
+                                    <th class="ventas-table__actions-head"></th>
+                                    <th>Descripcion</th>
+                                    <th>Precio</th>
+                                    <th>Descuento</th>
+                                    <th>IVA</th>
+                                    <th>Cantidad</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let item of documentoActivo!.listado">
+                                    <td class="centrado ventas-table__actions-cell">
+                                        <button *ngIf="item.estado_linea_venta == 'A'" type="button" class="btn ventas-table__icon" (click)="eliminarLinea(item)" title="Eliminar linea">
+                                            <i class="bi bi-x-circle"></i>
+                                        </button>
+                                        <button *ngIf="item.estado_linea_venta == 'A'" type="button" class="btn ventas-table__icon is-edit" (click)="editar(item)" title="Editar linea">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                    </td>
+                                    <td>
+                                        <div class="ventas-table__product">
+                                            <strong>{{ item.nombreProducto }}</strong>
+                                        </div>
+                                    </td>
+                                    <td class="text-end">{{ item.presioSinIVa | currency }}</td>
+                                    <td class="text-end">{{ item.descuento | currency }}</td>
+                                    <td class="text-end">{{ item.IVA | currency }}</td>
+                                    <td class="text-end">{{ item.cantidadVendida }}</td>
+                                    <td class="text-end ventas-table__total">{{ item.valorTotal | currency }}</td>
+                                </tr>
+                                <tr *ngIf="!documentoActivo!.listado || documentoActivo!.listado.length === 0">
+                                    <td colspan="7">
+                                        <div class="ventas-empty">
+                                            <i class="bi bi-bag-dash"></i>
+                                            <strong>No hay productos cargados</strong>
+                                            <span>Busca un producto por codigo o usa la busqueda auxiliar para empezar la venta.</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <aside class="ventas-shell__side">
+                <div class="app-panel ventas-card">
+                    <div class="ventas-card__head">
+                        <div>
+                            <h2 class="ventas-card__title">Medios de pago</h2>
+                            <p class="ventas-card__subtitle">Resumen de valores preparados para cierre.</p>
+                        </div>
+                    </div>
+
+                    <div class="ventas-payment-list">
+                        <div class="ventas-payment-item" *ngFor="let medio of MedioP; let i = index">
+                            <div class="ventas-payment-item__label">
+                                <strong>{{ medio.nombre }}</strong>
+                            </div>
+                            <input class="form-control app-input ventas-payment-item__input" readonly type="number" [(ngModel)]="MedioP[i].valor_aux">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="app-panel ventas-card">
+                    <div class="ventas-card__head">
+                        <div>
+                            <h2 class="ventas-card__title">Resumen de la venta</h2>
+                            <p class="ventas-card__subtitle">Totales calculados del documento activo.</p>
+                        </div>
+                    </div>
+
+                    <div class="app-stat-grid">
+                        <div class="app-stat-card">
+                            <span class="app-stat-card__label">Subtotal</span>
+                            <span class="app-stat-card__value">{{ documentoActivo!.valorParcial | currency }}</span>
+                        </div>
+                        <div class="app-stat-card">
+                            <span class="app-stat-card__label">Descuento</span>
+                            <span class="app-stat-card__value">{{ documentoActivo!.descuento | currency }}</span>
+                        </div>
+                        <div class="app-stat-card">
+                            <span class="app-stat-card__label">IVA</span>
+                            <span class="app-stat-card__value">{{ documentoActivo!.valorIVA | currency }}</span>
+                        </div>
+                        <div class="app-stat-card">
+                            <span class="app-stat-card__label">Otros impuestos</span>
+                            <span class="app-stat-card__value">{{ '0' | currency }}</span>
+                        </div>
+                    </div>
+
+                    <div class="app-keyvalue-list ventas-summary-list ventas-summary-list--compact">
+                        <div class="app-keyvalue">
+                            <span class="app-keyvalue__label">Total</span>
+                            <span class="app-keyvalue__value">{{ documentoActivo!.valorTotal | currency }}</span>
+                        </div>
+                        <div class="app-keyvalue">
+                            <span class="app-keyvalue__label">Ajuste al peso</span>
+                            <span class="app-keyvalue__value">{{ documentoActivo!.ajusteAlpeso | currency }}</span>
+                        </div>
+                    </div>
+
+                    <div class="ventas-summary-footer">
+                        <div class="app-keyvalue ventas-summary-footer__item">
+                            <span class="app-keyvalue__label">Total factura</span>
+                            <span class="app-keyvalue__value">{{ documentoActivo!.totalFactura | currency }}</span>
+                        </div>
+                    </div>
+                </div>
+            </aside>
         </div>
-        <div class="col-sm-12 col-lg-3 borde ps-3 pe-3">
-       
-          <div class="row">
-            <div class="col-sm-12 col-lg-12"  > 
-                <table class="table " style="width: 100%;">
-                <tr>
-                    <th colspan="2">
-                        <h3 style="color: coral;">Medios de Pago</h3>
-                    </th>
-                </tr>
-                <tr *ngFor="let medio of MedioP; let i = index">
-                    <td   style="text-align: right; text-wrap: nowrap; font-weight: bold;" >{{medio.nombre}}</td>
-                    <td><input class="o_input form-control" readonly type="number" [(ngModel)]='MedioP[i].valor_aux'></td>
-                </tr>
-                </table>
-            </div>
-          </div>
-        </div>  
-    </div> 
-    <div class="row ps-1 pe-1 pt-1">  
-                <div class="col-sm-12 col-lg-2 borde">
-                    <div class="row"> 
-                        <div class="col-sm-12 col-lg-12"   >
-                            <h5>Sub Total</h5>
-                        </div>
-                    </div>
-                    <div class="row"> 
-                        <div class="col-sm-12 col-lg-12 text-end"   >
-                            <h5>{{documentoActivo!.valorParcial | currency}}</h5>
-                        </div>
-                    </div> 
-                </div>
-                <div class="col-sm-12 col-lg-2 borde">
-                    <div class="row"> 
-                        <div class="col-sm-12 col-lg-12"   >
-                            <h5>Descuento</h5>
-                        </div>
-                    </div>
-                    <div class="row"> 
-                        <div class="col-sm-12 col-lg-12 text-end"   >
-                            <h5>{{documentoActivo!.descuento | currency}}</h5>
-                        </div>
-                    </div> 
-                </div>
-                <div class="col-sm-12 col-lg-1 borde">
-                    <div class="row"> 
-                        <div class="col-sm-12 col-lg-12"   >
-                            <h5>Iva</h5>
-                        </div>
-                    </div>
-                    <div class="row"> 
-                        <div class="col-sm-12 col-lg-12 text-end"   >
-                            <h5>{{documentoActivo!.valorIVA | currency}}</h5>
-                        </div> 
-                    </div> 
-                </div>
-                <div class="col-sm-12 col-lg-2 borde">
-                    <div class="row"> 
-                        <div class="col-sm-12 col-lg-12"   >
-                            <h5>Otros impuestos</h5>
-                        </div>
-                    </div>
-                    <div class="row"> 
-                        <div class="col-sm-12 col-lg-12 text-end"   >
-                         <h5>{{'0' | currency}}</h5>
-                        </div> 
-                    </div> 
-                </div>   
-            <div class="col-sm-12 col-lg-2 borde">
-                <div class="row"> 
-                    <div class="col-sm-12 col-lg-12"   >
-                        <h5>Total</h5>
-                    </div>
-                </div>
-                <div class="row"> 
-                    <div class="col-sm-12 col-lg-12 text-end"   >
-                        <h5>{{documentoActivo!.valorTotal | currency}}</h5>
-                    </div> 
-                </div> 
-            </div>
-            <div class="col-sm-12 col-lg-1 borde">
-                <div class="row"> 
-                    <div class="col-sm-12 col-lg-12"   >
-                        <h5>Ajuste</h5>
-                    </div>
-                </div>
-                <div class="row"> 
-                    <div class="col-sm-12 col-lg-12 text-end"   >
-                        <h5>{{documentoActivo!.ajusteAlpeso | currency}}</h5>
-                    </div> 
-                </div> 
-            </div>
-            <div class="col-sm-12 col-lg-2 borde">
-                <div class="row"> 
-                    <div class="col-sm-12 col-lg-12"   >
-                        <h5>Total Factura</h5>
-                    </div>
-                </div>
-                <div class="row"> 
-                    <div class="col-sm-12 col-lg-12 text-end"   >
-                       <h5>{{documentoActivo!.totalFactura | currency}}</h5> 
-                    </div> 
-                </div> 
-            </div>  
-</div> 
-</div>
+    </section>
 </div>
 
 <ng-template #ErrorEstablecimiento>

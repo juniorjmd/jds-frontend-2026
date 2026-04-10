@@ -1,0 +1,36 @@
+.cxp-page {
+    display: grid;
+    gap: 1rem;
+    width: 100%;
+}
+
+.cxp-page__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.cxp-page__title {
+    margin: 0;
+    color: var(--app-text);
+    font-size: 1.05rem;
+    font-weight: 800;
+}
+
+.cxp-page__surface {
+    width: 100%;
+}
+
+.cxp-page__table-wrap {
+    width: 100%;
+    padding: 0 !important;
+}
+
+.cxp-page__table-wrap .table {
+    width: 100% !important;
+}
+
+.cxp-page__empty {
+    padding: 1rem 0;
+    color: var(--app-text-soft);
+}

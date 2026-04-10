@@ -1,0 +1,73 @@
+<div class="servicio-dialog">
+    <div class="servicio-dialog__header">
+        <div class="servicio-dialog__copy">
+            <span class="app-badge">Vehiculos</span>
+            <h2 class="servicio-dialog__title">{{ titulo }}</h2>
+            <p class="servicio-dialog__subtitle">{{ subtitulo }}</p>
+        </div>
+        <button type="button" class="servicio-dialog__close" (click)="cerrar()" aria-label="Cerrar formulario">
+            <i class="bi bi-x-lg"></i>
+        </button>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-md-6">
+            <label class="servicio-dialog__label" for="servicioNombre">Nombre</label>
+            <input
+                id="servicioNombre"
+                type="text"
+                [(ngModel)]="servicio.nombre"
+                class="form-control app-input"
+                placeholder="Nombre del servicio">
+        </div>
+
+        <div class="col-md-6">
+            <label class="servicio-dialog__label" for="servicioEstado">Estado</label>
+            <select
+                id="servicioEstado"
+                [(ngModel)]="servicio.estado"
+                class="form-control app-select">
+                <option [ngValue]="0">Escoger estado</option>
+                <option [ngValue]="1">Activo</option>
+                <option [ngValue]="2">Inactivo</option>
+            </select>
+        </div>
+
+        <div class="col-md-6">
+            <label class="servicio-dialog__label" for="servicioTipo">Tipo de servicio</label>
+            <select
+                id="servicioTipo"
+                [(ngModel)]="servicio.tipo_servicio"
+                class="form-control app-select">
+                <option [ngValue]="0">Escoger tipo de servicio</option>
+                <option *ngFor="let tipo of data.tiposServicio" [ngValue]="tipo.id">{{ tipo.nombre }}</option>
+            </select>
+        </div>
+
+        <div class="col-md-6">
+            <label class="servicio-dialog__label" for="servicioPrecio">Precio general</label>
+            <input
+                id="servicioPrecio"
+                type="number"
+                [(ngModel)]="servicio.precio_general"
+                class="form-control app-input"
+                placeholder="0">
+        </div>
+
+        <div class="col-12">
+            <label class="servicio-dialog__label" for="servicioDescripcion">Descripcion</label>
+            <textarea
+                id="servicioDescripcion"
+                [(ngModel)]="servicio.descripcion"
+                class="form-control app-input servicio-dialog__textarea"
+                placeholder="Descripcion breve del servicio"></textarea>
+        </div>
+    </div>
+
+    <div class="app-toolbar servicio-dialog__actions">
+        <button type="button" class="app-chip-button" (click)="cerrar()">Cancelar</button>
+        <button type="button" class="app-chip-button app-chip-button--primary" (click)="guardar()">
+            {{ esEdicion ? 'Guardar cambios' : 'Crear servicio' }}
+        </button>
+    </div>
+</div>

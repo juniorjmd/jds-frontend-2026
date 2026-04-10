@@ -1,18 +1,386 @@
-a {
-    color: white !important
+:host {
+    display: contents;
 }
 
-.dropdown-item:focus {
-    background-color: #9db8d4!important
+.app-shell-nav {
+    display: contents;
 }
 
-.dropdown-item:hover {
-    background-color: #9db8d4!important
+.app-topbar {
+    padding: 1rem 1rem 0.75rem;
+    z-index: 1030;
+    grid-area: header;
 }
 
-.sticky-top {
-    position: sticky;
-    top: 0;
-    z-index: 1030; /* Z-index por encima del contenido */
-  }
-  
+.app-topbar__surface {
+    display: grid;
+    gap: 1rem;
+    padding: 1.1rem;
+    border-radius: 18px;
+    border: 1px solid rgba(54, 44, 38, 0.12);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(255, 255, 255, 0.84));
+    backdrop-filter: blur(18px);
+    box-shadow: 0 16px 40px rgba(42, 28, 20, 0.1);
+}
+
+.app-topbar__brand {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    cursor: pointer;
+}
+
+.app-topbar__menu-toggle {
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border-radius: 12px;
+    border: 1px solid rgba(54, 44, 38, 0.12);
+    background: rgba(255, 255, 255, 0.88);
+    color: var(--app-text);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.app-topbar__logo-wrap {
+    width: 56px;
+    height: 56px;
+    display: grid;
+    place-items: center;
+    border-radius: 14px;
+    background: linear-gradient(135deg, rgba(143, 79, 47, 0.14), rgba(31, 108, 99, 0.12));
+    border: 1px solid rgba(143, 79, 47, 0.12);
+    flex-shrink: 0;
+}
+
+.app-topbar__logo {
+    object-fit: contain;
+}
+
+.app-topbar__brand-copy {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.app-topbar__brand-copy strong {
+    color: var(--app-text);
+    font-size: 1.85rem;
+    line-height: 1;
+}
+
+.app-topbar__eyebrow {
+    color: var(--app-text-soft);
+    font-size: 0.84rem;
+    margin-top: 0.3rem;
+    font-weight: 600;
+}
+
+.app-topbar__search {
+    position: relative;
+    display: flex;
+    align-items: center;
+    min-width: 0;
+}
+
+.app-topbar__search-icon {
+    position: absolute;
+    left: 0.95rem;
+    color: var(--app-text-soft);
+    font-size: 1.2rem;
+    pointer-events: none;
+}
+
+.app-topbar__search-input {
+    padding-left: 2.7rem !important;
+    border-radius: 12px !important;
+    min-height: 52px;
+    color: var(--app-text-soft) !important;
+}
+
+.app-topbar__module-banner {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.8rem 1rem;
+    min-height: 52px;
+    padding: 0.45rem 0.25rem;
+}
+
+.app-topbar__module-main {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    min-width: 0;
+}
+
+.app-topbar__module-main strong {
+    font-size: 1.05rem;
+    line-height: 1.1;
+    color: var(--app-text);
+    white-space: nowrap;
+}
+
+.app-topbar__module-help {
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border-radius: 50%;
+    border: 1px solid rgba(54, 44, 38, 0.12);
+    background: rgba(255, 255, 255, 0.72);
+    color: var(--app-text-soft);
+    font-size: 0.95rem;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.app-topbar__module-meta {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 0.55rem;
+}
+
+.app-topbar__module-chip {
+    min-width: 138px;
+    padding: 0.5rem 0.75rem;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.76);
+    border: 1px solid rgba(54, 44, 38, 0.1);
+}
+
+.app-topbar__module-chip span {
+    display: block;
+    color: var(--app-text-soft);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.18rem;
+}
+
+.app-topbar__module-chip strong {
+    display: block;
+    color: var(--app-text);
+    font-size: 0.92rem;
+    line-height: 1.2;
+}
+
+.app-topbar__actions {
+    display: flex;
+    gap: 0.9rem;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.app-topbar__icon {
+    width: 48px;
+    height: 48px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+}
+
+.app-topbar__user {
+    position: relative;
+}
+
+.app-topbar__user-button {
+    min-width: 220px;
+    max-width: 100%;
+    border: 1px solid rgba(54, 44, 38, 0.12);
+    background: rgba(255, 255, 255, 0.88);
+    border-radius: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.85rem;
+    padding: 0.8rem 0.9rem;
+    color: var(--app-text);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.app-topbar__user-avatar {
+    width: 40px;
+    height: 40px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--app-primary), var(--app-primary-strong));
+    color: #fff;
+    font-weight: 800;
+    flex-shrink: 0;
+}
+
+.app-topbar__user-meta {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+    min-width: 0;
+}
+
+.app-topbar__user-meta small {
+    color: var(--app-text-soft);
+    line-height: 1.1;
+}
+
+.app-topbar__user-meta strong {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.app-topbar__user-menu {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 0.5rem);
+    min-width: 210px;
+    padding: 0.45rem;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.96);
+    border: 1px solid rgba(54, 44, 38, 0.12);
+    box-shadow: 0 18px 36px rgba(42, 28, 20, 0.16);
+    z-index: 20;
+}
+
+.app-topbar__user-link {
+    width: 100%;
+    display: block;
+    padding: 0.75rem 0.85rem;
+    border: 0;
+    background: transparent;
+    color: var(--app-text);
+    text-align: left;
+    border-radius: 10px;
+    text-decoration: none;
+}
+
+.app-topbar__user-link:hover {
+    background: rgba(143, 79, 47, 0.08);
+}
+
+.app-topbar__user-link.is-danger {
+    color: var(--app-danger);
+}
+
+.app-sidebar-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.18);
+    z-index: 1040;
+}
+
+.app-sidebar {
+    position: fixed;
+    left: 0.6rem;
+    top: 8.2rem;
+    bottom: 1rem;
+    width: 84px;
+    z-index: 1050;
+    pointer-events: none;
+}
+
+.app-sidebar__surface {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem;
+    width: 100%;
+    height: 100%;
+    border-radius: 12px;
+    background: linear-gradient(180deg, #2562eb 0%, #285be0 52%, #2047c2 100%);
+    box-shadow: 0 18px 32px rgba(33, 85, 219, 0.24);
+    overflow: hidden;
+    pointer-events: auto;
+    transition: width 0.22s ease, box-shadow 0.22s ease, transform 0.22s ease;
+}
+
+.app-sidebar__title {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    color: #fff;
+}
+
+.app-sidebar__eyebrow {
+    color: rgba(255, 255, 255, 0.72);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.68rem;
+    font-weight: 700;
+}
+
+.app-sidebar__nav {
+    min-height: 0;
+    overflow: auto;
+    flex: 1 1 auto;
+    padding-right: 0.15rem;
+}
+
+.app-sidebar__menu {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.app-sidebar.app-sidebar-collapsed .app-sidebar__surface {
+    width: 84px;
+    padding-left: 0.55rem;
+    padding-right: 0.55rem;
+}
+
+.app-sidebar.is-expanded .app-sidebar__surface {
+    width: min(320px, calc(100vw - 2rem));
+    box-shadow: 0 24px 48px rgba(15, 23, 42, 0.26);
+}
+
+@media (min-width: 1200px) {
+    .app-topbar {
+        padding: 0;
+    }
+
+    .app-topbar__surface {
+        grid-template-columns: auto minmax(260px, 1fr) auto;
+        align-items: center;
+    }
+}
+
+@media (max-width: 1199px) {
+    .app-topbar__brand {
+        flex-wrap: wrap;
+    }
+
+    .app-topbar__module-banner {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .app-topbar__module-main,
+    .app-topbar__module-meta {
+        justify-content: flex-start;
+    }
+
+    .app-sidebar {
+        left: 0.75rem;
+        right: 0.75rem;
+        top: 7.35rem;
+        bottom: 0.75rem;
+        width: auto;
+    }
+
+    .app-sidebar.app-sidebar-collapsed {
+        display: none;
+    }
+
+    .app-sidebar.is-expanded .app-sidebar__surface {
+        width: min(320px, 100%);
+        max-width: min(320px, 100%);
+    }
+}

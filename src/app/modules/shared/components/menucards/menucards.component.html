@@ -1,16 +1,14 @@
- 
-<div>
-<a class="link_sin" [routerLink]="menuDetalle.direccion">
-    <div class="card text-center" style="cursor:pointer;width: 100%;  background-color :  transparent !important;border:none !important">
-        <div [ngStyle]="{'background-image': 'url('+menuDetalle.img+')' } " class="icono_aplicacion ">
-        </div>
-        <div class="card-body center ">
-            <h5 class="card-title " style="margin:auto;font-family: 'Lucida Sans', 'Lucida Sans Regular', 
-        'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif ; color: white; ">
-                {{menuDetalle.display_nombre}}</h5>
+<a class="menu-card-link" [routerLink]="menuDetalle.direccion">
+  <article class="menu-card text-center">
+    <div
+      class="menu-card__icon"
+      [ngStyle]="menuDetalle.img ? { 'background-image': 'url(' + menuDetalle.img + ')' } : null"
+    ></div>
 
-        </div>
-
+    <div class="card-body menu-card__body">
+      <h5 class="card-title menu-card__title">
+        {{ menuDetalle.display_nombre }}
+      </h5>
     </div>
+  </article>
 </a>
-</div>

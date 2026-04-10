@@ -1,2 +1,20 @@
+<section class="module-shell">
+    <nav class="module-shell__tabs" aria-label="Secciones de inventarios">
+        <a [routerLink]="['inicio']" routerLinkActive="is-active" class="module-shell__tab" [routerLinkActiveOptions]="{ exact: true }">Resumen</a>
+        <a [routerLink]="['bodegas']" routerLinkActive="is-active" class="module-shell__tab">Bodegas</a>
+        <a [routerLink]="['categorias']" routerLinkActive="is-active" class="module-shell__tab">Categorias</a>
+        <a [routerLink]="['productos']" routerLinkActive="is-active" class="module-shell__tab">Productos</a>
+        <a [routerLink]="['marcas']" routerLinkActive="is-active" class="module-shell__tab">Marcas</a>
+        <a [routerLink]="['existencias']" routerLinkActive="is-active" class="module-shell__tab">Existencias</a>
+        <a [routerLink]="['lotes']" routerLinkActive="is-active" class="module-shell__tab">Lotes</a>
+        <a [routerLink]="['gruposProductos']" routerLinkActive="is-active" class="module-shell__tab">Grupos</a>
+        <a [routerLink]="['descuentos']" routerLinkActive="is-active" class="module-shell__tab">Descuentos</a>
+        <a [routerLink]="['actividades']" routerLinkActive="is-active" class="module-shell__tab">Act. descuento</a>
+        <a [routerLink]="['inventario']" routerLinkActive="is-active" class="module-shell__tab">Inventario</a>
+        <a [routerLink]="['inventario_por_plantilla']" routerLinkActive="is-active" class="module-shell__tab">Por plantilla</a>
+    </nav>
 
-<router-outlet></router-outlet>
+    <div class="module-shell__content">
+        <router-outlet></router-outlet>
+    </div>
+</section>

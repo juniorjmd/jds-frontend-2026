@@ -1,22 +1,12 @@
-<div class="container-fluid  fondoGeneral confondoBrillante pt-3">
-    <div class="row">
-        <!-- Menú lateral -->
-        <div class="col-md-3 col-lg-2 d-md-block sidebar collapse">
-            <div class="list-group">
-                <a  [routerLink]="[ 'desdeCaja'] "  routerLinkActive="active"  class="list-group-item list-group-item-action ">Desde Caja</a>
-                <a  [routerLink]="[ 'asignarSaldos'] "  routerLinkActive="active"  class="list-group-item list-group-item-action">Asignar Saldos Cuenta</a>
-                <a  [routerLink]="[ 'moverHaciaMuchasCnts'] "  routerLinkActive="active"  class="list-group-item list-group-item-action">Desde una cuenta a muchas</a>
-                <a  [routerLink]="[ 'moverDesdeMuchasCnts'] "  routerLinkActive="active"  class="list-group-item list-group-item-action">Hacia una cuenta de muchas</a>
-                
-              
+<section class="module-shell">
+    <nav class="module-shell__tabs" aria-label="Secciones de traslados contables">
+        <a [routerLink]="['desdeCaja']" routerLinkActive="is-active" class="module-shell__tab">Desde caja</a>
+        <a [routerLink]="['asignarSaldos']" routerLinkActive="is-active" class="module-shell__tab">Asignar saldos</a>
+        <a [routerLink]="['moverHaciaMuchasCnts']" routerLinkActive="is-active" class="module-shell__tab">Una a muchas</a>
+        <a [routerLink]="['moverDesdeMuchasCnts']" routerLinkActive="is-active" class="module-shell__tab">Muchas a una</a>
+    </nav>
 
-
-            </div>
-        </div>
-        <!-- Contenido principal -->
-        <div class="col-md-9 col-lg-10 ml-sm-auto px-md-4"> 
-            <h5>Manejo de traslados</h5>
-            <router-outlet></router-outlet>
-        </div>
+    <div class="module-shell__content">
+        <router-outlet></router-outlet>
     </div>
-</div>
+</section>

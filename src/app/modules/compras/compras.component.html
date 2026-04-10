@@ -1,25 +1,17 @@
-<div class="container-fluid  fondoGeneral confondoBrillante pt-3">
-    <div class="row">
-        <!-- Menú lateral -->
-        <div class="col-md-3 col-lg-2 d-md-block sidebar collapse">
-            <div class="list-group">
-                <a  [routerLink]="[ 'listar'] "  routerLinkActive="active"  class="list-group-item list-group-item-action ">Listar</a>
-                <a  [routerLink]="[ 'crear'] "  routerLinkActive="active"  class="list-group-item list-group-item-action">Nueva Compra</a>
-                <a  [routerLink]="[ 'editar'] "  routerLinkActive="active"  class="list-group-item list-group-item-action">Editar Compra</a> 
-                <a  [routerLink]="[ 'anular'] "  routerLinkActive="active"  class="list-group-item list-group-item-action">crear Notas Debito</a> 
-                <a  [routerLink]="[ 'listarAnulaciones'] "  routerLinkActive="active"  class="list-group-item list-group-item-action">listar Notas Debito</a>
-                <a  [routerLink]="[ 'listarCxP'] "  routerLinkActive="active"  class="list-group-item list-group-item-action">listar Cuentas Por Pagar</a>
-                <a  [routerLink]="[ 'listarPagosProveedor'] "  routerLinkActive="active"  class="list-group-item list-group-item-action">listar Pago Proveedor</a>
-                <a  [routerLink]="[ 'abonarCredito'] "  routerLinkActive="active"  class="list-group-item list-group-item-action">Abono cuentas por pagar</a>
-                
-              
+<section class="compras-shell">
+    <nav class="compras-shell__tabs" aria-label="Secciones de compras">
+        <a
+            *ngFor="let section of sections"
+            class="compras-shell__tab"
+            [routerLink]="[section.route]"
+            routerLinkActive="is-active"
+            [routerLinkActiveOptions]="{ exact: true }"
+        >
+            {{ section.label }}
+        </a>
+    </nav>
 
-
-            </div>
-        </div>
-        <!-- Contenido principal -->
-        <div class="col-md-9 col-lg-10 ml-sm-auto px-md-4"> 
-            <router-outlet></router-outlet>
-        </div>
+    <div class="compras-shell__content">
+        <router-outlet></router-outlet>
     </div>
-</div>
+</section>

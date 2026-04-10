@@ -1,10 +1,10 @@
-<div class="container-fluid  " >
-    <!-- Título principal -->
-    <div class="row" >
-      <div class="col-sm-12" style="color: aliceblue;">    <h4 >Listar Notas Debito</h4></div></div>
-      <div class=" container-sub" style="width: 100% !important;margin: 0;padding: 15px;">
-    <div class="row " *ngIf="documentos && documentos.length > 0">
-        <div class="col-sm-12">
+<section class="compras-list-page">
+    <div class="compras-list-page__header">
+        <h4 class="compras-list-page__title">Pagos proveedor</h4>
+    </div>
+
+    <div class="compras-list-page__surface" *ngIf="documentos && documentos.length > 0">
+        <div class="table-responsive compras-list-page__table-wrap">
             <table class="table table-striped">
                 <thead>
                     <tr>
@@ -34,10 +34,9 @@
             </table>
         </div>
     </div>
-    <div class="row" *ngIf="documentos && documentos.length === 0">
-        <div class="col-sm-12 text-center">
+
+    <div class="compras-list-page__empty" *ngIf="documentos && documentos.length === 0">
             <p>No se encontraron pagos.</p>
-        </div>
     </div>
-</div></div>
+</section>
 

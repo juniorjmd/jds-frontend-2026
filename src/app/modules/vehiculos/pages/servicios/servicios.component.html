@@ -1,81 +1,105 @@
 <div class="container">
-    <br>
-    <div class="row">
-        <div class="col-sm-12">
-            <h2 class="centrado">Mantenimiento a servicios a vehiculos</h2>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-sm-3"></div>
-        <div class="col-sm-3">
-            <div class="form-group">
-                <label for="exampleInputEmail1">Nombre</label>
-                <input type="text" [(ngModel)]="newServicioAVehiculo.nombre" class="form-control" aria-describedby="nombreHelp" placeholder="Nombre">
+    <section class="servicios-shell app-page">
+        <header class="app-panel servicios-shell__header">
+            <div class="servicios-shell__copy">
+                <span class="app-badge">Servicios</span>
+                <h2 class="app-title servicios-shell__title">Listado de servicios a vehiculos</h2>
+                <p class="servicios-shell__description">
+                    Consulta los registros existentes y abre el mismo formulario emergente para crear o editar.
+                </p>
             </div>
-            <div class="form-group">
-                <label for="exampleInputEmail1">Tipo de servicio</label>
-                <select [(ngModel)]="newServicioAVehiculo.tipo_servicio" (change)="mostrarServicioPorTipo()" class="form-control">
-                    <option value=0>Escoger tipoServicio</option>
-                    <option *ngFor="let tpServicio of tiposServicio" value="{{tpServicio.id}}">{{tpServicio.nombre}}</option> 
-                </select>
+
+            <div class="servicios-shell__controls">
+                <div class="servicios-shell__filter">
+                    <label for="filtroTipoServicio">Filtrar por tipo</label>
+                    <select
+                        id="filtroTipoServicio"
+                        [(ngModel)]="filtroTipoServicio"
+                        (change)="mostrarServicioPorTipo()"
+                        class="form-control app-select">
+                        <option [ngValue]="0">Todos los tipos</option>
+                        <option *ngFor="let tipo of tiposServicio" [ngValue]="tipo.id">{{ tipo.nombre }}</option>
+                    </select>
+                </div>
+
+                <button type="button" class="app-chip-button app-chip-button--primary" (click)="abrirModalServicio()">
+                    <i class="bi bi-plus-circle"></i>
+                    Crear nuevo
+                </button>
             </div>
-        </div>
-        <div class="col-sm-3">
-            <div class="form-group">
-                <label for="exampleInputEmail1">Estado</label>
-                <select [(ngModel)]="newServicioAVehiculo.estado" class="form-control">
-                    <option value=0>Estado</option>
-                    <option value=1>Activo</option>
-                    <option value=2>Inactivo</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="exampleInputEmail1">Precio General</label>
-                <input type="number" [(ngModel)]="newServicioAVehiculo.precio_general" class="form-control" aria-describedby="nombreHelp" placeholder="Nombre">
-            </div>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-sm-3"></div>
-        <div class="col-sm-3">
-            <div class="form-group">
-                <label for="exampleInputEmail1">Descripcion</label>
-                <textarea [(ngModel)]="newServicioAVehiculo.descripcion" class="form-control"></textarea>
-            </div>
-        </div>
-        <div class="col-sm-3">
-            <div class="form-group">
-                <br>
-                <div class="btn-group btn-group-toggle" data-toggle="buttons">
-                    <button type="button" (click)="manageServicioVehiculo()" class="btn btn-success">Enviar</button>
-                    <button type="button" (click)="cancelar()" class="btn btn-danger">Cancelar</button>
+        </header>
+
+        <section class="app-panel servicios-shell__table-panel" *ngIf="serviciosAmostrar.length > 0; else serviciosVacios">
+            <div class="app-toolbar app-toolbar--between servicios-shell__table-toolbar">
+                <div class="app-toolbar__group">
+                    <span class="app-badge">{{ serviciosAmostrar.length }} registros</span>
                 </div>
             </div>
-        </div>
-    </div>
-    <div class="row" style="height: 200px !important; overflow: auto;" *ngIf="serviciosAVehiculos.length > 0">
-        <div class="col-sm-12">
-            <table class="table">
-                <tr>
-                    <th>Nombre</th>
-                    <th>Descripcion</th>
-                    <th>Estado</th>
-                    <th>Precio</th>
-                    <th>Tipo Servicio</th>
-                    <th colspan="2">Opcion</th>
-                </tr>
-                <tr *ngFor="let servicioAVehiculos of serviciosAmostrar">
-                    <td>{{servicioAVehiculos.nombre}}</td>
-                    <td>{{servicioAVehiculos.descripcion}}</td>
-                    <td>{{servicioAVehiculos.nombre_estado}}</td>
-                    <td>{{servicioAVehiculos.precio_general}}</td>
-                    <td>{{servicioAVehiculos.
-                        tipo_servicio_detalle?.nombre
-                        }}</td>
-                    <td title="editar"><i class="bi bi-pencil-square boton_activo" (click)="setActualiza_servicio_vehiculo(servicioAVehiculos)"></i></td>
-                    <td title="eliminar"><i class="bi bi-trash boton_activo" (click)="borrarTipoVehiculo(servicioAVehiculos)"></i></td>
-                </tr>
-            </table>
-        </div>
-    </div>
+
+            <div class="servicios-shell__table-wrap">
+                <table class="table servicios-table">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Descripcion</th>
+                            <th>Estado</th>
+                            <th>Precio</th>
+                            <th>Tipo servicio</th>
+                            <th class="servicios-table__actions-head">Opciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let servicio of serviciosAmostrar; trackBy: trackByServicio">
+                            <td>{{ servicio.nombre }}</td>
+                            <td>{{ servicio.descripcion || 'Sin descripcion' }}</td>
+                            <td>
+                                <span
+                                    class="servicios-table__state"
+                                    [class.is-active]="servicio.estado === 1"
+                                    [class.is-inactive]="servicio.estado === 2">
+                                    {{ obtenerEstado(servicio) }}
+                                </span>
+                            </td>
+                            <td>${{ (servicio.precio_general || 0) | number:'1.0-0' }}</td>
+                            <td>{{ obtenerNombreTipo(servicio) }}</td>
+                            <td class="servicios-table__actions">
+                                <button
+                                    type="button"
+                                    class="servicios-table__action"
+                                    title="Editar servicio"
+                                    aria-label="Editar servicio"
+                                    (click)="abrirModalServicio(servicio)">
+                                    <i class="bi bi-pencil-square"></i>
+                                </button>
+                                <button
+                                    type="button"
+                                    class="servicios-table__action is-danger"
+                                    title="Eliminar servicio"
+                                    aria-label="Eliminar servicio"
+                                    (click)="borrarTipoVehiculo(servicio)">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <ng-template #serviciosVacios>
+            <section class="app-panel servicios-shell__empty">
+                <i class="bi bi-card-list servicios-shell__empty-icon"></i>
+                <h3>No hay servicios para mostrar</h3>
+                <p>
+                    {{ filtroTipoServicio > 0
+                        ? 'No existen registros para el tipo seleccionado.'
+                        : 'Todavia no has creado servicios para este modulo.' }}
+                </p>
+                <button type="button" class="app-chip-button app-chip-button--primary" (click)="abrirModalServicio()">
+                    <i class="bi bi-plus-circle"></i>
+                    Crear primer servicio
+                </button>
+            </section>
+        </ng-template>
+    </section>
 </div>

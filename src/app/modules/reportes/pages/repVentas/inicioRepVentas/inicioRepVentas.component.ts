@@ -8,25 +8,22 @@ import { usuarioService } from 'src/app/services/usuario.services';
 
 @Component({
   selector: 'app-inicio-rep-ventas', 
-  template: `<div class="container-fluid  fondoGeneral confondoBrillante pt-3 pb-3">
-  <div class="row">
-      <!-- Menú lateral -->
-      <div class="col-md-3 col-lg-2 d-md-block sidebar collapse">
-          <div class="list-group">
-          <a class="list-group-item list-group-item-action" routerLinkActive="active" 
+  template: `<section class="module-shell">
+  <nav class="module-shell__tabs" aria-label="Secciones de reportes de ventas">
+      <a
+          class="module-shell__tab"
+          routerLinkActive="is-active"
           *ngFor="let item of menusUsuario"
-          [routerLink]="item.direccion"><span [innerHTML] = "item.img"></span> {{item.display_nombre}}
-          </a> 
- 
-        </div>
-      </div>
-      <!-- Contenido principal -->
-      <div class="col-md-9 col-lg-10 ml-sm-auto px-md-4">
-          <h2>Reportes de Ventas:</h2>
-          <router-outlet></router-outlet>
-      </div>
+          [routerLink]="item.direccion"
+      >
+          {{ item.display_nombre }}
+      </a>
+  </nav>
+
+  <div class="module-shell__content">
+      <router-outlet></router-outlet>
   </div>
-</div>
+</section>
 `,
   styleUrls: ['./inicioRepVentas.component.css'], 
 })

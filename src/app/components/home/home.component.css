@@ -1,0 +1,30 @@
+.home-shell {
+    min-height: 100vh;
+    position: relative;
+}
+
+.home-shell__content {
+    padding: 0 0.45rem 0.6rem;
+}
+
+.home-shell__page {
+    min-width: 0;
+}
+
+@media (min-width: 1200px) {
+    .home-shell {
+        display: grid;
+        grid-template-columns: 84px minmax(0, 1fr);
+        grid-template-areas:
+            "header header"
+            ". content";
+        gap: 0.6rem;
+        padding: 0.6rem;
+        align-items: start;
+    }
+
+    .home-shell__content {
+        grid-area: content;
+        padding: 0;
+    }
+}

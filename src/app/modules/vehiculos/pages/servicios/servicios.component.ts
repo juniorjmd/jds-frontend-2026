@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { select } from 'src/app/interfaces/generales.interface';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
 import { ServiciosModule } from 'src/app/models/servicios/servicios.module';
 import { VehiculosService } from 'src/app/services/vehiculos.service';
 import Swal from 'sweetalert2';
@@ -7,54 +7,48 @@ import { loading } from 'src/app/models/app.loading';
 import { TiposServiciosModule } from 'src/app/models/tipos-servicios/tipos-servicios.module';
 import { CustomConsole } from 'src/app/models/CustomConsole';
 import { VehiculoMutationResponse, VehiculoServiciosResponse, VehiculoTiposServiciosResponse } from 'src/app/interfaces/vehiculos-response.interface';
+import { ModuleBannerService } from 'src/app/services/module-banner.service';
+import { ServicioVehiculoDialogComponent, ServicioVehiculoDialogResult } from '../../modals/servicio-vehiculo-dialog/servicio-vehiculo-dialog.component';
 @Component({
   selector: 'app-servicios',
   templateUrl: './servicios.component.html',
   styleUrls: ['./servicios.component.css'],
 })
-export class ServiciosComponent implements OnInit {
-  newServicioAVehiculo: ServiciosModule = new ServiciosModule('', 0, 0);
+export class ServiciosComponent implements OnInit, OnDestroy {
   serviciosAVehiculos: ServiciosModule[] = [];
   serviciosAmostrar: ServiciosModule[] = [];
   tiposServicio: TiposServiciosModule[] = [];
+  filtroTipoServicio = 0;
 
   constructor(
-    private VehiculosService: VehiculosService,
-    private loading: loading
-  ) {
-    this.getTiposServicios();
-    this.getServiciosVehiculos();
-  }
+    private vehiculosService: VehiculosService,
+    private loading: loading,
+    private dialog: MatDialog,
+    private moduleBannerService: ModuleBannerService
+  ) {}
+
   mostrarServicioPorTipo() {
-    this.serviciosAmostrar = [];
-    if (this.newServicioAVehiculo.tipo_servicio <= 0) {
-      this.serviciosAmostrar = this.serviciosAVehiculos;
+    if (this.filtroTipoServicio <= 0) {
+      this.serviciosAmostrar = [...this.serviciosAVehiculos];
+      this.syncModuleBanner();
       return;
     }
-    let cont = 0;
-    //newServicioAVehiculo.tipo_servicio
-    this.serviciosAVehiculos!.forEach((servicioAsignado: ServiciosModule) => {
-      CustomConsole.log(servicioAsignado);
 
-      if (
-        servicioAsignado.tipo_servicio.toString() ===
-        this.newServicioAVehiculo.tipo_servicio.toString()
-      ) {
-        this.serviciosAmostrar[cont] = servicioAsignado;
-        cont++;
-      }
-    });
+    this.serviciosAmostrar = this.serviciosAVehiculos.filter(
+      (servicioAsignado: ServiciosModule) =>
+        Number(servicioAsignado.tipo_servicio) === Number(this.filtroTipoServicio)
+    );
+    this.syncModuleBanner();
   }
 
   getTiposServicios() {
-    this.tiposServicio[0] = new TiposServiciosModule('', '');
     this.loading.show();
-    this.VehiculosService.getTiposServicios().subscribe({next:
+    this.vehiculosService.getTiposServicios().subscribe({next:
       (datos: VehiculoTiposServiciosResponse) => {
         CustomConsole.log(datos);
 
         if (datos.data.count > 0) {
-          this.tiposServicio = datos.data.records;
+          this.tiposServicio = this.normalizarRecords<TiposServiciosModule>(datos.data.records);
           CustomConsole.log(this.tiposServicio);
         } else {
           this.tiposServicio = [];
@@ -62,13 +56,29 @@ export class ServiciosComponent implements OnInit {
       }, error: (error) => {
         this.loading.hide();
         CustomConsole.log(error);
-        Swal.fire(error.error.error, '', 'error');
+        Swal.fire(this.vehiculosService.getErrorMessage(error), '', 'error');
       },complete:()=>  this.loading.hide() }
     );
   }
-  public setActualiza_servicio_vehiculo(tipo: ServiciosModule) {
-    this.newServicioAVehiculo = tipo;
+
+  abrirModalServicio(servicio?: ServiciosModule): void {
+    this.dialog
+      .open(ServicioVehiculoDialogComponent, {
+        width: 'min(760px, 95vw)',
+        autoFocus: false,
+        data: {
+          servicio,
+          tiposServicio: this.tiposServicio
+        }
+      })
+      .afterClosed()
+      .subscribe((resultado?: ServicioVehiculoDialogResult) => {
+        if (resultado?.saved) {
+          this.getServiciosVehiculos();
+        }
+      });
   }
+
   public borrarTipoVehiculo(tipo: ServiciosModule) {
     Swal.fire({
       title: `Seguro que quiere borrar el servicio a vehiculo : "${tipo.nombre}"`,
@@ -77,26 +87,28 @@ export class ServiciosComponent implements OnInit {
     }).then((result) => {
       /* Read more about isConfirmed, isDenied below */
       if (result.isConfirmed) {
-        this.VehiculosService.eliminarServicios(tipo).subscribe(
-          (respuesta: VehiculoMutationResponse) => {
+        this.vehiculosService.eliminarServicios(tipo).subscribe({
+          next: (respuesta: VehiculoMutationResponse) => {
             CustomConsole.log(respuesta);
             if (respuesta.ok) {
               this.getServiciosVehiculos();
               Swal.fire('Elemento eliminado con exito!', '', 'success');
             }
+          },
+          error: (error) => {
+            Swal.fire(this.vehiculosService.getErrorMessage(error), '', 'error');
           }
-        );
+        });
       }
     });
   }
   getServiciosVehiculos() {
-    this.serviciosAVehiculos[0] = new ServiciosModule('', 0, 0);
     this.loading.show();
-    this.VehiculosService.getServicios().subscribe({next:
+    this.vehiculosService.getServicios().subscribe({next:
       (datos: VehiculoServiciosResponse) => {
         CustomConsole.log(datos);
         if (datos.data.count > 0) {
-          this.serviciosAVehiculos = datos.data.records;
+          this.serviciosAVehiculos = this.normalizarRecords<ServiciosModule>(datos.data.records);
           CustomConsole.log(this.serviciosAVehiculos);
         } else {
           this.serviciosAVehiculos = [];
@@ -107,46 +119,56 @@ export class ServiciosComponent implements OnInit {
       error:  (error) => {
         this.loading.hide();
         CustomConsole.log(error);
-        Swal.fire(error.error.error, '', 'error');
+        Swal.fire(this.vehiculosService.getErrorMessage(error), '', 'error');
       }
 
   });
   }
 
-  manageServicioVehiculo(): any {
-    if (this.newServicioAVehiculo.nombre.trim() === '') {
-      alert('Debe ingresar el nombre del tipo');
-      return 0;
-    }
-    if (this.newServicioAVehiculo.estado === 0) {
-      alert('Debe escoger el estado del servicio');
-      return 0;
-    }
-    if (this.newServicioAVehiculo.tipo_servicio === 0) {
-      alert('Debe escoger el estado del tipo de servicio');
-      return 0;
-    }
-    //newServicioAVehiculo.tipo_servicio
-    this.loading.show();
-    this.VehiculosService.guardarServicios(this.newServicioAVehiculo).subscribe(
-      (respuesta: VehiculoMutationResponse) => {
-        CustomConsole.log(respuesta);
-
-        if (respuesta.ok) {
-          Swal.fire('datos ingresados con exito');
-          this.newServicioAVehiculo = new ServiciosModule('', 0, 0);
-          this.getServiciosVehiculos();
-        } else {
-          Swal.fire(respuesta.error?.message ?? 'error en el servidor', '', 'error');
-        }
-        this.loading.hide();
-      }
-    );
+  obtenerNombreTipo(servicio: ServiciosModule): string {
+    return servicio.tipo_servicio_detalle?.nombre || servicio.nombre_tipo_servicio || 'Sin tipo';
   }
 
-  cancelar() {
-    this.newServicioAVehiculo = new ServiciosModule('', 0, 0);
+  obtenerEstado(servicio: ServiciosModule): string {
+    if ((servicio.nombre_estado || '').trim() !== '') {
+      return servicio.nombre_estado!;
+    }
+
+    if (Number(servicio.estado) === 1) {
+      return 'Activo';
+    }
+
+    if (Number(servicio.estado) === 2) {
+      return 'Inactivo';
+    }
+
+    return 'Sin definir';
   }
 
-  ngOnInit(): void {}
+  trackByServicio = (index: number, servicio: ServiciosModule): number | string =>
+    servicio.id ?? `${servicio.nombre}-${index}`;
+
+  ngOnInit(): void {
+    this.syncModuleBanner();
+    this.getTiposServicios();
+    this.getServiciosVehiculos();
+  }
+
+  ngOnDestroy(): void {
+    this.moduleBannerService.clear();
+  }
+
+  private syncModuleBanner(): void {
+    this.moduleBannerService.setTitle('Vehiculos', {
+      helpText: 'Consulta el listado de servicios y abre el mismo formulario emergente para crear o editar.',
+      meta: [
+        { label: 'Submodulo', value: 'Servicios' },
+        { label: 'Registros visibles', value: String(this.serviciosAmostrar.length) }
+      ]
+    });
+  }
+
+  private normalizarRecords<T>(records: unknown[]): T[] {
+    return (records ?? []).map((record: any) => record?.obj ?? record) as T[];
+  }
 }

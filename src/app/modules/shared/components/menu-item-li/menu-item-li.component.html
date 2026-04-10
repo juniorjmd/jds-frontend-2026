@@ -1,29 +1,45 @@
-<li *ngIf="recurso.recursosHijos!.length === 0 && (recurso.direccion != undefined && recurso.direccion.length  > 0 &&  recurso.direccion[0] != '' )" 
-    class="nav-item item-drop-down-per">
-  <a class="nav-link" [routerLink]="recurso.direccion">
-     {{recurso.display_nombre}}
+<li
+  *ngIf="recurso.recursosHijos!.length === 0 && (recurso.direccion != undefined && recurso.direccion.length > 0 && recurso.direccion[0] != '')"
+  class="app-menu-item"
+>
+  <a
+    class="app-menu-link"
+    [routerLink]="recurso.direccion"
+    routerLinkActive="is-active"
+    [routerLinkActiveOptions]="{ exact: false }"
+    [attr.title]="recurso.display_nombre"
+  >
+    <span *ngIf="hasIcon(recurso)" class="app-menu-link__icon"><i class="bi" [ngClass]="getIconClass(recurso)"></i></span>
+    <span class="app-menu-link__text">{{ recurso.display_nombre }}</span>
   </a>
 </li>
 
-<li *ngIf="recurso.recursosHijos!.length > 0" class="nav-item dropdown item-drop-down-per" 
-  (mouseenter)="showDropdown()" 
+<li
+  *ngIf="recurso.recursosHijos!.length > 0"
+  class="app-menu-group"
+  [ngClass]="{ 'is-active': isActiveBranch() }"
+  (mouseenter)="showDropdown()"
   (mouseleave)="hideDropdown()"
-  [ngClass]="{ 'show': isDropdownActive }">
-  <a class="nav-link dropdown-toggle"  
-      id="navbarDropdown{{recurso.id}}" role="button"
-      aria-expanded="false" 
-      data-toggle="dropdown"
-      aria-haspopup="true">
-      {{recurso.display_nombre}}
-  </a>
-  <div class="dropdown-menu" 
-      [ngClass]="{ 'show': isDropdownActive }">
-      <ul>
-          <ng-container *ngFor="let subRecurso of recurso.recursosHijos">
-              <li class="dropdown-item" *ngIf="(subRecurso.direccion != undefined && subRecurso.direccion.length  > 0 &&  subRecurso.direccion[0] != '' )">
-                  <shared-menu-item-li [recurso]="subRecurso"></shared-menu-item-li>
-              </li>
-          </ng-container>
-      </ul>
-  </div>
+>
+  <button  [routerLink]="recurso.direccion" type="button" class="app-menu-group__label" [attr.title]="recurso.display_nombre">
+    <span *ngIf="hasIcon(recurso)" class="app-menu-link__icon"><i class="bi" [ngClass]="getIconClass(recurso)"></i></span>
+    <span class="app-menu-group__label-text">{{ recurso.display_nombre }}</span>
+    <small>▾</small>
+  </button>
+
+  <ul class="app-menu-group__list" [ngClass]="{ 'is-open': isDropdownActive || isActiveBranch() }">
+    <ng-container *ngFor="let subRecurso of recurso.recursosHijos">
+      <li class="app-menu-group__child" *ngIf="hasNavigableRoute(subRecurso) || subRecurso.recursosHijos!.length > 0">
+        <a
+          class="app-menu-link"
+          [routerLink]="getFallbackRoute(subRecurso)"
+          routerLinkActive="is-active"
+          [routerLinkActiveOptions]="{ exact: false }"
+          [attr.title]="subRecurso.display_nombre"
+        >
+          <span class="app-menu-link__text">{{ subRecurso.display_nombre }}</span>
+        </a>
+      </li>
+    </ng-container>
+  </ul>
 </li>

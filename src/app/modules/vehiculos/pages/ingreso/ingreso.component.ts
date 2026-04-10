@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ServiciosModule } from 'src/app/models/servicios/servicios.module';
 import { TipoVehiculoModule } from 'src/app/models/tipo-vehiculo/tipo-vehiculo.module';
 import { TiposServiciosModule } from 'src/app/models/tipos-servicios/tipos-servicios.module';
@@ -23,16 +23,18 @@ import { CustomConsole } from 'src/app/models/CustomConsole';
 import { ApiResponse } from 'src/app/interfaces/api-response.interface';
 import { GenericMultiRecordsPayload, GenericRecordsPayload } from 'src/app/interfaces/generic-response.interface';
 import { VehiculoIngresoResponse, VehiculoPropietarioResponse, VehiculoServiciosCostosResponse, VehiculoTiposResponse, VehiculoTiposServiciosResponse } from 'src/app/interfaces/vehiculos-response.interface';
+import { ModuleBannerService } from 'src/app/services/module-banner.service';
 
 @Component({
   selector: 'app-ingreso',
   templateUrl: './ingreso.component.html',
   styleUrls: ['./ingreso.component.css'],
 })
-export class IngresoComponent implements OnInit {
+export class IngresoComponent implements OnInit, OnDestroy {
   ingreso: VehiculosIngresoServicioModule = new VehiculosIngresoServicioModule(  );
   // serviciosAVehiculos:ServiciosModule[] = [];
   cajaEStablecida: cajaModel = new cajaModel(undefined);
+  mostrarAyudaCabecera = false;
 
   serviciosAmostrar: any[] = [{ id: 0, nombre: 'Escoger tipoServicio' }];
   serviciosAVehiculos: ServiciosCostosModule[] = [];
@@ -45,7 +47,8 @@ export class IngresoComponent implements OnInit {
     private newAbrirDialog: MatDialog,
     private VehiculosService: VehiculosService,
     private empleadosServices: EmpleadosService,
-    private loading: loading
+    private loading: loading,
+    private moduleBannerService: ModuleBannerService
   ) {
     this.establecerCajaInicialDefault();
     this.getTiposServicios();
@@ -88,6 +91,7 @@ export class IngresoComponent implements OnInit {
 
             this.cajaEStablecida.id = cajaAux.id;
             this.cajaEStablecida.nombre = cajaAux.nombre;
+            this.syncModuleBanner();
           });
           //CustomConsole.log('cajas : ' , this.cajas);
         } else if (cajasResponse.length > 0) {
@@ -103,6 +107,7 @@ export class IngresoComponent implements OnInit {
               if (definir === cajaAux.id) {
                 this.cajaEStablecida.id = cajaAux.id;
                 this.cajaEStablecida.nombre = cajaAux.nombre;
+                this.syncModuleBanner();
               }
             });
           }
@@ -133,6 +138,7 @@ export class IngresoComponent implements OnInit {
         CustomConsole.log('caja_seleccionada', caja);
         if (typeof caja != 'undefined') {this.cajaEStablecida = caja;
           this.serviceCaja.asignarCaja(caja);
+          this.syncModuleBanner();
         }
       });
   }
@@ -202,6 +208,7 @@ export class IngresoComponent implements OnInit {
               this.ingreso.valor = 0;
               this.ingreso.cod_servicio = 0;
               this.tipo_servicio = 0;
+              this.syncModuleBanner();
               this.cancelar();
             } else {
               try {
@@ -230,6 +237,7 @@ export class IngresoComponent implements OnInit {
           this.ingreso.valor = 0;
           this.ingreso.cod_servicio = 0;
           this.tipo_servicio = 0;
+          this.syncModuleBanner();
           this.cancelar();
           //this.getServiciosVehiculos();
         } else {
@@ -246,6 +254,11 @@ export class IngresoComponent implements OnInit {
 
   cancelar() {
     this.ingreso = new VehiculosIngresoServicioModule();
+    this.syncModuleBanner();
+  }
+
+  toggleAyudaCabecera(): void {
+    this.mostrarAyudaCabecera = !this.mostrarAyudaCabecera;
   }
 
   getEmpleados() {
@@ -306,6 +319,7 @@ export class IngresoComponent implements OnInit {
         this.ingreso.idDocumento = (dato.nombreTipoDoc == 'EnBlanco' ) ? dato.idDocumento:undefined;
         this.ingreso.cajaAsignada =(dato.nombreTipoDoc == 'EnBlanco' ) ? dato.cajaAsignada:undefined;
         this.ingreso.nombreCajaAsignada = (dato.nombreTipoDoc == 'EnBlanco' ) ? dato.nombreCajaAsignada:'';
+        this.syncModuleBanner();
         this.getServiciosVehiculos();
         this.loading.hide();
       },error:
@@ -419,6 +433,26 @@ export class IngresoComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.serviceCaja.currentCaja.subscribe({next:(caja)=>  this.cajaEStablecida = (caja!= undefined) ? caja : this.cajaEStablecida })
+    this.syncModuleBanner();
+    this.serviceCaja.currentCaja.subscribe({
+      next: (caja) => {
+        this.cajaEStablecida = (caja != undefined) ? caja : this.cajaEStablecida;
+        this.syncModuleBanner();
+      }
+    })
+  }
+
+  ngOnDestroy(): void {
+    this.moduleBannerService.clear();
+  }
+
+  private syncModuleBanner(): void {
+    this.moduleBannerService.setTitle('Vehiculos', {
+      helpText: 'Registra la placa, valida el propietario y asigna el servicio operativo antes de enviarlo a patios.',
+      meta: [
+        { label: 'Caja vehiculos', value: this.cajaEStablecida.nombre || 'Sin definir' },
+        { label: 'Documento vehiculo', value: String(this.ingreso.idDocumento || 'Nuevo ingreso') }
+      ]
+    });
   }
 }

@@ -1,0 +1,8 @@
+.module-shell {
+    gap: 0.65rem;
+    align-content: start;
+}
+
+:host {
+    display: block;
+}

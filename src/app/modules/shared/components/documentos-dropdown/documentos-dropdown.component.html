@@ -1,8 +1,6 @@
- 
-  <div class="d-flex input-group">
-    <div class="btn-group dropend" style="width: 100%;">
-
-<button type="button"class="btn btn-outline-success ">
+<div class="app-doc-dropdown">
+    <div class="btn-group app-doc-dropdown__group dropend">
+<button type="button" class="btn app-doc-dropdown__value">
     <ng-container *ngIf="selectedValue?.campo_info_1 !== undefined  && selectedValue?.campo_info_1 != ''">
         <i *ngIf="selectedValue?.campo_info_1 !== 'Comprobante' " class="bi bi-car-front"></i> 
         <i *ngIf="selectedValue?.campo_info_1 == 'Comprobante' " class="bi bi-shield"></i> 
@@ -18,15 +16,15 @@
     <span *ngIf="selectedValue?.campo_info_2  == 'Compra' ">{{selectedValue?.idDocumentoFinal}}</span>
 
 </button>
-<button type="button"class="btn btn-outline-primary "  (click)="triggerExternalFunction()">
+<button type="button" class="btn app-doc-dropdown__action" (click)="triggerExternalFunction()">
         <i class="bi bi-arrow-repeat" [ngClass]="{'fa-spin': vueltas==true}"></i>
 </button>
-<button type="button"class="btn btn-outline-primary  dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+<button type="button" class="btn app-doc-dropdown__toggle dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
  </button>
-<ul class="dropdown-menu" aria-labelledby="dropdownMenuOffset">
+<ul class="dropdown-menu app-doc-dropdown__menu" aria-labelledby="dropdownMenuOffset">
     <li *ngFor="let option of options" (click)="selectOption(option)">  
-        <a class="dropdown-item">
-            <span style="cursor: pointer;">
+        <a class="dropdown-item app-doc-dropdown__item">
+            <span>
         <ng-container *ngIf="option.campo_info_1 !== undefined && option.campo_info_1 != ''">
             <i *ngIf="option.campo_info_1 !== 'Comprobante' " class="bi bi-car-front"></i> 
             <i *ngIf="option.campo_info_1 == 'Comprobante' " class="bi bi-shield"></i>  

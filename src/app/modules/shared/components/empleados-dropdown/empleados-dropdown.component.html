@@ -1,18 +1,15 @@
-<div class="d-flex input-group">  
-    <div class="btn-group ">
-        <button type="button"class="btn btn-outline-success "> 
-                <span>{{selectedValue!.nombreCompleto}}</span>
+<div class="app-inline-dropdown">
+    <div class="btn-group app-inline-dropdown__group">
+        <button type="button" class="btn app-inline-dropdown__value">
+            <span>{{ selectedValue!.nombreCompleto }}</span>
         </button>
-        <button type="button"class="btn btn-outline-primary  dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-        </button>
-       <ul class="dropdown-menu" aria-labelledby="dropdownMenuOffset">
-           <li *ngFor="let option of options" (click)="selectOption(option)">  
-               <a class="dropdown-item">
-                   <span style="cursor: pointer;">
-                    {{option.nombreCompleto }}
-                   </span>
-              
-           </a>  
-             </li>
-         </ul>
-       </div></div>
+        <button type="button" class="btn app-inline-dropdown__toggle dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"></button>
+        <ul class="dropdown-menu app-inline-dropdown__menu" aria-labelledby="dropdownMenuOffset">
+            <li *ngFor="let option of options" (click)="selectOption(option)">
+                <a class="dropdown-item app-inline-dropdown__item">
+                    <span>{{ option.nombreCompleto }}</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+</div>

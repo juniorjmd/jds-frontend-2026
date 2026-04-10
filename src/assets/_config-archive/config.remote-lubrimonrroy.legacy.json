@@ -1,0 +1,19 @@
+ {
+    "baseURL": "https://lubrimonrroy.sofdla.net/backend/services/view/action/",
+    "endpoints": {
+      "action": "",
+      "inventario": "inventario/",
+      "actionDocumentos": "documentos/",
+      "actionVentas": "ventas/",
+      "admin": "admin/",
+      "login": "login/",
+      "datosIniciales": "datosiniciales/",
+      "brand": "brand/"
+    },
+    "printer": {
+      "namePrinterGenerico": "impresora_punto_de_venta"
+    },
+    "enviroment":   "dev"
+
+  }
+

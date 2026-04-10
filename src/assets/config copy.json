@@ -1,19 +1,5 @@
 {
-    "baseURL": "https://carwash.sofdla.com.co/bk.services/services/view/action/",
-    "endpoints": {
-      "action": "",
-      "inventario": "inventario/",
-      "actionDocumentos": "documentos/",
-      "actionVentas": "ventas/",
-      "admin": "admin/",
-      "login": "login/",
-      "datosIniciales": "datosiniciales/",
-      "brand": "brand/",
-      "csv_manager": "csv_manager/"
-    },  
-    "printer": {
-      "namePrinterGenerico": "impresora_punto_de_venta"
-    }, 
-    "enviroment":   "dev"
-  }
-  
+  "__archived": true,
+  "__do_not_use": true,
+  "__note": "Archivo historico. La configuracion activa del frontend vive unicamente en src/assets/config.json. Referencia original archivada en src/assets/_config-archive/config.remote-carwash.legacy.json."
+}

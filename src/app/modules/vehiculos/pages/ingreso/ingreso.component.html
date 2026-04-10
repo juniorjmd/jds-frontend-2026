@@ -1,89 +1,166 @@
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-sm-12">
-            <h4 class="">Caja establecida: {{cajaEStablecida.nombre}} - 
-                <i title="Establecer caja" (click)="establecerCaja()" 
-                class="bi bi-piggy-bank-fill boton_activo"></i>
-            </h4>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-sm-12">
-            <h2 class="centrado">Ingreso de vehículos</h2>
-        </div>
-    </div>
-    <br>
-    <div class="row">
-        <div class="col-sm-3"></div>
-        <div class="col-sm-2"># Placa</div>
-        <div class="col-sm-3">
-            <input type="text" [(ngModel)]="ingreso.placaVehiculo" (keyup.enter)="validarPlaca()" (blur)="validarPlaca()" class="form-control" placeholder="Número de placa">
-        </div>
-    </div>
-    <br>
-    <div class="row">
-        <div class="col-sm-3"></div>
-        <div class="col-sm-2">Propietario</div>
-        <div class="col-sm-3">
-            <div class="input-group">
-                <input type="text" readonly [(ngModel)]="ingreso.nombrePropietario" class="form-control" placeholder="Nombre propietario">
-                <button class="btn btn-outline-secondary" type="button" (click)="asignarPropietario()">
-                    <i class="bi bi-person-plus"></i>
+<section class="vehiculos-shell">
+    <header class="app-page-header vehiculos-shell__header">
+        <div class="vehiculos-shell__header-row">
+            <div class="vehiculos-shell__subtitle-row">
+                <p class="vehiculos-shell__subtitle">Ingreso y asignacion</p>
+                <div class="vehiculos-shell__help-wrap">
+                    <button
+                        type="button"
+                        class="btn vehiculos-shell__help-trigger"
+                        (click)="toggleAyudaCabecera()"
+                        [attr.aria-expanded]="mostrarAyudaCabecera"
+                        aria-label="Mostrar ayuda de ingreso y asignacion"
+                    >
+                        ?
+                    </button>
+
+                    <div class="vehiculos-shell__help-popover" *ngIf="mostrarAyudaCabecera">
+                        <strong>Flujo recomendado</strong>
+                        <p>Primero valida la placa, luego confirma propietario, servicio y lavador antes de enviar a patios.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="app-toolbar vehiculos-shell__actions">
+                <button type="button" class="btn app-chip-button app-chip-button--soft" (click)="establecerCaja()" title="Establecer caja">
+                    <i class="bi bi-piggy-bank-fill"></i>
+                    Cambiar caja
+                </button>
+                <button type="button" class="btn app-chip-button app-chip-button--accent" (click)="generarIngresoApatios()">
+                    <i class="bi bi-check2-circle"></i>
+                    Enviar a patios
+                </button>
+                <button type="button" class="btn app-chip-button app-chip-button--danger" (click)="cancelar()">
+                    <i class="bi bi-x-circle"></i>
+                    Cancelar
                 </button>
             </div>
         </div>
-    </div>
-    <br> 
-    <div class="row">
-        <div class="col-sm-3"></div>
-        <div class="col-sm-2">Tipo de vehículo</div>
-        <div class="col-sm-3">
-            <select class="form-control" (change)="getServiciosVehiculos()" [(ngModel)]="ingreso.cod_tipo_vehiculo">
-                <option  [ngValue]="0">Escoger Tipo Vehículo</option>
-                <option *ngFor="let vehiculo of tiposVehiculo" [ngValue]="vehiculo.id">{{vehiculo.nombre}}</option> 
-            </select>
-        </div>
-    </div>
-    <br>
-    <div class="row">
-        <div class="col-sm-3"></div>
-        <div class="col-sm-2">Tipo de servicio</div>
-        <div class="col-sm-3">
-            <select class="form-control" [(ngModel)]="tipo_servicio" (change)="mostrarServicioPorTipo()"> 
-                <option [ngValue]="0">Escoger Tipo de servicio</option> 
-                <option *ngFor="let tpServicio of tiposServicio" [ngValue]="tpServicio.id">{{tpServicio.nombre}}</option> 
-            </select>
-        </div>
-    </div>
-    <br>
-    <div class="row">
-        <div class="col-sm-3"></div>
-        <div class="col-sm-2">Servicio</div>
-        <div class="col-sm-3">
-            <select class="form-control" (change)="optenerValor()" [(ngModel)]="ingreso.cod_servicio">
-                <option *ngFor="let Servicio of serviciosAmostrar" [value]="Servicio.cod_servicio">{{Servicio.nombreServicio}}</option> 
-            </select>
-        </div>
-    </div>
-    <br>
-    <div class="row">
-        <div class="col-sm-3"></div>
-        <div class="col-sm-2">Empleado Asignado</div>
-        <div class="col-sm-3">
-            <select class="form-control" [(ngModel)]="ingreso.lavador"> 
-                <option value="0">Escoger lavador</option> 
-                <option *ngFor="let empleado of empleados" [value]="empleado.id">{{empleado.persona?.nombreCompleto}}</option> 
-            </select>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-sm-3"></div>
-        <div class="col-sm-5">
-            <div class="btn-group btn-group-toggle" data-toggle="buttons">
-                <button type="button" (click)="generarIngresoApatios()" class="btn btn-success">Enviar</button>
-                <button type="button" (click)="cancelar()" class="btn btn-danger">Cancelar</button>
+    </header>
+
+    <div class="vehiculos-shell__grid">
+        <section class="vehiculos-shell__main">
+            <div class="app-panel vehiculos-card">
+                <div class="vehiculos-card__head">
+                    <div>
+                        <h2 class="vehiculos-card__title">Datos del vehiculo</h2>
+                        <p class="vehiculos-card__subtitle">Completa la placa, el propietario y la asignacion del servicio.</p>
+                    </div>
+                </div>
+
+                <div class="vehiculos-form-grid">
+                    <div class="vehiculos-field">
+                        <label class="vehiculos-field__label">Placa</label>
+                        <input
+                            type="text"
+                            [(ngModel)]="ingreso.placaVehiculo"
+                            (keyup.enter)="validarPlaca()"
+                            (blur)="validarPlaca()"
+                            class="form-control app-input"
+                            placeholder="Numero de placa"
+                        >
+                        <small class="vehiculos-field__hint">Al salir del campo se validan propietario y documento existente.</small>
+                    </div>
+
+                    <div class="vehiculos-field">
+                        <label class="vehiculos-field__label">Propietario</label>
+                        <div class="vehiculos-owner-picker">
+                            <input
+                                type="text"
+                                readonly
+                                [(ngModel)]="ingreso.nombrePropietario"
+                                class="form-control app-input"
+                                placeholder="Nombre propietario"
+                            >
+                            <button class="btn vehiculos-owner-picker__action" type="button" (click)="asignarPropietario()">
+                                <i class="bi bi-person-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="vehiculos-field">
+                        <label class="vehiculos-field__label">Tipo de vehiculo</label>
+                        <select class="form-control app-select" (change)="getServiciosVehiculos()" [(ngModel)]="ingreso.cod_tipo_vehiculo">
+                            <option [ngValue]="0">Escoger tipo vehiculo</option>
+                            <option *ngFor="let vehiculo of tiposVehiculo" [ngValue]="vehiculo.id">{{ vehiculo.nombre }}</option>
+                        </select>
+                    </div>
+
+                    <div class="vehiculos-field">
+                        <label class="vehiculos-field__label">Tipo de servicio</label>
+                        <select class="form-control app-select" [(ngModel)]="tipo_servicio" (change)="mostrarServicioPorTipo()">
+                            <option [ngValue]="0">Escoger tipo de servicio</option>
+                            <option *ngFor="let tpServicio of tiposServicio" [ngValue]="tpServicio.id">{{ tpServicio.nombre }}</option>
+                        </select>
+                    </div>
+
+                    <div class="vehiculos-field">
+                        <label class="vehiculos-field__label">Servicio</label>
+                        <select class="form-control app-select" (change)="optenerValor()" [(ngModel)]="ingreso.cod_servicio">
+                            <option [ngValue]="0">Escoger servicio</option>
+                            <option *ngFor="let servicio of serviciosAmostrar" [value]="servicio.cod_servicio">{{ servicio.nombreServicio }}</option>
+                        </select>
+                    </div>
+
+                    <div class="vehiculos-field">
+                        <label class="vehiculos-field__label">Empleado asignado</label>
+                        <select class="form-control app-select" [(ngModel)]="ingreso.lavador">
+                            <option value="0">Escoger lavador</option>
+                            <option *ngFor="let empleado of empleados" [value]="empleado.id">{{ empleado.persona?.nombreCompleto }}</option>
+                        </select>
+                    </div>
+                </div>
             </div>
-        </div>
-        <br>
+        </section>
+
+        <aside class="vehiculos-shell__side">
+            <div class="app-panel vehiculos-card">
+                <div class="vehiculos-card__head">
+                    <div>
+                        <h2 class="vehiculos-card__title">Resumen operativo</h2>
+                        <p class="vehiculos-card__subtitle">Estado actual del ingreso antes de enviarlo.</p>
+                    </div>
+                </div>
+
+                <div class="app-stat-grid">
+                    <div class="app-stat-card">
+                        <span class="app-stat-card__label">Placa</span>
+                        <span class="app-stat-card__value">{{ ingreso.placaVehiculo || 'Pendiente' }}</span>
+                    </div>
+                    <div class="app-stat-card">
+                        <span class="app-stat-card__label">Valor servicio</span>
+                        <span class="app-stat-card__value is-accent">{{ ingreso.valor || 0 | currency }}</span>
+                    </div>
+                </div>
+
+                <div class="app-keyvalue-list vehiculos-summary-list">
+                    <div class="app-keyvalue">
+                        <span class="app-keyvalue__label">Propietario</span>
+                        <span class="app-keyvalue__value">{{ ingreso.nombrePropietario || 'Sin asignar' }}</span>
+                    </div>
+                    <div class="app-keyvalue">
+                        <span class="app-keyvalue__label">Caja asignada</span>
+                        <span class="app-keyvalue__value">{{ ingreso.nombreCajaAsignada || cajaEStablecida.nombre || 'Sin definir' }}</span>
+                    </div>
+                    <div class="app-keyvalue">
+                        <span class="app-keyvalue__label">Documento relacionado</span>
+                        <span class="app-keyvalue__value">{{ ingreso.idDocumento || 'No detectado' }}</span>
+                    </div>
+                    <div class="app-keyvalue">
+                        <span class="app-keyvalue__label">Tipo de vehiculo</span>
+                        <span class="app-keyvalue__value">{{ ingreso.cod_tipo_vehiculo || 'Pendiente' }}</span>
+                    </div>
+                    <div class="app-keyvalue">
+                        <span class="app-keyvalue__label">Servicio</span>
+                        <span class="app-keyvalue__value">{{ ingreso.cod_servicio || 'Pendiente' }}</span>
+                    </div>
+                    <div class="app-keyvalue">
+                        <span class="app-keyvalue__label">Lavador</span>
+                        <span class="app-keyvalue__value">{{ ingreso.lavador || 'Pendiente' }}</span>
+                    </div>
+                </div>
+            </div>
+
+        </aside>
     </div>
-</div>
+</section>

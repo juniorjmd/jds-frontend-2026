@@ -1,17 +1,15 @@
-<div class="container-fluid  fondoGeneral confondoBrillante pt-3">  
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-          </button>
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <a class="navbar-brand" [routerLink]="[ 'Ingresos'] ">Vehiculos</a>
-            <ul class="navbar-nav mr-auto ">
-                <li class="nav-item " *ngFor="let item of  permisos?.recursosHijos">
-                    <a class="nav-link "  *ngIf="item.direccion != undefined  && item.direccion.length > 0 "  
-                        routerLinkActive="active"  [routerLink]="item.direccion">{{item.display_nombre}}</a>
-                </li> 
-            </ul>
-        </div>
+<div class="container-fluid fondoGeneral confondoBrillante pt-2">
+    <nav class="module-shell__tabs" aria-label="Secciones de vehiculos">
+        <ng-container *ngFor="let item of permisos?.recursosHijos">
+            <a
+                *ngIf="item.direccion != undefined && item.direccion.length > 0"
+                class="module-shell__tab"
+                routerLinkActive="is-active"
+                [routerLink]="item.direccion"
+            >
+                {{ item.display_nombre }}
+            </a>
+        </ng-container>
     </nav>
     <router-outlet></router-outlet>
 

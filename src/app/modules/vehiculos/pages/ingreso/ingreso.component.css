@@ -1,0 +1,218 @@
+:host {
+    display: block;
+}
+
+.vehiculos-shell {
+    display: grid;
+    gap: 0.65rem;
+}
+
+.vehiculos-shell__header {
+    display: grid;
+    gap: 0.65rem;
+    padding-bottom: 0 !important;
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+}
+
+.vehiculos-shell__header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.vehiculos-shell__subtitle-row {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    margin-top: 0.35rem;
+}
+
+.vehiculos-shell__subtitle {
+    margin: 0;
+    color: var(--app-text-soft);
+    font-size: 0.92rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.vehiculos-shell__help-wrap {
+    position: relative;
+}
+
+.vehiculos-shell__help-trigger {
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border-radius: 50%;
+    border: 1px solid rgba(54, 44, 38, 0.12);
+    background: rgba(255, 255, 255, 0.82);
+    color: var(--app-text-soft);
+    font-size: 0.95rem;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.vehiculos-shell__help-popover {
+    position: absolute;
+    top: calc(100% + 0.55rem);
+    left: 0;
+    z-index: 5;
+    width: min(320px, calc(100vw - 3rem));
+    padding: 0.85rem 0.95rem;
+    border-radius: 14px;
+    border: 1px solid rgba(54, 44, 38, 0.12);
+    background: rgba(255, 255, 255, 0.96);
+    box-shadow: 0 16px 32px rgba(42, 28, 20, 0.12);
+    color: var(--app-text-soft);
+    line-height: 1.45;
+}
+
+.vehiculos-shell__help-popover strong {
+    display: block;
+    margin-bottom: 0.35rem;
+    color: var(--app-text);
+}
+
+.vehiculos-shell__help-popover p {
+    margin: 0;
+}
+
+.vehiculos-shell__actions {
+    justify-content: flex-end;
+}
+
+.vehiculos-shell__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+    padding: 0.35rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.62);
+    border: 1px solid rgba(54, 44, 38, 0.08);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.vehiculos-shell__grid {
+    display: grid;
+    gap: 1rem;
+}
+
+.vehiculos-shell__main,
+.vehiculos-shell__side {
+    display: grid;
+    gap: 1rem;
+    min-width: 0;
+}
+
+.vehiculos-card {
+    padding: 1rem;
+}
+
+.vehiculos-card__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.vehiculos-card__title {
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--app-text);
+}
+
+.vehiculos-card__subtitle {
+    margin: 0.35rem 0 0;
+    color: var(--app-text-soft);
+    font-size: 0.92rem;
+}
+
+.vehiculos-form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+}
+
+.vehiculos-field {
+    display: grid;
+    gap: 0.55rem;
+}
+
+.vehiculos-field__label {
+    color: var(--app-text-soft);
+    font-size: 0.8rem;
+    font-weight: 800;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+}
+
+.vehiculos-field__hint {
+    color: var(--app-text-soft);
+    font-size: 0.82rem;
+}
+
+.vehiculos-owner-picker {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.6rem;
+}
+
+.vehiculos-owner-picker__action {
+    min-width: 50px;
+    border-radius: 12px;
+    border: 1px solid rgba(54, 44, 38, 0.12);
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: #fff;
+}
+
+.vehiculos-summary-list .app-keyvalue__value {
+    max-width: 220px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+@media (min-width: 1200px) {
+    .vehiculos-shell__grid {
+        grid-template-columns: minmax(0, 1.8fr) minmax(320px, 0.9fr);
+        align-items: start;
+    }
+
+    .vehiculos-shell__side {
+        position: sticky;
+        top: 1rem;
+    }
+}
+
+@media (max-width: 767px) {
+    .vehiculos-shell__header-row,
+    .vehiculos-shell__subtitle-row,
+    .vehiculos-shell__actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .vehiculos-shell__help-popover {
+        left: auto;
+        right: 0;
+    }
+
+    .vehiculos-card {
+        padding: 0.85rem;
+    }
+
+    .vehiculos-owner-picker {
+        grid-template-columns: 1fr;
+    }
+
+    .vehiculos-owner-picker__action {
+        width: 100%;
+        min-height: 46px;
+    }
+}
