@@ -1,0 +1,20 @@
+$kind: collection
+name: JDS Carwash - Modulo Ventas
+description: Suite base de Postman para el flujo principal del modulo de ventas.
+  Incluye login, sesion, documentos, insercion de producto, pagos y
+  cierre/cancelacion.
+variables:
+  baseUrl: http://localhost/jds_back_2026/api
+  usuario: ""
+  password: ""
+  token: ""
+  documentoId: ""
+  productoId: ""
+  cantidadVenta: "1"
+  precioConIva: "1000"
+  precioAntesIva: "840.34"
+  valorIva: "159.66"
+  medioPagoId: "1"
+  valorPago: "1000"
+  invoker: ventas
+  usuarioId: ""

@@ -1,0 +1,13 @@
+# Use this workspace to collaborate
+workspace:
+  id: 89c283e2-3c5c-42f9-8593-4d086f2c58e0
+
+localResources:
+  collections:
+    - ..\ventas-module.postman_collection.json
+  environments:
+    - ..\ventas-module.postman_environment.json
+
+cloudResources:
+  collections:
+    ..\postman\collections\JDS Carwash - Modulo Ventas: 254bb883-698b-4de3-8daa-0c026c73c1db

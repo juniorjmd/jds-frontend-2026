@@ -1,0 +1,39 @@
+$kind: http-request
+url: "{{baseUrl}}/ventas/"
+method: POST
+headers:
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+  X-Session-Token: "{{token}}"
+body:
+  type: text
+  content: |-
+    {
+      "action": "insertar_producto_venta",
+      "documento": {{documentoId}},
+      "producto_enviado": "{{productoId}}",
+      "cantidadVenta": {{cantidadVenta}},
+      "validarExistencia": true,
+      "precioVenta": {
+        "precio_con_iva": {{precioConIva}},
+        "precio_antes_de_iva": {{precioAntesIva}},
+        "valor_iva": {{valorIva}}
+      },
+      "key_registro": "{{token}}",
+      "_llaveSession": "{{token}}"
+    }
+scripts:
+  - type: afterResponse
+    code: >-
+      pm.test('Insertar producto responde 200', function () {
+      pm.response.to.have.status(200); });
+
+      const json = pm.response.json();
+
+      pm.test('Insercion sin error', function () {
+      pm.expect(json.error).to.eql('ok'); });
+
+      pm.test('Devuelve ordenDocumento', function () {
+      pm.expect(json?.data?.ordenDocumento).to.exist; });
+    language: text/javascript
+order: 6000

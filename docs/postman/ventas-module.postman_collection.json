@@ -1,0 +1,402 @@
+{
+  "info": {
+    "_postman_id": "c5ef69f3-6f8b-4c8e-9f7e-ventas-module-suite",
+    "name": "JDS Carwash - Modulo Ventas",
+    "description": "Suite base de Postman para el flujo principal del modulo de ventas. Incluye login, sesion, documentos, insercion de producto, pagos y cierre/cancelacion.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost/jds_back_2026/api" },
+    { "key": "usuario", "value": "" },
+    { "key": "password", "value": "" },
+    { "key": "token", "value": "" },
+    { "key": "documentoId", "value": "" },
+    { "key": "productoId", "value": "" },
+    { "key": "cantidadVenta", "value": "1" },
+    { "key": "precioConIva", "value": "1000" },
+    { "key": "precioAntesIva", "value": "840.34" },
+    { "key": "valorIva", "value": "159.66" },
+    { "key": "medioPagoId", "value": "1" },
+    { "key": "valorPago", "value": "1000" },
+    { "key": "invoker", "value": "ventas" }
+  ],
+  "item": [
+    {
+      "name": "01. Login",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"action\": \"ef2e1d89937fba9f888516293ab1e19e7ed789a5\",\n  \"_usuario\": \"{{usuario}}\",\n  \"_password\": \"{{password}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/login/",
+          "host": ["{{baseUrl}}"],
+          "path": ["login", ""]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Login responde 200', function () { pm.response.to.have.status(200); });",
+              "const json = pm.response.json();",
+              "pm.test('Login trae data', function () { pm.expect(json.data).to.exist; });",
+              "const token = json?.data?.usuario?.key_registro || json?.data?.key_registro || '';",
+              "pm.test('Login entrega token', function () { pm.expect(token).to.not.eql(''); });",
+              "if (token) { pm.collectionVariables.set('token', token); }",
+              "const userId = json?.data?.usuario?.id || json?.data?.id || '';",
+              "if (userId) { pm.collectionVariables.set('usuarioId', String(userId)); }"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "02. Validar sesion",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{token}}" },
+          { "key": "X-Session-Token", "value": "{{token}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"action\": \"16770d92a6a82ee846f7ff23b4c8ad05b69fba03\",\n  \"_llaveSession\": \"{{token}}\",\n  \"_invoker\": \"{{invoker}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/login/",
+          "host": ["{{baseUrl}}"],
+          "path": ["login", ""]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Sesion valida responde 200', function () { pm.response.to.have.status(200); });",
+              "const json = pm.response.json();",
+              "pm.test('Sesion valida usuario', function () { pm.expect(json.data || json.usuario).to.exist; });"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "03. Documentos del usuario por caja activa",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{token}}" },
+          { "key": "X-Session-Token", "value": "{{token}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"action\": \"GET_DOCUMENTOS_USUARIO_ACTUAL_CAJA_ACTIVA\",\n  \"key_registro\": \"{{token}}\",\n  \"_llaveSession\": \"{{token}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/documentos/",
+          "host": ["{{baseUrl}}"],
+          "path": ["documentos", ""]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Listado documentos responde 200', function () { pm.response.to.have.status(200); });",
+              "const json = pm.response.json();",
+              "pm.test('Respuesta OK', function () { pm.expect(json.ok).to.eql(true); });",
+              "const records = json?.data?.records || [];",
+              "pm.test('records es arreglo', function () { pm.expect(records).to.be.an('array'); });",
+              "if (records.length > 0) {",
+              "  const docId = records[0].orden || records[0].documentId || '';",
+              "  if (docId) { pm.collectionVariables.set('documentoId', String(docId)); }",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "04. Crear documento en blanco",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{token}}" },
+          { "key": "X-Session-Token", "value": "{{token}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"action\": \"CREAR_DOCUMENTO_POR_USUARIO\",\n  \"key_registro\": \"{{token}}\",\n  \"_llaveSession\": \"{{token}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/documentos/",
+          "host": ["{{baseUrl}}"],
+          "path": ["documentos", ""]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Crear documento responde 200', function () { pm.response.to.have.status(200); });",
+              "const json = pm.response.json();",
+              "pm.test('Crear documento OK', function () { pm.expect(json.ok).to.eql(true); });",
+              "const docId = json?.data?.documentId || json?.data?.documentoFinal?.orden || json?.data?.records?.[0]?.orden || '';",
+              "if (docId) { pm.collectionVariables.set('documentoId', String(docId)); }"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "05. Cambiar documento activo",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{token}}" },
+          { "key": "X-Session-Token", "value": "{{token}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"action\": \"CAMBIAR_DOCUMENTO_ACTIVO_POR_USUARIO\",\n  \"_docActual\": {{documentoId}},\n  \"key_registro\": \"{{token}}\",\n  \"_llaveSession\": \"{{token}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/documentos/",
+          "host": ["{{baseUrl}}"],
+          "path": ["documentos", ""]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Cambiar documento responde 200', function () { pm.response.to.have.status(200); });",
+              "const json = pm.response.json();",
+              "pm.test('Cambio de documento OK', function () { pm.expect(json.ok).to.eql(true); });"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "06. Insertar producto en venta",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{token}}" },
+          { "key": "X-Session-Token", "value": "{{token}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"action\": \"insertar_producto_venta\",\n  \"documento\": {{documentoId}},\n  \"producto_enviado\": \"{{productoId}}\",\n  \"cantidadVenta\": {{cantidadVenta}},\n  \"validarExistencia\": true,\n  \"precioVenta\": {\n    \"precio_con_iva\": {{precioConIva}},\n    \"precio_antes_de_iva\": {{precioAntesIva}},\n    \"valor_iva\": {{valorIva}}\n  },\n  \"key_registro\": \"{{token}}\",\n  \"_llaveSession\": \"{{token}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/ventas/",
+          "host": ["{{baseUrl}}"],
+          "path": ["ventas", ""]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Insertar producto responde 200', function () { pm.response.to.have.status(200); });",
+              "const json = pm.response.json();",
+              "pm.test('Insercion sin error', function () { pm.expect(json.error).to.eql('ok'); });",
+              "pm.test('Devuelve ordenDocumento', function () { pm.expect(json?.data?.ordenDocumento).to.exist; });"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "07. Asignar pagos a documento",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{token}}" },
+          { "key": "X-Session-Token", "value": "{{token}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"action\": \"ASIGNAR_PAGOS_DOCUMENTOS\",\n  \"_ordenDocumento\": {{documentoId}},\n  \"_pagos\": [\n    {\n      \"id\": {{medioPagoId}},\n      \"valor\": {{valorPago}},\n      \"nombre\": \"Pago Postman\"\n    }\n  ],\n  \"key_registro\": \"{{token}}\",\n  \"_llaveSession\": \"{{token}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/ventas/",
+          "host": ["{{baseUrl}}"],
+          "path": ["ventas", ""]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Asignar pagos responde 200', function () { pm.response.to.have.status(200); });",
+              "const json = pm.response.json();",
+              "pm.test('Asignar pagos sin error', function () { pm.expect(json.error).to.eql('ok'); });",
+              "pm.test('Devuelve documentoFinal', function () { pm.expect(json?.data?.documentoFinal).to.exist; });"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "08. Cerrar documento factura",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{token}}" },
+          { "key": "X-Session-Token", "value": "{{token}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"action\": \"CERRAR_DOCUMENTO_FACTURA\",\n  \"_documento\": {{documentoId}},\n  \"key_registro\": \"{{token}}\",\n  \"_llaveSession\": \"{{token}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/documentos/",
+          "host": ["{{baseUrl}}"],
+          "path": ["documentos", ""]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Cerrar documento responde 200', function () { pm.response.to.have.status(200); });",
+              "const json = pm.response.json();",
+              "pm.test('Cierre OK', function () { pm.expect(json.ok).to.eql(true); });"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "09. Cancelar documento",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{token}}" },
+          { "key": "X-Session-Token", "value": "{{token}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"action\": \"CANCELAR_DOCUMENTO_POR_USUARIO\",\n  \"_documento\": {{documentoId}},\n  \"key_registro\": \"{{token}}\",\n  \"_llaveSession\": \"{{token}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/documentos/",
+          "host": ["{{baseUrl}}"],
+          "path": ["documentos", ""]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Cancelar documento responde 200 o 400 controlado', function () { pm.expect([200, 400]).to.include(pm.response.code); });",
+              "const json = pm.response.json();",
+              "pm.test('Respuesta JSON reconocible', function () { pm.expect(json).to.be.an('object'); });",
+              "pm.test('Sin HTML ni respuesta vacia', function () { pm.expect(pm.response.text().length).to.be.above(2); });"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "10. Cambiar documento a envio",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{token}}" },
+          { "key": "X-Session-Token", "value": "{{token}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"action\": \"CAMBIAR_DOCUMENTO_A_ENVIO\",\n  \"_documento\": {{documentoId}},\n  \"key_registro\": \"{{token}}\",\n  \"_llaveSession\": \"{{token}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/documentos/",
+          "host": ["{{baseUrl}}"],
+          "path": ["documentos", ""]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Enviar a domicilio responde 200', function () { pm.response.to.have.status(200); });",
+              "const json = pm.response.json();",
+              "pm.test('Operacion OK', function () { pm.expect(json.ok).to.eql(true); });"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "11. Convertir documento en cotizacion",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{token}}" },
+          { "key": "X-Session-Token", "value": "{{token}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"action\": \"CREAR_DOCUMENTO_COTIZACION_POR_USUARIO\",\n  \"_documento\": {{documentoId}},\n  \"key_registro\": \"{{token}}\",\n  \"_llaveSession\": \"{{token}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/documentos/",
+          "host": ["{{baseUrl}}"],
+          "path": ["documentos", ""]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Convertir a cotizacion responde 200', function () { pm.response.to.have.status(200); });",
+              "const json = pm.response.json();",
+              "pm.test('Operacion OK', function () { pm.expect(json.ok).to.eql(true); });"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    }
+  ]
+}

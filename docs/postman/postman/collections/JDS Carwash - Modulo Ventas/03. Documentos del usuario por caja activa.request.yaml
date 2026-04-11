@@ -1,0 +1,36 @@
+$kind: http-request
+url: "{{baseUrl}}/documentos/"
+method: POST
+headers:
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+  X-Session-Token: "{{token}}"
+body:
+  type: text
+  content: |-
+    {
+      "action": "GET_DOCUMENTOS_USUARIO_ACTUAL_CAJA_ACTIVA",
+      "key_registro": "{{token}}",
+      "_llaveSession": "{{token}}"
+    }
+scripts:
+  - type: afterResponse
+    code: >-
+      pm.test('Listado documentos responde 200', function () {
+      pm.response.to.have.status(200); });
+
+      const json = pm.response.json();
+
+      pm.test('Respuesta OK', function () { pm.expect(json.ok).to.eql(true); });
+
+      const records = json?.data?.records || [];
+
+      pm.test('records es arreglo', function () {
+      pm.expect(records).to.be.an('array'); });
+
+      if (records.length > 0) {
+        const docId = records[0].orden || records[0].documentId || '';
+        if (docId) { pm.collectionVariables.set('documentoId', String(docId)); }
+      }
+    language: text/javascript
+order: 3000

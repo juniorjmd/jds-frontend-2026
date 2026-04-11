@@ -1,0 +1,27 @@
+$kind: http-request
+url: "{{baseUrl}}/login/"
+method: POST
+headers:
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+  X-Session-Token: "{{token}}"
+body:
+  type: text
+  content: |-
+    {
+      "action": "16770d92a6a82ee846f7ff23b4c8ad05b69fba03",
+      "_llaveSession": "{{token}}",
+      "_invoker": "{{invoker}}"
+    }
+scripts:
+  - type: afterResponse
+    code: >-
+      pm.test('Sesion valida responde 200', function () {
+      pm.response.to.have.status(200); });
+
+      const json = pm.response.json();
+
+      pm.test('Sesion valida usuario', function () { pm.expect(json.data ||
+      json.usuario).to.exist; });
+    language: text/javascript
+order: 2000

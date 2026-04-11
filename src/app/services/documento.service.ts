@@ -52,6 +52,20 @@ constructor(private http: HttpClient, private loading: loading , private configS
     CustomConsole.log('servicio documentos');
   }
 
+  private withSessionPayload<T extends Record<string, any>>(payload: T): T & { key_registro?: string; _llaveSession?: string } {
+    const token = localStorage.getItem('sis41254#2@') ?? '';
+
+    if (token === '') {
+      return payload;
+    }
+
+    return {
+      ...payload,
+      key_registro: token,
+      _llaveSession: token,
+    };
+  }
+
   private postObjectRecords<T>(datos: any): Observable<ApiResponse<GenericRecordsPayload<T>>> {
     return this.http
       .post<ApiResponse<GenericRecordsPayload<any>>>(this.configService.url.action, datos, httpOptions())
@@ -782,7 +796,7 @@ getCuentasXPagarByfecha(_fechaInicio:string, _fechaFin:string): Observable<Credi
   }
 
   cancelarDocumento(documento: number): Observable<ApiResponse<GenericMutationPayload>> {
-    let datos = {"action": actions.actionCancelarDocumentos, "_documento": documento};
+    let datos = this.withSessionPayload({"action": actions.actionCancelarDocumentos, "_documento": documento});
     CustomConsole.log('cancelarDocumento activo', this.configService.url.actionDocumentos, datos, httpOptions());
     return this.http
       .post<ApiResponse<GenericMutationPayload> | any>(this.configService.url.actionDocumentos, datos, httpOptions())

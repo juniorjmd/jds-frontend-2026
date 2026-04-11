@@ -1,0 +1,38 @@
+$kind: http-request
+url: "{{baseUrl}}/ventas/"
+method: POST
+headers:
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+  X-Session-Token: "{{token}}"
+body:
+  type: text
+  content: |-
+    {
+      "action": "ASIGNAR_PAGOS_DOCUMENTOS",
+      "_ordenDocumento": {{documentoId}},
+      "_pagos": [
+        {
+          "id": {{medioPagoId}},
+          "valor": {{valorPago}},
+          "nombre": "Pago Postman"
+        }
+      ],
+      "key_registro": "{{token}}",
+      "_llaveSession": "{{token}}"
+    }
+scripts:
+  - type: afterResponse
+    code: >-
+      pm.test('Asignar pagos responde 200', function () {
+      pm.response.to.have.status(200); });
+
+      const json = pm.response.json();
+
+      pm.test('Asignar pagos sin error', function () {
+      pm.expect(json.error).to.eql('ok'); });
+
+      pm.test('Devuelve documentoFinal', function () {
+      pm.expect(json?.data?.documentoFinal).to.exist; });
+    language: text/javascript
+order: 7000

@@ -1,0 +1,27 @@
+$kind: http-request
+url: "{{baseUrl}}/documentos/"
+method: POST
+headers:
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+  X-Session-Token: "{{token}}"
+body:
+  type: text
+  content: |-
+    {
+      "action": "CREAR_DOCUMENTO_COTIZACION_POR_USUARIO",
+      "_documento": {{documentoId}},
+      "key_registro": "{{token}}",
+      "_llaveSession": "{{token}}"
+    }
+scripts:
+  - type: afterResponse
+    code: >-
+      pm.test('Convertir a cotizacion responde 200', function () {
+      pm.response.to.have.status(200); });
+
+      const json = pm.response.json();
+
+      pm.test('Operacion OK', function () { pm.expect(json.ok).to.eql(true); });
+    language: text/javascript
+order: 11000

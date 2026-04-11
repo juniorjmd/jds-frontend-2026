@@ -1,0 +1,37 @@
+$kind: http-request
+url: "{{baseUrl}}/login/"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "action": "ef2e1d89937fba9f888516293ab1e19e7ed789a5",
+      "_usuario": "{{usuario}}",
+      "_password": "{{password}}"
+    }
+scripts:
+  - type: afterResponse
+    code: >-
+      pm.test('Login responde 200', function () {
+      pm.response.to.have.status(200); });
+
+      const json = pm.response.json();
+
+      pm.test('Login trae data', function () { pm.expect(json.data).to.exist;
+      });
+
+      const token = json?.data?.usuario?.key_registro ||
+      json?.data?.key_registro || '';
+
+      pm.test('Login entrega token', function () {
+      pm.expect(token).to.not.eql(''); });
+
+      if (token) { pm.collectionVariables.set('token', token); }
+
+      const userId = json?.data?.usuario?.id || json?.data?.id || '';
+
+      if (userId) { pm.collectionVariables.set('usuarioId', String(userId)); }
+    language: text/javascript
+order: 1000

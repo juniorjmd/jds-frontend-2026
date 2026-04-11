@@ -1,0 +1,31 @@
+$kind: http-request
+url: "{{baseUrl}}/documentos/"
+method: POST
+headers:
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+  X-Session-Token: "{{token}}"
+body:
+  type: text
+  content: |-
+    {
+      "action": "CANCELAR_DOCUMENTO_POR_USUARIO",
+      "_documento": {{documentoId}},
+      "key_registro": "{{token}}",
+      "_llaveSession": "{{token}}"
+    }
+scripts:
+  - type: afterResponse
+    code: >-
+      pm.test('Cancelar documento responde 200 o 400 controlado', function () {
+      pm.expect([200, 400]).to.include(pm.response.code); });
+
+      const json = pm.response.json();
+
+      pm.test('Respuesta JSON reconocible', function () {
+      pm.expect(json).to.be.an('object'); });
+
+      pm.test('Sin HTML ni respuesta vacia', function () {
+      pm.expect(pm.response.text().length).to.be.above(2); });
+    language: text/javascript
+order: 9000
