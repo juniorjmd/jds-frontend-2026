@@ -1,115 +1,114 @@
-<div class="container-fluid contenedor">
-    <div class="row">
-        <div class="col-sm-12  ">
+<div class="container">
+    <section class="contadores-shell app-page">
+        <header class="app-panel contadores-shell__header">
+            <div class="contadores-shell__copy">
+                <span class="app-badge">Contadores</span>
+                <h2 class="app-title contadores-shell__title">Listado de contadores</h2>
+                <p class="contadores-shell__description">
+                    Administra los consecutivos disponibles por establecimiento y tipo documental desde un modal unico de creacion y edicion.
+                </p>
+            </div>
 
-            <h2 class="centrado">Matenimientos de Contadores</h2>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-sm-2">&nbsp;</div>
-        <div class="col-sm-1">Codigo :</div>
-        <div class="col-sm-2">
-            <input type="text" class="o_input" maxlength="4" [(ngModel)]="newContador.codContador" placeholder="Prefijo...">
-        </div>
-        <div class="col-sm-2" style="margin-right: 15px;text-align: end;">Tipo Contador :</div>
-        <div class="col-sm-2">
-            <select class=" o_input " [(ngModel)]="newContador.tipoContador">
-                <option    value ="0" >Seleccione un tipo de contador</option> 
-                <option *ngFor="let item of tipContadores" [value]="item.id" >{{item.nombre}}</option> 
-            </select>
-        </div>
-    </div><br>
-    <div class="row">
-        <div class="col-sm-1"></div>
-        <div class="col-sm-2" style="margin-right: 15px; text-align: end;">Establecimiento :</div>
-        <div class="col-sm-2">
-            <select class=" o_input " [(ngModel)]="newContador.establecimiento">
-                <option [ngValue]=0 >Establecimiento</option>
-                <option *ngFor="let item of esta" [ngValue]="item.id">{{item.nombre}}</option> 
-            </select>
-        </div>
-        <div class="col-sm-1" style="margin-right: 15px; text-align: end;">Desde :</div>
-        <div class="col-sm-1">
-            <input type="number" class="o_input" [(ngModel)]="newContador.desde" placeholder="Valor inicial...">
+            <div class="contadores-shell__controls">
+                <div class="contadores-shell__filter">
+                    <label for="filtroContadores">Filtrar listado</label>
+                    <input
+                        id="filtroContadores"
+                        type="text"
+                        class="form-control app-input"
+                        [(ngModel)]="filtroContadores"
+                        (ngModelChange)="actualizarFiltro()"
+                        placeholder="Buscar por codigo, tipo o establecimiento">
+                </div>
 
-        </div>
-        <div class="col-sm-1" style="margin-right: 15px; text-align: end;">hasta :</div>
-        <div class="col-sm-1">
-            <input type="number" class="o_input" [(ngModel)]="newContador.hasta" placeholder="valor Final...">
+                <button type="button" class="app-chip-button app-chip-button--primary" (click)="abrirModalContador()">
+                    <i class="bi bi-plus-circle"></i>
+                    Crear nuevo
+                </button>
+            </div>
+        </header>
 
-        </div>
+        <section class="app-panel contadores-shell__table-panel" *ngIf="contadores.length > 0; else contadoresVacios">
+            <div class="app-toolbar app-toolbar--between contadores-shell__table-toolbar">
+                <div class="app-toolbar__group">
+                    <span class="app-badge">{{ contadoresFiltrados.length }} registros</span>
+                </div>
+                <div class="app-toolbar__group">
+                    <label class="contadores-shell__page-size-label" for="tamanoPaginaContadores">Mostrar</label>
+                    <select
+                        id="tamanoPaginaContadores"
+                        class="form-control app-select contadores-shell__page-size"
+                        [(ngModel)]="tamanoPagina"
+                        (ngModelChange)="cambiarTamanoPagina()">
+                        <option *ngFor="let size of tamanosPagina" [ngValue]="size">{{ size }}</option>
+                    </select>
+                </div>
+            </div>
 
+            <div class="contadores-shell__table-wrap">
+                <table class="table contadores-table">
+                    <thead>
+                        <tr>
+                            <th>Codigo</th>
+                            <th>Establecimiento</th>
+                            <th>Tipo</th>
+                            <th>Consecutivo</th>
+                            <th>Conteo general</th>
+                            <th>Resolucion</th>
+                            <th>Vigencia</th>
+                            <th class="contadores-table__actions-head">Opciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let contador of contadoresPaginados; trackBy: trackByContador">
+                            <td>{{ contador.codContador }}</td>
+                            <td>{{ contador.nombreEstablecimiento || 'Sin establecimiento' }}</td>
+                            <td>{{ contador.nombreTipo || 'Sin tipo' }}</td>
+                            <td>{{ contador.contador }}</td>
+                            <td>{{ contador.contador_real_establecimiento }}</td>
+                            <td>{{ contador.resolucion || 'Sin resolucion' }}</td>
+                            <td>
+                                <span *ngIf="contador.fechaInicioResolucion || contador.fechaFinResolucion; else sinVigencia">
+                                    {{ contador.fechaInicioResolucion | date: 'yyyy-MM-dd' }} / {{ contador.fechaFinResolucion | date: 'yyyy-MM-dd' }}
+                                </span>
+                                <ng-template #sinVigencia>Sin vigencia</ng-template>
+                            </td>
+                            <td class="contadores-table__actions">
+                                <button
+                                    type="button"
+                                    class="contadores-table__action"
+                                    title="Editar contador"
+                                    aria-label="Editar contador"
+                                    (click)="abrirModalContador(contador)">
+                                    <i class="bi bi-pencil-square"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
 
-    </div>
-    <br>
-    <div class="row">
-        <div class="col-sm-1"></div>
-        <div class="col-sm-2" style="margin-right: 15px; text-align: end;">resolución :</div>
-        <div class="col-sm-2">
-            <input type="number" class="o_input" [(ngModel)]="newContador.resolucion" placeholder="Resolucion de factura">
+            <div class="contadores-shell__pagination" *ngIf="totalPaginas > 1">
+                <button type="button" class="contadores-shell__page-btn" (click)="irAPagina(paginaActual - 1)" [disabled]="paginaActual === 1">
+                    Anterior
+                </button>
+                <span class="contadores-shell__page-indicator">Pagina {{ paginaActual }} de {{ totalPaginas }}</span>
+                <button type="button" class="contadores-shell__page-btn" (click)="irAPagina(paginaActual + 1)" [disabled]="paginaActual === totalPaginas">
+                    Siguiente
+                </button>
+            </div>
+        </section>
 
-        </div>
-        <div class="col-sm-1" style="margin-right: 15px; text-align: end;">Fecha inicial :</div>
-        <div class="col-sm-1">
-            <input type="date" class="o_input" [(ngModel)]="newContador.fechaInicioResolucion">
-
-        </div>
-        <div class="col-sm-1" style="margin-right: 15px; text-align: end;">Fecha final :</div>
-        <div class="col-sm-1">
-            <input type="date" class="o_input" [(ngModel)]="newContador.fechaFinResolucion">
-
-        </div>
-
-
-    </div>
-    <br>
-    <div class="row">
-
-        <div class="col-sm-2">&nbsp;</div>
-        <div class="col-sm-4 justify-content-center">
-            <button class="btn btn-outline-primary" style="margin-right: 10px;" (click)="guardarContador()" role="button">
-                <i class="fas fa-save"></i> Guardar
-            </button>
-            <button class="btn btn-outline-danger" role="button" (click)='Cancelar()'>
-                <i class="fas fa-trash"></i>Cancelar
-            </button>
-        </div>
-    </div>
-    <hr>
-    <br>
-    <div class="row" style="
-    overflow: auto;
-    height: 350px;">
-        <div class="col-sm-1"></div>
-        <div class="col-sm-10">
-            <table class="table">
-                <tr>
-                    <!--  id, codContador, establecimiento, contador, contador_real_establecimiento, fecha, hora, estado-->
-                    <th>codContador</th>
-                    <th>establecimiento</th>
-
-                    <th>tipo</th>
-                    <th>contador</th>
-                    <th>conteo general</th>  
-                    <th>resolucion</th>
-                    <th>Inicio</th>
-                    <th>Fin</th> 
-                </tr>
-                <tr *ngFor="let Contador of contadores">
-                    <td>{{Contador.codContador}}</td>
-                    <td>{{Contador.nombreEstablecimiento}}</td>
-                    <td>{{Contador.nombreTipo}}</td>
-                    <td>{{Contador.contador }}</td>
-                    <td>{{Contador.contador_real_establecimiento }}</td> 
-                    <td>{{Contador.resolucion}}</td>
-                    <td>{{Contador.fechaInicioResolucion}}</td>
-                    <td>{{Contador.fechaFinResolucion}}</td> 
-
-
-                </tr>
-
-
-            </table>
-        </div>
-    </div>
+        <ng-template #contadoresVacios>
+            <section class="app-panel contadores-shell__empty">
+                <i class="bi bi-calculator contadores-shell__empty-icon"></i>
+                <h3>No hay contadores para mostrar</h3>
+                <p>Todavia no existen consecutivos registrados o el filtro actual no devolvio resultados.</p>
+                <button type="button" class="app-chip-button app-chip-button--primary" (click)="abrirModalContador()">
+                    <i class="bi bi-plus-circle"></i>
+                    Crear primer contador
+                </button>
+            </section>
+        </ng-template>
+    </section>
 </div>

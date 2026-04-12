@@ -1,103 +1,112 @@
-<div class="container-fluid contenedor">
-    <div class="row">
-        <div class="col-sm-12">
-            <h2 class="text-center">Creación de Cajas</h2>
-        </div>
-    </div>
-    <form>
-        <div class="row">
-            <div class="col-sm-2"></div>
-            <div class="col-sm-2">
-                <label for="nombreCaja">Nombre</label> 
-                <input type="text" class="form-control" id="nombreCaja" [(ngModel)]="newCaja.nombre" name="nombre" placeholder="Nombre de la caja...">
+<div class="container">
+    <section class="cajas-shell app-page">
+        <header class="app-panel cajas-shell__header">
+            <div class="cajas-shell__copy">
+                <span class="app-badge">Cajas</span>
+                <h2 class="app-title cajas-shell__title">Listado de cajas</h2>
+                <p class="cajas-shell__description">
+                    Consulta las cajas configuradas y abre el mismo formulario emergente para crear o editar.
+                </p>
             </div>
-            <div class="col-sm-2" style="margin-right: 15px;">
-                <label for="estadoCaja">Estado</label> 
-                <select class="form-control" id="estadoCaja" [(ngModel)]="newCaja.estadoGeneral" name="estado">
-                    <option value="0">Estado</option>
-                    <option value="1">Activo</option>
-                    <option value="2">Inactivo</option>
-                </select>
-            </div>
-            <div class="col-sm-2" style="margin-right: 15px;">
-                <label for="establecimientoCaja">Establecimiento</label>
-            
-                <select class="form-control" id="establecimientoCaja" [(ngModel)]="newCaja.establecimiento" name="establecimiento">
-                    <option value="0">Establecimiento</option>
-                    <option *ngFor="let item of esta" [ngValue]="item.id">{{item.nombre}}</option>
-                </select>
-            </div>
-        </div>
-        <div class="row mt-3">
-            <div class="col-sm-2"></div>
-            <div class="col-sm-2">
-                <label for="descripcionCaja">Descripción</label> 
-                <textarea [(ngModel)]="newCaja.descripcion" id="descripcionCaja" name="descripcion" class="form-control" placeholder="Descripcion..."></textarea>
-            </div>
-            <div class="col-sm-3" style="margin-right: 15px;">
-                <label for="establecimientoCaja">Cuenta Para Efectivo</label> 
-                <div class="input-group mb-3">
-                   
-                    <input type="text"[(ngModel)]="newCaja.nombre_scuenta_venta" name="nombreSubcuentaVenta" class="form-control" placeholder="cuenta efectivo" aria-label="Username" aria-describedby="basic-addon1">  
-                    <button type="button" class="btn btn-outline-primary" (click)='buscarCuentasContablesEfectivo()'>
-                        <i class="bi bi-search"></i>  
-                    </button>
+
+            <div class="cajas-shell__controls">
+                <div class="cajas-shell__filter">
+                    <label for="filtroCajas">Filtrar listado</label>
+                    <input
+                        id="filtroCajas"
+                        type="text"
+                        class="form-control app-input"
+                        [(ngModel)]="filtroCajas"
+                        (ngModelChange)="actualizarFiltro()"
+                        placeholder="Buscar por nombre, estado o establecimiento">
                 </div>
-            </div>
-            <div class="col-sm-3" style="margin-right: 15px;">
-                <label for="establecimientoCaja">Cuenta Para Gastos</label> 
-                <div class="input-group mb-3">
-                   
-                    <input type="text" class="form-control" placeholder="cuenta gastos" [(ngModel)]="newCaja.nombre_scuenta_gastos" name="nombreSubcuentaGastos"  aria-label="Username"  aria-describedby="basic-addon1">  
-                    <button type="button"class="btn btn-outline-primary" (click)='buscarCuentasContablesGastos()'>
-                        <i class="bi bi-search"></i>  
-                    </button>
-                </div>
-            </div>
-        </div>
-        <br>
-        <div class="row mt-3" *ngIf="guardarBtn">
-            <div class="col-sm-2"></div>
-            <div class="col-sm-4 text-center">
-                <button type="button" class="btn btn-outline-primary" (click)='guardarCaja()'>
-                    <i class="bi bi-save"></i> Guardar
-                </button>
-                <button type="button" class="btn btn-outline-danger" (click)='Cancelar()'>
-                    <i class="bi bi-trash"></i> Cancelar
+
+                <button *ngIf="guardarBtn" type="button" class="app-chip-button app-chip-button--primary" (click)="abrirModalCaja()">
+                    <i class="bi bi-plus-circle"></i>
+                    Crear nuevo
                 </button>
             </div>
-        </div>
-    </form>
-    <hr>
-    <br>
-    <div class="row">
-        <div class="col-sm-12">
-            <table class="table" *ngIf="cajas.length > 0">
-                <thead>
-                    <tr>
-                        <th>Nombre</th> 
-                        <th>Estado General</th>
-                        <th>cuenta de gastos</th>
-                        <th>cuenta de efectivo</th>
-                        <th>Estado (Abierto/Cerrado)</th> 
-                        <th>Establecimiento</th>
-                        <th>Opción</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr *ngFor="let caja of cajas" title="{{caja.descripcion}}">
-                        <td>{{caja.nombre}}</td> 
-                        <td>{{caja.nombreEstadoGeneral}}</td>
-                        <td>{{caja.nombre_scuenta_gastos}}</td>
-                        <td>{{caja.nombre_scuenta_venta}}</td>
-                        <td>{{caja.nombreEstado}}</td> 
-                        <td>{{caja.nombreEstablecimiento}}</td>
-                        <td>
-                            <i class="bi bi-pencil-fill boton_activo" (click)="setActualizaCaja(caja)"></i>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
+        </header>
+
+        <section class="app-panel cajas-shell__table-panel" *ngIf="cajas.length > 0; else cajasVacias">
+            <div class="app-toolbar app-toolbar--between cajas-shell__table-toolbar">
+                <div class="app-toolbar__group">
+                    <span class="app-badge">{{ cajasFiltradas.length }} registros</span>
+                </div>
+                <div class="app-toolbar__group">
+                    <label class="cajas-shell__page-size-label" for="tamanoPaginaCajas">Mostrar</label>
+                    <select
+                        id="tamanoPaginaCajas"
+                        class="form-control app-select cajas-shell__page-size"
+                        [(ngModel)]="tamanoPagina"
+                        (ngModelChange)="cambiarTamanoPagina()">
+                        <option *ngFor="let size of tamanosPagina" [ngValue]="size">{{ size }}</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="cajas-shell__table-wrap">
+                <table class="table cajas-table">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Estado general</th>
+                            <th>Cuenta de gastos</th>
+                            <th>Cuenta de efectivo</th>
+                            <th>Estado operativo</th>
+                            <th>Establecimiento</th>
+                            <th class="cajas-table__actions-head">Opciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let caja of cajasPaginadas; trackBy: trackByCaja" [title]="caja.descripcion">
+                            <td>{{ caja.nombre }}</td>
+                            <td>
+                                <span class="cajas-table__state" [class.is-active]="caja.nombreEstadoGeneral === 'Activo'" [class.is-inactive]="caja.nombreEstadoGeneral !== 'Activo'">
+                                    {{ caja.nombreEstadoGeneral || 'Sin estado' }}
+                                </span>
+                            </td>
+                            <td>{{ caja.nombre_scuenta_gastos || 'Sin cuenta' }}</td>
+                            <td>{{ caja.nombre_scuenta_venta || 'Sin cuenta' }}</td>
+                            <td>{{ caja.nombreEstado || 'Sin estado' }}</td>
+                            <td>{{ caja.nombreEstablecimiento || 'Sin establecimiento' }}</td>
+                            <td class="cajas-table__actions">
+                                <button
+                                    *ngIf="guardarBtn"
+                                    type="button"
+                                    class="cajas-table__action"
+                                    title="Editar caja"
+                                    aria-label="Editar caja"
+                                    (click)="abrirModalCaja(caja)">
+                                    <i class="bi bi-pencil-square"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="cajas-shell__pagination" *ngIf="totalPaginas > 1">
+                <button type="button" class="cajas-shell__page-btn" (click)="irAPagina(paginaActual - 1)" [disabled]="paginaActual === 1">
+                    Anterior
+                </button>
+                <span class="cajas-shell__page-indicator">Pagina {{ paginaActual }} de {{ totalPaginas }}</span>
+                <button type="button" class="cajas-shell__page-btn" (click)="irAPagina(paginaActual + 1)" [disabled]="paginaActual === totalPaginas">
+                    Siguiente
+                </button>
+            </div>
+        </section>
+
+        <ng-template #cajasVacias>
+            <section class="app-panel cajas-shell__empty">
+                <i class="bi bi-safe2 cajas-shell__empty-icon"></i>
+                <h3>No hay cajas para mostrar</h3>
+                <p>Todavía no hay registros en este catálogo o el listado actual está vacío.</p>
+                <button *ngIf="guardarBtn" type="button" class="app-chip-button app-chip-button--primary" (click)="abrirModalCaja()">
+                    <i class="bi bi-plus-circle"></i>
+                    Crear primera caja
+                </button>
+            </section>
+        </ng-template>
+    </section>
 </div>

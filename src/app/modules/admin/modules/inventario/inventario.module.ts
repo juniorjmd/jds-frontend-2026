@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common'; 
+import { CommonModule } from '@angular/common';
 import { SharedModule } from 'src/app/modules/shared/shared.module';
 import { ApiRoutingModule } from './api-routing.module';
 import { ModalCrearActDescuentoComponent } from './component/modal-crear-act-descuento/modal-crear-act-descuento.component';
@@ -20,13 +20,12 @@ import { DescuentosComponent } from './pages/descuentos/descuentos.component';
 import { ExistenciasComponent } from './pages/existencias/existencias.component';
 import { GruposComponent } from './pages/grupos/grupos.component';
 import { InventariosComponent } from './pages/inventarios/inventarios.component';
-import { LotesComponent } from './pages/lotes/lotes.component';
-import { MarcasComponent } from './pages/marcas/marcas.component';
-import { ProductosComponent } from './pages/productos/productos.component';
-import { WrkInventarioComponent } from './pages/wrk-inventario/wrk-inventario.component';
+
 import { FormsModule } from '@angular/forms';
 import { IndexComponent } from './pages/index/index.component';
 import { InventariosPorPlantillaComponent } from './pages/inventarios_por_plantilla/inventarios_por_plantilla.component';
+import { InventarioModuleNavComponent } from './components/inventario-module-nav/inventario-module-nav.component';
+import { MarcasComponent } from './pages/marcas/marcas.component';
 
 
 
@@ -36,10 +35,8 @@ import { InventariosPorPlantillaComponent } from './pages/inventarios_por_planti
     InventariosComponent,
     CategoriasComponent,
     MarcasComponent,
-    ProductosComponent,
     BodegasComponent,
     ExistenciasComponent,
-    LotesComponent,
     GruposComponent,
     DescuentosComponent,
     ActividadesDescuentosComponent,
@@ -53,13 +50,14 @@ import { InventariosPorPlantillaComponent } from './pages/inventarios_por_planti
     ModalCrearGrupoComponent,
     ModalCrearDescuentoComponent,
     ModalCrearActDescuentoComponent,
-    WrkInventarioComponent,InventariosPorPlantillaComponent,
-    IndexComponent
+    InventariosPorPlantillaComponent,
+    IndexComponent,
+    InventarioModuleNavComponent
   ],
   imports: [
     CommonModule,
     ApiRoutingModule,
-    SharedModule  ,FormsModule  
+    SharedModule  ,FormsModule
   ]
 })
 export class InventarioModule { }

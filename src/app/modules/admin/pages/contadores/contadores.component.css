@@ -1,0 +1,205 @@
+.contadores-shell {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.contadores-shell__header,
+.contadores-shell__table-panel,
+.contadores-shell__empty {
+  border-radius: 28px;
+}
+
+.contadores-shell__header {
+  display: grid;
+  gap: 1.5rem;
+  align-items: end;
+}
+
+.contadores-shell__copy {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.contadores-shell__title {
+  margin: 0;
+}
+
+.contadores-shell__description {
+  margin: 0;
+  max-width: 62ch;
+  color: var(--app-text-muted);
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.contadores-shell__controls {
+  display: grid;
+  gap: 1rem;
+}
+
+.contadores-shell__filter {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.contadores-shell__filter label,
+.contadores-shell__page-size-label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--app-text-soft);
+}
+
+.contadores-shell__table-toolbar {
+  margin-bottom: 1rem;
+}
+
+.contadores-shell__page-size {
+  min-width: 88px;
+}
+
+.contadores-shell__table-wrap {
+  overflow-x: auto;
+}
+
+.contadores-table {
+  margin: 0;
+  min-width: 980px;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.contadores-table thead th {
+  padding: 1rem 0.85rem;
+  border-top: 1px solid rgba(112, 135, 166, 0.18);
+  border-bottom: 1px solid rgba(112, 135, 166, 0.18);
+  background: rgba(244, 248, 252, 0.95);
+  color: var(--app-text-soft);
+  font-size: 0.88rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.contadores-table thead th:first-child {
+  border-left: 1px solid rgba(112, 135, 166, 0.18);
+  border-top-left-radius: 18px;
+}
+
+.contadores-table thead th:last-child {
+  border-right: 1px solid rgba(112, 135, 166, 0.18);
+  border-top-right-radius: 18px;
+}
+
+.contadores-table tbody td {
+  padding: 1rem 0.85rem;
+  border-right: 1px solid rgba(112, 135, 166, 0.14);
+  border-bottom: 1px solid rgba(112, 135, 166, 0.14);
+  color: var(--app-text);
+  vertical-align: middle;
+  background: rgba(255, 255, 255, 0.96);
+}
+
+.contadores-table tbody td:first-child {
+  border-left: 1px solid rgba(112, 135, 166, 0.14);
+  font-weight: 700;
+}
+
+.contadores-table tbody tr:last-child td:first-child {
+  border-bottom-left-radius: 18px;
+}
+
+.contadores-table tbody tr:last-child td:last-child {
+  border-bottom-right-radius: 18px;
+}
+
+.contadores-table__actions-head,
+.contadores-table__actions {
+  width: 92px;
+  text-align: center;
+}
+
+.contadores-table__action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 1px solid rgba(143, 110, 88, 0.18);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--app-text);
+  transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
+}
+
+.contadores-table__action:hover {
+  transform: translateY(-1px);
+  border-color: rgba(143, 110, 88, 0.42);
+  box-shadow: 0 12px 24px rgba(26, 43, 61, 0.08);
+}
+
+.contadores-shell__pagination {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.9rem;
+  margin-top: 1rem;
+}
+
+.contadores-shell__page-btn {
+  border: 1px solid rgba(26, 43, 61, 0.12);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--app-text);
+  font-weight: 700;
+  padding: 0.72rem 1.2rem;
+}
+
+.contadores-shell__page-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.contadores-shell__page-indicator {
+  color: var(--app-text-soft);
+  font-weight: 700;
+}
+
+.contadores-shell__empty {
+  display: grid;
+  justify-items: start;
+  gap: 0.85rem;
+  text-align: left;
+}
+
+.contadores-shell__empty h3,
+.contadores-shell__empty p {
+  margin: 0;
+}
+
+.contadores-shell__empty p {
+  color: var(--app-text-muted);
+  max-width: 52ch;
+}
+
+.contadores-shell__empty-icon {
+  font-size: 2rem;
+  color: var(--app-accent);
+}
+
+@media (min-width: 992px) {
+  .contadores-shell__header {
+    grid-template-columns: minmax(0, 1fr) minmax(320px, 420px);
+  }
+}
+
+@media (max-width: 767px) {
+  .contadores-shell__pagination {
+    justify-content: space-between;
+  }
+
+  .contadores-shell__page-indicator {
+    font-size: 0.9rem;
+  }
+}

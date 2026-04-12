@@ -18,6 +18,7 @@ import { PrdPreciosModule } from '../models/prd-precios/prd-precios.module';
 import { CategoriasModel } from '../models/categorias.model';
 import { MarcasModel } from '../models/marcas/marcas.module';
 import { DescuentoModule } from '../models/descuento/descuento.model';
+import { BodegasModule } from '../models/bodegas/bodegas.module';
 import { CustomConsole } from '../models/CustomConsole';
 import { ConfigService } from './config.service';
 import { InventarioCategoriesResponse, InventarioExistenceResponse, InventarioPrechartResponse, InventarioProductMutationResponse, InventarioProductResponse, InventarioProductsResponse, InventarioReturnResponse, InventarioWarehousesResponse } from '../interfaces/inventario-response.interface';
@@ -223,6 +224,39 @@ getbodegas(){
   CustomConsole.log('servicios de usuarios activo - getbodegas' ,this.baseUrl, datos, httpOptions());
   return this.http.post<InventarioWarehousesResponse>(this.urlInventario, datos, httpOptions());
 } 
+
+setBodega(bodega: BodegasModule): Observable<ApiResponse<GenericMutationPayload>> {
+  const payload: any = {
+    nombre: (bodega.nombre || '').trim(),
+    descripcion: (bodega.descripcion || '').trim(),
+    tipo: Number(bodega.tipo || 1),
+    estado: Number(bodega.estado || 1)
+  };
+
+  let datos: any = {
+    action: actions.actionInsert,
+    _tabla: TABLA.inv_bodegas,
+    _arraydatos: {
+      ...payload,
+      usuario_creacion: 'USUARIO_LOGUEADO'
+    }
+  };
+
+  const id = Number(bodega.id || 0);
+  if (id > 0) {
+    datos = {
+      action: actions.actionUpdate,
+      _tabla: TABLA.inv_bodegas,
+      _where: [{ columna: 'id', tipocomp: '=', dato: id }],
+      _arraydatos: {
+        ...payload,
+        usuario_edicion: 'USUARIO_LOGUEADO'
+      }
+    };
+  }
+
+  return this.http.post<ApiResponse<GenericMutationPayload>>(this.configService.url.action, datos, httpOptions());
+}
 
 getCategorias():Observable<InventarioCategoriesResponse>{
   let datos = {"action": actions.get_categorias};

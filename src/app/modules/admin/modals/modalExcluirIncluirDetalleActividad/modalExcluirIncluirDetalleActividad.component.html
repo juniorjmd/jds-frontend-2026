@@ -1,16 +1,43 @@
-<div class="container-fluid pt-4 pb-4 modal_container ">
-    <div class="row"   >
-        <div class="col-sm-12" style="height: 400px; overflow-y: auto; min-width: 400px;">
-            <table class="table">
-                <tr>
-                    <th colspan="3"><input type="text" [(ngModel)] ='filtroName' (keyup.enter)="filtrarPorNombre()" class="form-control"> <th>
-                </tr>
-                <tr>
-                    <th colspan="3">Productos Disponibles<th>
-                </tr>
-                <tr  (click)="enviarProducto(item)" [ngClass]="{'ModalItemSelected': !item.selected}" *ngFor="let item of productosFiltrados">
-                    <td>{{item.nombre}}</td><td>{{item.nombre2}}</td><td>{{item.nombre3}}</td>
-                </tr>
-            </table>
-        </div>
-    </div> </div>
+<section class="actividad-productos-dialog">
+  <header class="actividad-productos-dialog__header">
+    <div class="actividad-productos-dialog__copy">
+      <span class="app-badge">Actividad</span>
+      <h2>Productos disponibles</h2>
+      <p>Elige productos para incluir o excluir de la actividad.</p>
+    </div>
+
+    <button type="button" class="actividad-productos-dialog__close" (click)="cerrar()" aria-label="Cerrar">
+      <i class="bi bi-x-lg"></i>
+    </button>
+  </header>
+
+  <div class="actividad-productos-dialog__body">
+    <div class="actividad-productos-dialog__filter">
+      <input
+        type="text"
+        [(ngModel)]="filtroName"
+        (keyup.enter)="filtrarPorNombre()"
+        class="form-control"
+        placeholder="Buscar producto..." />
+    </div>
+
+    <div class="actividad-productos-dialog__table-wrapper">
+      <table class="table actividad-productos-dialog__table">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Nombre 2</th>
+            <th>Nombre 3</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr (click)="enviarProducto(item)" [ngClass]="{'ModalItemSelected': !item.selected}" *ngFor="let item of productosFiltrados">
+            <td>{{item.nombre}}</td>
+            <td>{{item.nombre2}}</td>
+            <td>{{item.nombre3}}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>

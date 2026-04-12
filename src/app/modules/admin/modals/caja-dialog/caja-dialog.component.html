@@ -1,0 +1,93 @@
+<div class="caja-dialog">
+    <div class="caja-dialog__header">
+        <div class="caja-dialog__copy">
+            <span class="app-badge">Admin</span>
+            <h2 class="caja-dialog__title">{{ titulo }}</h2>
+            <p class="caja-dialog__subtitle">{{ subtitulo }}</p>
+        </div>
+
+        <button type="button" class="caja-dialog__close" (click)="cerrar()" aria-label="Cerrar formulario">
+            <i class="bi bi-x-lg"></i>
+        </button>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-md-4">
+            <label class="caja-dialog__label" for="cajaNombre">Nombre</label>
+            <input
+                id="cajaNombre"
+                type="text"
+                [(ngModel)]="caja.nombre"
+                class="form-control app-input"
+                placeholder="Nombre de la caja">
+        </div>
+
+        <div class="col-md-4">
+            <label class="caja-dialog__label" for="cajaEstado">Estado</label>
+            <select
+                id="cajaEstado"
+                [(ngModel)]="caja.estadoGeneral"
+                class="form-control app-select">
+                <option [ngValue]="0">Escoger estado</option>
+                <option *ngFor="let estado of estados" [ngValue]="estado.value">{{ estado.label }}</option>
+            </select>
+        </div>
+
+        <div class="col-md-4">
+            <label class="caja-dialog__label" for="cajaEstablecimiento">Establecimiento</label>
+            <select
+                id="cajaEstablecimiento"
+                [(ngModel)]="caja.establecimiento"
+                class="form-control app-select">
+                <option [ngValue]="0">Escoger establecimiento</option>
+                <option *ngFor="let item of data.establecimientos" [ngValue]="item.id">{{ item.nombre }}</option>
+            </select>
+        </div>
+
+        <div class="col-md-4">
+            <label class="caja-dialog__label" for="cajaDescripcion">Descripcion</label>
+            <textarea
+                id="cajaDescripcion"
+                [(ngModel)]="caja.descripcion"
+                class="form-control app-input caja-dialog__textarea"
+                placeholder="Descripcion breve de la caja"></textarea>
+        </div>
+
+        <div class="col-md-4">
+            <label class="caja-dialog__label" for="cajaCuentaEfectivo">Cuenta para efectivo</label>
+            <div class="caja-dialog__account-picker">
+                <input
+                    id="cajaCuentaEfectivo"
+                    type="text"
+                    [(ngModel)]="caja.nombre_scuenta_venta"
+                    class="form-control app-input"
+                    placeholder="Cuenta efectivo">
+                <button type="button" class="caja-dialog__account-action" (click)="buscarCuentasContablesEfectivo()">
+                    <i class="bi bi-search"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <label class="caja-dialog__label" for="cajaCuentaGastos">Cuenta para gastos</label>
+            <div class="caja-dialog__account-picker">
+                <input
+                    id="cajaCuentaGastos"
+                    type="text"
+                    [(ngModel)]="caja.nombre_scuenta_gastos"
+                    class="form-control app-input"
+                    placeholder="Cuenta gastos">
+                <button type="button" class="caja-dialog__account-action" (click)="buscarCuentasContablesGastos()">
+                    <i class="bi bi-search"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="app-toolbar caja-dialog__actions">
+        <button type="button" class="app-chip-button" (click)="cerrar()">Cancelar</button>
+        <button type="button" class="app-chip-button app-chip-button--primary" (click)="guardar()">
+            {{ esEdicion ? 'Guardar cambios' : 'Crear caja' }}
+        </button>
+    </div>
+</div>

@@ -1,7 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { Title } from '@angular/platform-browser';
-import { actividadesDetalleRequest, actividadesRequest } from 'src/app/interfaces/producto-request';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ActividadesDescuentoModel } from 'src/app/models/actividadesDescuentoModel';
 import { CategoriasModel } from 'src/app/models/categorias.model';
 import { ClientesModel } from 'src/app/models/clientes/clientes.module';
@@ -24,6 +23,10 @@ import { GenericMutationPayload, GenericRecordsPayload } from 'src/app/interface
 export class ListarActividadComponent {
 
     actividades:ActividadesDescuentoModel[] =[];
+    filtroActividades = '';
+    paginaActual = 1;
+    tamanoPagina = 10;
+    readonly tamanosPagina = [5, 10, 20, 50];
 
     productos:ProductoModel[] = [];
     categorias:CategoriasModel[] = [];
@@ -31,12 +34,66 @@ export class ListarActividadComponent {
     clientes: ClientesModel[] = [] ;
 
     private serviceAct = inject(ActiDescuentoService)
+    private router = inject(Router);
+    private route = inject(ActivatedRoute);
     constructor(    private newAbrirDialog: MatDialog,){
       CustomConsole.log('entro primero aqui en ListarActividadComponent');
-      
-      this.serviceAct.getActividades().subscribe({next:(value:ApiResponse<GenericRecordsPayload<ActividadesDescuentoModel>>)=>{
-        this.actividades = value.data.records;
-      }})
+      this.cargarActividades();
+    }
+
+    get actividadesFiltradas(): ActividadesDescuentoModel[] {
+      const term = this.filtroActividades.trim().toLowerCase();
+      if (term === '') {
+        return this.actividades;
+      }
+
+      return this.actividades.filter((item) =>
+        [
+          item.nombre,
+          item.nombreTipo,
+          item.fechaInicial,
+          item.fechaFinal,
+          item.nombreDescuento,
+          item.nombre_estado
+        ]
+          .filter((value) => value !== undefined && value !== null)
+          .some((value) => String(value).toLowerCase().includes(term))
+      );
+    }
+
+    get totalPaginas(): number {
+      return Math.max(1, Math.ceil(this.actividadesFiltradas.length / this.tamanoPagina));
+    }
+
+    get actividadesPaginadas(): ActividadesDescuentoModel[] {
+      const start = (this.paginaActual - 1) * this.tamanoPagina;
+      return this.actividadesFiltradas.slice(start, start + this.tamanoPagina);
+    }
+
+    actualizarFiltro(): void {
+      this.paginaActual = 1;
+    }
+
+    cambiarTamanoPagina(): void {
+      this.paginaActual = 1;
+    }
+
+    irAPagina(page: number): void {
+      this.paginaActual = Math.min(Math.max(page, 1), this.totalPaginas);
+    }
+
+    irACrear(): void {
+      this.router.navigate(['../crear'], { relativeTo: this.route });
+    }
+
+    cargarActividades(): void {
+      this.serviceAct.getActividades().subscribe({
+        next:(value:ApiResponse<GenericRecordsPayload<ActividadesDescuentoModel>>)=>{
+          this.actividades = value.data.records ?? [];
+          this.paginaActual = 1;
+        },
+        error:error=>Swal.fire('Error', error.error?.error ?? 'No fue posible consultar las actividades', 'error')
+      })
     }
     activarDesactivarActividad(actividad:ActividadesDescuentoModel){
       let act = {...actividad } 
@@ -45,9 +102,7 @@ CustomConsole.log((act.estado! == 1 ) );
 
       this.serviceAct.updateActividad(act).subscribe({next:(value:ApiResponse<GenericMutationPayload>)=>{
         if(value.ok){
-          this.serviceAct.getActividades().subscribe({next:(value:ApiResponse<GenericRecordsPayload<ActividadesDescuentoModel>>)=>{
-            this.actividades = value.data.records;
-          }})
+          this.cargarActividades();
         }
       }, error:error=>Swal.fire(error.error.error)       })
     }
@@ -57,8 +112,7 @@ CustomConsole.log((act.estado! == 1 ) );
       .pipe(
         tap((confirmado: Boolean) => {      
           if(confirmado){     
-          this.serviceAct.getActividades().subscribe({next:(value:ApiResponse<GenericRecordsPayload<ActividadesDescuentoModel>>)=>{
-            this.actividades = value.data.records;  }})
+          this.cargarActividades();
         }})
       ).subscribe({
         next: () => {},
@@ -124,4 +178,6 @@ CustomConsole.log((act.estado! == 1 ) );
     }
 
     
+    trackByActividad = (index: number, actividad: ActividadesDescuentoModel): number | string =>
+      actividad.id ?? `${actividad.nombre}-${index}`;
 }

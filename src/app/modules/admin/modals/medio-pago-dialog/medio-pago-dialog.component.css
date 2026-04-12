@@ -1,0 +1,103 @@
+.medio-dialog {
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+    padding: 1.25rem;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(247, 244, 240, 0.95));
+    color: var(--app-text);
+}
+
+.medio-dialog__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.medio-dialog__copy {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+}
+
+.medio-dialog__title {
+    margin: 0;
+    font-size: 1.8rem;
+    font-weight: 800;
+}
+
+.medio-dialog__subtitle {
+    margin: 0;
+    color: var(--app-text-soft);
+    max-width: 48ch;
+}
+
+.medio-dialog__close {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 999px;
+    border: 1px solid var(--app-border);
+    background: rgba(255, 255, 255, 0.82);
+    color: var(--app-text-soft);
+}
+
+.medio-dialog__label {
+    display: block;
+    margin-bottom: 0.45rem;
+    color: var(--app-text-soft);
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.medio-dialog__account-picker {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.6rem;
+}
+
+.medio-dialog__account-action {
+    width: 2.9rem;
+    min-width: 2.9rem;
+    border: 1px solid rgba(54, 44, 38, 0.12);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.88);
+    color: var(--app-primary);
+}
+
+.medio-dialog__textarea {
+    min-height: 110px;
+    resize: vertical;
+}
+
+.medio-dialog__actions {
+    justify-content: flex-end;
+}
+
+@media (max-width: 767px) {
+    .medio-dialog {
+        padding: 1rem;
+    }
+
+    .medio-dialog__title {
+        font-size: 1.5rem;
+    }
+
+    .medio-dialog__account-picker {
+        grid-template-columns: 1fr;
+    }
+
+    .medio-dialog__account-action {
+        width: 100%;
+        height: 2.9rem;
+    }
+
+    .medio-dialog__actions {
+        justify-content: stretch;
+    }
+
+    .medio-dialog__actions .app-chip-button {
+        width: 100%;
+    }
+}

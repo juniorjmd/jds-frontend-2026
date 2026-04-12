@@ -1,0 +1,71 @@
+.descuento-dialog {
+  display: grid;
+  gap: 1.5rem;
+  color: var(--app-text);
+}
+
+.descuento-dialog__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.descuento-dialog__header h2 {
+  margin: 0.55rem 0 0.35rem;
+  font-size: clamp(1.45rem, 2vw, 1.9rem);
+  font-weight: 800;
+}
+
+.descuento-dialog__header p {
+  margin: 0;
+  color: var(--app-text-muted);
+  line-height: 1.6;
+  max-width: 52ch;
+}
+
+.descuento-dialog__close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.6rem;
+  height: 2.6rem;
+  border: 1px solid rgba(26, 43, 61, 0.12);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--app-text);
+}
+
+.descuento-dialog__grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.descuento-dialog__field {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.descuento-dialog__field span {
+  font-size: 0.84rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--app-text-soft);
+}
+
+.descuento-dialog__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+@media (min-width: 768px) {
+  .descuento-dialog__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .descuento-dialog__field--full {
+    grid-column: 1 / -1;
+  }
+}

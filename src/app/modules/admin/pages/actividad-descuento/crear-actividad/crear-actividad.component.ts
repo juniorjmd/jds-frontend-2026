@@ -1,6 +1,7 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
+import { ActivatedRoute, Router } from '@angular/router';
 import { tap } from 'rxjs';
 import { CategoriasModel } from 'src/app/models/categorias.model';
 import { ClientesModel } from 'src/app/models/clientes/clientes.module';
@@ -13,7 +14,6 @@ import { FindProductosComponent } from '../../../modals/findProductos/findProduc
 import { FindCategoriasComponent } from '../../../modals/findCategorias/findCategorias.component';
 import { FindMarcasComponent } from '../../../modals/findMarcas/findMarcas.component';
 import { ModalFndClienteComponent } from '../../../modals/modalFndCliente/modalFndCliente.component';
-import { error } from 'jquery';
 import { CustomConsole } from 'src/app/models/CustomConsole';
 import { ApiResponse } from 'src/app/interfaces/api-response.interface';
 import { GenericMutationPayload, GenericRecordsPayload } from 'src/app/interfaces/generic-response.interface';
@@ -37,6 +37,8 @@ export class CrearActividadComponent  implements OnInit{
   private actividadService =  inject(ActiDescuentoService);
   private newAbrirDialog = inject(MatDialog);
   private fb=  inject(FormBuilder );
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
   actividadForm: FormGroup;
   constructor() {  
       this.iniciaCat();
@@ -85,6 +87,10 @@ export class CrearActividadComponent  implements OnInit{
     CustomConsole.log('getProductosDisponibles',value); 
     this.actividadService.setArrayProductos(value.data.records)
   }})
+  }
+
+  cerrar(): void {
+    this.router.navigate(['../listar'], { relativeTo: this.route });
   }
   iniciaCat(){ 
     this.actividadService.getCategoriasDisponibles().subscribe({next : (value:ApiResponse<GenericRecordsPayload<CategoriasModel>>)=>{
@@ -234,7 +240,9 @@ onSubmitActividad() {
         if(this.showprd ) this.getTmpProductos()
         if( this.showcat ) this.getTmpCategorias()
         if( this.showmar  ) this.getTmpMarcas()
-        if( this.showcli ) this.getTmpClientes() 
+        if( this.showcli ) this.getTmpClientes()
+        Swal.fire('Actividad creada con exito', '', 'success');
+        this.router.navigate(['../listar'], { relativeTo: this.route });
       } },error:error=>Swal.fire(error.error.error) }   );
   }
 }

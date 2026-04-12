@@ -13,7 +13,7 @@ import { CustomConsole } from 'src/app/models/CustomConsole';
 import { InventarioCategoriesResponse } from 'src/app/interfaces/inventario-response.interface';
 import { ApiResponse } from 'src/app/interfaces/api-response.interface';
 import { GenericMutationPayload } from 'src/app/interfaces/generic-response.interface';
- 
+
 
 @Component({
   selector: 'modal-admin-categorias',
@@ -23,19 +23,19 @@ import { GenericMutationPayload } from 'src/app/interfaces/generic-response.inte
 export class AdminCategoriasComponent implements OnInit {
   categoriaForm?: FormGroup;
   private fb = inject( FormBuilder );
-private prdService = inject(ProductoService); 
+private prdService = inject(ProductoService);
 private newAbrirDialog =  inject(MatDialog)
-private loading= inject(loading)  
+private loading= inject(loading)
 private dialogo= inject(MatDialogRef<AdminCategoriasComponent>);
 
-categorias: CategoriasModel[] = []; 
-newCateg: CategoriasModel =  new CategoriasModel(null); 
-categoriasPadre1: CategoriasModel[] = []; 
-categoriasPadre2: CategoriasModel[] = []; 
+categorias: CategoriasModel[] = [];
+newCateg: CategoriasModel =  new CategoriasModel(null);
+categoriasPadre1: CategoriasModel[] = [];
+categoriasPadre2: CategoriasModel[] = [];
 
 
 filtrarPadre2(){
-  const padre1Id = this.categoriaForm?.get('categoriaPadre1')?.value;  
+  const padre1Id = this.categoriaForm?.get('categoriaPadre1')?.value;
   //CustomConsole.log('padre1Id' , padre1Id)
   let objPadre =    this.categorias.filter(x => x.id == padre1Id)[0];
   //CustomConsole.log(objPadre)
@@ -45,10 +45,10 @@ filtrarPadre2(){
 
 }
 filtrarPadre3(){
-  const padre1Id = this.categoriaForm?.get('categoriaPadre2')?.value;  
+  const padre1Id = this.categoriaForm?.get('categoriaPadre2')?.value;
   let objPadre =    this.categorias.filter(x => x.id == padre1Id)[0];
   this.categoriaForm?.get('cuentaContable')?.setValue( objPadre.NombreCuentaContable);
-  this.newCateg.idCuentaContable  = objPadre.idCuentaContable; 
+  this.newCateg.idCuentaContable  = objPadre.idCuentaContable;
 
 }
  ngOnInit(): void {
@@ -59,7 +59,7 @@ filtrarPadre3(){
     }
  }})
 
-  this.categoriaForm = this.fb.group({ 
+  this.categoriaForm = this.fb.group({
     letra: ['', Validators.required],
     nombre: ['', Validators.required],
     descripcion: ['', Validators.required] ,
@@ -69,63 +69,66 @@ filtrarPadre3(){
   });
  }
 
- 
+
  buscarCuentasContables(){
   this.newAbrirDialog.open(ModalCntSubCuentasComponent, { data:  null })
-  .afterClosed() 
+  .afterClosed()
   .pipe(
     tap((response: responseSubC) => {
       //CustomConsole.log('buscarCuentasContables',response);
-      if (response.confirmado && response.datoDevolucion !== undefined ) {  
+      if (response.confirmado && response.datoDevolucion !== undefined ) {
         this.categoriaForm?.get('cuentaContable')?.setValue( response.datoDevolucion.nombre_scuenta);
         this.newCateg.idCuentaContable  = response.datoDevolucion.id_scuenta;
-      }  
+      }
     })
   ).subscribe({
     next: () => {},
     error: (error) => Swal.fire('Error:', error),
     complete: () =>  CustomConsole.log('buscarCuentasContables completo')
-  }); 
+  });
+}
+cerrar(): void {
+  this.dialogo.close(false);
 }
   onSubmit(): void {
     if (this.categoriaForm?.valid) {
       //CustomConsole.log(this.categoriaForm.value);
-      let valores:any = this.categoriaForm.value ; 
+      let valores:any = this.categoriaForm.value ;
       this.newCateg.idPadreCategoria = 0;
       if( valores.categoriaPadre2!= undefined && valores.categoriaPadre2 > 0 ){
         this.newCateg.idPadreCategoria = valores.categoriaPadre2;
       }else if( valores.categoriaPadre1!= undefined && valores.categoriaPadre1 > 0 ){
         this.newCateg.idPadreCategoria = valores.categoriaPadre1;
-      } 
+      }
       if ( this.newCateg.idPadreCategoria! > 0 ){
         let auxPadre =  this.categorias.filter(x=> x.id == this.newCateg.idPadreCategoria)[0]
         this.newCateg.letra = `${auxPadre.letra}${valores.letra}`;
       }else{
         this.newCateg.letra = valores.letra ;
       }
-      
+
       this.newCateg.letra = this.newCateg.letra.toUpperCase();
-      this.newCateg.descripcion = valores.descripcion ; 
-      this.newCateg.nombre = valores.nombre ; 
-      this.newCateg.usuario_creacion = 'USUARIO_LOGUEADO' ;  
-      this.newCateg.name_usuario_creacion = undefined ; 
-      this.newCateg.name_usuario_edicion = undefined ;  
+      this.newCateg.descripcion = valores.descripcion ;
+      this.newCateg.nombre = valores.nombre ;
+      this.newCateg.usuario_creacion = 'USUARIO_LOGUEADO' ;
+      this.newCateg.name_usuario_creacion = undefined ;
+      this.newCateg.name_usuario_edicion = undefined ;
 
       //CustomConsole.log(this.newCateg);
-      this.prdService.setCategorias(this.newCateg).subscribe({next:(value:ApiResponse<GenericMutationPayload>)=>{ 
+      this.prdService.setCategorias(this.newCateg).subscribe({next:(value:ApiResponse<GenericMutationPayload>)=>{
         if (value.ok) {
-          this.dialogo.close(true); 
+          this.dialogo.close(true);
         }
       },error:error=>Swal.fire(error)})
-    } 
+    }
   }
-  getAllCategorias(){ 
+  getAllCategorias(){
     this.loading.show()
     this.prdService.getCategorias().subscribe({
        next :(datos:InventarioCategoriesResponse)=>{
          //CustomConsole.log('getAllCategorias',datos);
-         
-    if (datos.data.count > 0 ){  
+
+    if (datos.data.count > 0 ){
         this.categorias = datos.data.categories;
         this.prdService.asignarCategorias(this.categorias);
         //CustomConsole.log(this.categorias);

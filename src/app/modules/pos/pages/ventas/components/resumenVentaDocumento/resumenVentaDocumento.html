@@ -1,0 +1,26 @@
+<div class="app-panel ventas-card ventas-card--summary">
+  <div class="ventas-card__head">
+    <div>
+      <h2 class="ventas-card__title">Resumen de la venta</h2>
+    </div>
+  </div>
+
+  <div class="app-stat-grid ventas-summary-board__stats">
+    <div class="app-stat-card">
+      <span class="app-stat-card__label">Subtotal</span>
+      <span class="app-stat-card__value">{{ (documentoActivo?.valorParcial || 0) | currency }}</span>
+    </div>
+    <div class="app-stat-card">
+      <span class="app-stat-card__label">Descuento</span>
+      <span class="app-stat-card__value">{{ (documentoActivo?.descuento || 0) | currency }}</span>
+    </div>
+    <div class="app-stat-card">
+      <span class="app-stat-card__label">IVA</span>
+      <span class="app-stat-card__value">{{ (documentoActivo?.valorIVA || 0) | currency }}</span>
+    </div>
+    <div class="app-stat-card">
+      <span class="app-stat-card__label">Otros impuestos</span>
+      <span class="app-stat-card__value">{{ 0 | currency }}</span>
+    </div>
+  </div>
+</div>

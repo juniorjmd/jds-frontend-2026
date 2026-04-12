@@ -1,10 +1,3 @@
-<section class="module-shell">
-    <nav class="module-shell__tabs" aria-label="Secciones de actividades de descuento">
-        <a [routerLink]="['listar']" routerLinkActive="is-active" class="module-shell__tab">Listar</a>
-        <a [routerLink]="['crear']" routerLinkActive="is-active" class="module-shell__tab">Crear</a>
-    </nav>
-
-    <div class="module-shell__content">
-        <router-outlet></router-outlet>
-    </div>
-</section>
+<app-inventario-layout>
+    <router-outlet></router-outlet>
+</app-inventario-layout>

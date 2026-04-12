@@ -4,7 +4,7 @@
 >
   <a
     class="app-menu-link"
-    [routerLink]="recurso.direccion"
+    [routerLink]="getRouterLink(recurso)"
     routerLinkActive="is-active"
     [routerLinkActiveOptions]="{ exact: false }"
     [attr.title]="recurso.display_nombre"
@@ -21,7 +21,7 @@
   (mouseenter)="showDropdown()"
   (mouseleave)="hideDropdown()"
 >
-  <button  [routerLink]="recurso.direccion" type="button" class="app-menu-group__label" [attr.title]="recurso.display_nombre">
+  <button [routerLink]="getRouterLink(recurso)" type="button" class="app-menu-group__label" [attr.title]="recurso.display_nombre">
     <span *ngIf="hasIcon(recurso)" class="app-menu-link__icon"><i class="bi" [ngClass]="getIconClass(recurso)"></i></span>
     <span class="app-menu-group__label-text">{{ recurso.display_nombre }}</span>
     <small>▾</small>

@@ -47,6 +47,46 @@ export class IndexComponent  implements OnInit {
   getSanitizedHtml(html: string): SafeHtml {
     return this.sanitizer.bypassSecurityTrustHtml(html);
   }
+
+  getRouterLink(recurso: RecursoDetalle): string[] {
+    const route = recurso.direccion ?? [];
+    if (route.length === 0) {
+      return [];
+    }
+
+    const absolute = route[0]?.startsWith('/') ?? false;
+    let segments = route.flatMap((part) => part.split('/').filter(Boolean));
+
+    if (segments[0] === 'admin') {
+      segments = ['home', ...segments];
+    }
+
+    if (segments[0] === 'inventarios') {
+      segments = ['home', 'admin', ...segments];
+    }
+
+    if (segments[0] === 'inventario') {
+      segments = ['home', 'admin', 'inventarios', ...segments];
+    }
+
+    if (segments[0] === 'home' && segments[1] === 'admin') {
+      if (segments[2] === 'inventario') {
+        segments[2] = 'inventarios';
+      }
+
+      if (segments[2] === 'inventarios' && segments.length === 3) {
+        segments.push('inicio');
+      }
+    }
+
+    if (segments.length === 0) {
+      return [];
+    }
+
+    return absolute || segments[0] === 'home'
+      ? [`/${segments[0]}`, ...segments.slice(1)]
+      : segments;
+  }
   
   getMenuImage(recursos:RecursoDetalle[]){
 

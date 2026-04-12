@@ -1,45 +1,47 @@
-<div class="container-fluid pt-4 pb-4 modal_container ">
-
-    <div class="row"   >
-
-        <div class="col-sm-12"   >
-            <h1>Modificacion de fecha de aplicacion de la actividad</h1>
-        </div>
+<section class="actividad-dialog">
+  <header class="actividad-dialog__header">
+    <div class="actividad-dialog__copy">
+      <span class="app-badge">Actividades</span>
+      <h2>Modificar fecha de la actividad</h2>
+      <p>Actualiza las fechas de aplicación de descuentos de forma rápida y segura.</p>
     </div>
-        <div class="row mt-4"   >
-            <div class="col-sm-2"   >Actividad
-            </div>
-            <div class="col-sm-4"   > 
-                <input id="nombre"   [(ngModel)]="actividad.nombre" type="text" class="form-control"  > </div>
-        <div class="col-sm-2"   >descuento  </div>
-            <div class="col-sm-4"   >{{actividad.nombreDescuento}}</div>
-                </div>
 
-        
-                <div class="row mt-4"   >    
-            
-                    <div class="col-sm-2"   >Descripcion 
-                    </div>
-                    <div class="col-sm-5"   > 
-                        <textarea id="nombre"  [(ngModel)]="actividad.descripcion"   class="form-control"  > </textarea> </div>
-        </div>
+    <button type="button" class="actividad-dialog__close" (click)="cancelar()" aria-label="Cerrar">
+      <i class="bi bi-x-lg"></i>
+    </button>
+  </header>
 
-
-    <div class="row mt-4"   >
-
-        <div class="col-sm-2"   >fecha inicial  </div>
-        <div class="col-sm-3"   >  <input id="fechaInicial" (change)="validarFechaFinal()" [(ngModel)]="actividad.fechaInicial" type="date" class="form-control"  > </div>
-        
-        <div class="col-sm-2"   >fecha final  </div>
-        <div class="col-sm-3"   >  <input id="fechaFinal"  (change)="validarFechaFinal()" [min] = "actividad.fechaInicial"  [(ngModel)]="actividad.fechaFinal"  type="date" class="form-control"  > </div>
-    </div> 
-    <div class="row mt-4"   >
-
-        <div class="col-sm-2"   >
-            <button class="btn btn-success" (click)="enviar()" >Guardar</button>
-        </div>
-        <div class="col-sm-2"   >
-            <button class="btn btn-danger" (click)="cancelar()">Cancelar</button>
-        </div>
+  <div class="actividad-dialog__body">
+    <div class="row g-3">
+      <div class="col-md-2 actividad-dialog__label">Actividad</div>
+      <div class="col-md-4">
+        <input id="nombre" [(ngModel)]="actividad.nombre" type="text" class="form-control" />
       </div>
-</div>
+      <div class="col-md-2 actividad-dialog__label">Descuento</div>
+      <div class="col-md-4 actividad-dialog__value">{{actividad.nombreDescuento}}</div>
+    </div>
+
+    <div class="row g-3">
+      <div class="col-md-2 actividad-dialog__label">Descripción</div>
+      <div class="col-md-10">
+        <textarea id="descripcion" [(ngModel)]="actividad.descripcion" class="form-control actividad-dialog__textarea"></textarea>
+      </div>
+    </div>
+
+    <div class="row g-3">
+      <div class="col-md-2 actividad-dialog__label">Fecha inicial</div>
+      <div class="col-md-3">
+        <input id="fechaInicial" (change)="validarFechaFinal()" [(ngModel)]="actividad.fechaInicial" type="date" class="form-control" />
+      </div>
+      <div class="col-md-2 actividad-dialog__label">Fecha final</div>
+      <div class="col-md-3">
+        <input id="fechaFinal" (change)="validarFechaFinal()" [min]="actividad.fechaInicial" [(ngModel)]="actividad.fechaFinal" type="date" class="form-control" />
+      </div>
+    </div>
+  </div>
+
+  <footer class="app-toolbar actividad-dialog__footer">
+    <button type="button" class="app-chip-button" (click)="cancelar()">Cancelar</button>
+    <button type="button" class="app-chip-button app-chip-button--primary" (click)="enviar()">Guardar</button>
+  </footer>
+</section>

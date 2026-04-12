@@ -1,17 +1,18 @@
 import { Component, OnInit } from '@angular/core';
-import { cajaModel } from 'src/app/models/ventas/cajas.model';
+import { MatDialog } from '@angular/material/dialog';
+import Swal from 'sweetalert2';
 import { establecimientoModel } from 'src/app/models/ventas/establecimientos.model';
 import { cajasServices } from 'src/app/services/Cajas.services';
 import { loading } from 'src/app/models/app.loading';
-import { select } from 'src/app/interfaces/generales.interface';
-import { Establecimientos } from 'src/app/interfaces/establecimientos.interface';
-import { caja } from 'src/app/interfaces/caja.interface';
 import { TipoDocumento } from 'src/app/interfaces/tipo-documento';
 import { Contador } from 'src/app/interfaces/contador';
-import { establecimientosRequest } from 'src/app/interfaces/producto-request';
 import { CustomConsole } from 'src/app/models/CustomConsole';
 import { ApiResponse } from 'src/app/interfaces/api-response.interface';
-import { GenericMutationPayload, GenericRecordsPayload } from 'src/app/interfaces/generic-response.interface';
+import { GenericRecordsPayload } from 'src/app/interfaces/generic-response.interface';
+import {
+  ContadorDialogComponent,
+  ContadorDialogResult
+} from '../../modals/contador-dialog/contador-dialog.component';
 
 @Component({
   selector: 'app-contadores',
@@ -21,156 +22,154 @@ import { GenericMutationPayload, GenericRecordsPayload } from 'src/app/interface
 export class ContadoresComponent implements OnInit {
   tipContadores :TipoDocumento [] = [];
   contadores :Contador [] = [] ;
-  cajas :cajaModel[]  = []; 
-  auxnewContador :  Contador = {
-    id: 0,
-    codContador: '',
-    desde : 0 , 
-    hasta : 0,
-    establecimiento: 0,
-    contador: 0,
-    tipoContador: 0,
-    contador_real_establecimiento: 0,
-    estado: 0,
-    resolucion : ''
-  };
-  newContador :  Contador 
   esta : establecimientoModel[] = [];
-  constructor( private serviceCaja : cajasServices ,    
+  filtroContadores = '';
+  paginaActual = 1;
+  tamanoPagina = 10;
+  readonly tamanosPagina = [5, 10, 20, 50];
+
+  constructor(
+    private serviceCaja : cajasServices,
+    private dialog: MatDialog,
     private loading : loading ) { 
-      this.newContador={...this.auxnewContador  };
-      this.Cancelar();
       this.getTiposDocumentosConContadores(); 
-     this.getContadores();
-      }
-      ngOnInit(): void {
-        this.serviceCaja.currentArrEsta.subscribe({next:(esta:establecimientoModel[]|null)=>{
-          if(esta) this.esta = esta;
-        }})
-      }
-      Cancelar(){
-        this.newContador={...this.auxnewContador  };
-        
-         
-      }
-      getTiposDocumentosConContadores(){
-        this.tipContadores= [];
-        this.serviceCaja.getTiposDocumentosConContadores()
-         .subscribe({next:     (datos:any)=>{
-             CustomConsole.log(datos); 
-        if (datos.ok && datos.data.count > 0 ){  
-          datos.data.records.forEach((dato:TipoDocumento , index:number )=>{
-            this.tipContadores[index] = dato;
-          })  
+      this.getEstablecimientos();
+      this.getContadores();
+  }
+
+  ngOnInit(): void {
+    this.serviceCaja.currentArrEsta.subscribe({
+      next: (esta: establecimientoModel[] | null) => {
+        if (esta && esta.length > 0) {
+          this.esta = esta;
         }
-    
-            this.loading.hide()
-          } ,error:       error => {this.loading.hide();
-            
-            this.tipContadores = [];
-            alert( error.error.error);
-          }}
-          );
-      } 
-
-
-
-      setActualizaCaja(cajaActualizar : Contador){
-        this.newContador = cajaActualizar ; 
       }
-    getContadores(){ 
-      this.contadores = [];
-      this.loading.show()
-      this.serviceCaja.getContadores()
-         .subscribe({next :
-          (datos:any)=>{
-             CustomConsole.log(datos);
-             
-        if (datos.ok && datos.data.count > 0 ){ 
-          datos.data.records.forEach((dato:Contador  , index:number )=>{ 
-            this.contadores[index] = dato ;
-          }) 
-          CustomConsole.log(this.contadores);
-        }else{
+    });
+  }
+
+  get contadoresFiltrados(): Contador[] {
+    const term = this.filtroContadores.trim().toLowerCase();
+    if (term === '') {
+      return this.contadores;
+    }
+
+    return this.contadores.filter((contador) =>
+      [
+        contador.codContador,
+        contador.nombreEstablecimiento,
+        contador.nombreTipo,
+        contador.nombre_estado,
+        contador.resolucion,
+        contador.contador,
+        contador.contador_real_establecimiento
+      ]
+        .filter((value) => value !== undefined && value !== null)
+        .some((value) => String(value).toLowerCase().includes(term))
+    );
+  }
+
+  get totalPaginas(): number {
+    return Math.max(1, Math.ceil(this.contadoresFiltrados.length / this.tamanoPagina));
+  }
+
+  get contadoresPaginados(): Contador[] {
+    const start = (this.paginaActual - 1) * this.tamanoPagina;
+    return this.contadoresFiltrados.slice(start, start + this.tamanoPagina);
+  }
+
+  actualizarFiltro(): void {
+    this.paginaActual = 1;
+  }
+
+  cambiarTamanoPagina(): void {
+    this.paginaActual = 1;
+  }
+
+  irAPagina(page: number): void {
+    this.paginaActual = Math.min(Math.max(page, 1), this.totalPaginas);
+  }
+
+  abrirModalContador(contador?: Contador): void {
+    if (this.tipContadores.length === 0 || this.esta.length === 0) {
+      Swal.fire('Datos incompletos', 'Todavia no se cargan los catalogos necesarios para editar el contador.', 'warning');
+      return;
+    }
+
+    this.dialog
+      .open(ContadorDialogComponent, {
+        width: 'min(860px, 96vw)',
+        autoFocus: false,
+        data: {
+          contador,
+          tiposContador: this.tipContadores,
+          establecimientos: this.esta
+        }
+      })
+      .afterClosed()
+      .subscribe((resultado?: ContadorDialogResult) => {
+        if (resultado?.saved) {
+          this.getContadores();
+        }
+      });
+  }
+
+  getTiposDocumentosConContadores(): void {
+    this.tipContadores = [];
+    this.serviceCaja.getTiposDocumentosConContadores().subscribe({
+      next: (datos: ApiResponse<GenericRecordsPayload<TipoDocumento>>) => {
+        CustomConsole.log(datos);
+
+        if (datos.ok && datos.data.count > 0) {
+          this.tipContadores = [...datos.data.records];
+        }
+      },
+      error: (error) => {
+        this.tipContadores = [];
+        window.alert(this.serviceCaja.getErrorMessage(error));
+      }
+    });
+  }
+
+  getEstablecimientos(): void {
+    this.serviceCaja.getEstablecimientos().subscribe({
+      next: (datos: ApiResponse<GenericRecordsPayload<establecimientoModel>>) => {
+        if (datos.ok && datos.data.count > 0) {
+          this.esta = [...datos.data.records];
+          this.serviceCaja.asignarEstablecimientos(this.esta);
+          return;
+        }
+
+        this.esta = [];
+      },
+      error: (error) => {
+        this.esta = [];
+        window.alert(this.serviceCaja.getErrorMessage(error));
+      }
+    });
+  }
+
+  getContadores(): void {
+    this.contadores = [];
+    this.loading.show();
+    this.serviceCaja.getContadores().subscribe({
+      next: (datos: ApiResponse<GenericRecordsPayload<Contador>>) => {
+        CustomConsole.log(datos);
+
+        if (datos.ok && datos.data.count > 0) {
+          this.contadores = [...datos.data.records];
+        } else {
           this.contadores = [];
         }
-    
-            this.loading.hide()
-          } , error: error => {this.loading.hide();
-            alert( error.error.error);
-          }}
-          );
-    }
-    
-    
-     
-       guardarContador(){ 
-       if (typeof(this.newContador.codContador) === 'undefined'){
-        this.loading.hide();
-        alert('Debe ingresar el codigo para el contador');
-        return;
-       } 
-       if (this.newContador.establecimiento === 0){
-        this.loading.hide();
-        alert('Debe escoger el establecimiento');
-        return;
-       }
-       if (this.newContador.tipoContador === 0){
-        this.loading.hide();
-        alert('Debe escoger el tipo de contador');
-        return;
-       }
-       if (this.newContador.desde  === 0){
-        this.loading.hide();
-        alert('Debe escoger el tipo de contador');
-        return;
-       }
-       if (this.newContador.hasta  === 0){
-        this.loading.hide();
-        alert('Debe escoger el tipo de contador');
-        return;
-       } 
 
-       if (this.newContador.resolucion !== undefined && (typeof this.newContador.resolucion === 'string' && this.newContador.resolucion.trim() != '' )){
-        if (this.newContador.fechaInicioResolucion  === undefined || this.newContador.fechaInicioResolucion.toString() == ''){
-                  this.loading.hide();
-                  alert('Debe escoger el tipo de contador');
-                  return;
-                } 
-        if (this.newContador.fechaFinResolucion  === undefined || this.newContador.fechaFinResolucion.toString() == ''){
-          this.loading.hide();
-          alert('Debe escoger el tipo de contador');
-          return;
-         } 
+        this.paginaActual = 1;
+      },
+      error: (error) => {
+        window.alert(this.serviceCaja.getErrorMessage(error));
+      },
+      complete: () => this.loading.hide()
+    });
+  }
 
-         if (this.newContador.fechaFinResolucion <= this.newContador.fechaInicioResolucion)
-         { this.loading.hide();
-          alert('error en el rango de fecha');
-          return;}
-
-
-
-       } 
-       
-       this.loading.show(); 
-       this.serviceCaja.setConsecutivo(this.newContador).subscribe(
-       {next: (respuesta:any)=>{CustomConsole.log(respuesta)
-         
-        if (respuesta.ok){
-          alert('datos ingresados con exito');  
-          this.Cancelar();
-          this.getContadores();
-        }else{
-          alert(respuesta.error?.message ?? 'Error interno del servidor');
-          this.loading.hide();
-        }
-        }, error:   error => {this.loading.hide();
-          alert( error.error.error);
-          this.loading.hide();
-        }}
-    
-       )
-      }
-     
-    
-    }
+  trackByContador = (index: number, contador: Contador): number | string =>
+    contador.id ?? `${contador.codContador}-${index}`;
+}

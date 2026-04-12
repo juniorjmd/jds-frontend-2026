@@ -1,0 +1,244 @@
+.bodegas-shell__container {
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
+}
+
+.bodegas-shell {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.bodegas-shell__header,
+.bodegas-shell__table-panel,
+.bodegas-shell__empty {
+  border-radius: 28px;
+}
+
+.bodegas-shell__header {
+  display: grid;
+  gap: 1.5rem;
+  align-items: end;
+  padding: 1rem;
+}
+
+.bodegas-shell__copy {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.bodegas-shell__title {
+  margin: 0;
+}
+
+.bodegas-shell__description {
+  margin: 0;
+  max-width: 62ch;
+  color: var(--app-text-muted);
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.bodegas-shell__controls {
+  display: grid;
+  gap: 1rem;
+}
+
+.bodegas-shell__filter {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.bodegas-shell__filter label,
+.bodegas-shell__page-size-label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--app-text-soft);
+}
+
+.bodegas-shell__table-panel {
+  padding: 0.9rem 1rem 1rem;
+}
+
+.bodegas-shell__table-toolbar {
+  margin-bottom: 1rem;
+}
+
+.bodegas-shell__page-size {
+  min-width: 88px;
+}
+
+.bodegas-shell__table-wrap {
+  overflow-x: auto;
+}
+
+.bodegas-table {
+  margin: 0;
+  min-width: 920px;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.bodegas-table thead th {
+  padding: 1rem 0.85rem;
+  border-top: 1px solid rgba(112, 135, 166, 0.18);
+  border-bottom: 1px solid rgba(112, 135, 166, 0.18);
+  background: rgba(244, 248, 252, 0.95);
+  color: var(--app-text-soft);
+  font-size: 0.88rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.bodegas-table thead th:first-child {
+  border-left: 1px solid rgba(112, 135, 166, 0.18);
+  border-top-left-radius: 18px;
+}
+
+.bodegas-table thead th:last-child {
+  border-right: 1px solid rgba(112, 135, 166, 0.18);
+  border-top-right-radius: 18px;
+}
+
+.bodegas-table tbody td {
+  padding: 1rem 0.85rem;
+  border-right: 1px solid rgba(112, 135, 166, 0.14);
+  border-bottom: 1px solid rgba(112, 135, 166, 0.14);
+  color: var(--app-text);
+  vertical-align: middle;
+  background: rgba(255, 255, 255, 0.96);
+}
+
+.bodegas-table tbody td:first-child {
+  border-left: 1px solid rgba(112, 135, 166, 0.14);
+  font-weight: 700;
+}
+
+.bodegas-table tbody tr:last-child td:first-child {
+  border-bottom-left-radius: 18px;
+}
+
+.bodegas-table tbody tr:last-child td:last-child {
+  border-bottom-right-radius: 18px;
+}
+
+.bodegas-table__state {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 104px;
+  padding: 0.4rem 0.9rem;
+  border-radius: 999px;
+  font-weight: 700;
+}
+
+.bodegas-table__state.is-active {
+  background: rgba(88, 156, 130, 0.12);
+  color: #2b7b64;
+}
+
+.bodegas-table__state.is-inactive {
+  background: rgba(175, 132, 87, 0.12);
+  color: #91592a;
+}
+
+.bodegas-table__actions-head,
+.bodegas-table__actions {
+  width: 136px;
+  text-align: center;
+}
+
+.bodegas-table__actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+}
+
+.bodegas-table__action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 1px solid rgba(143, 110, 88, 0.18);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--app-text);
+}
+
+.bodegas-shell__pagination {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.9rem;
+  margin-top: 1rem;
+}
+
+.bodegas-shell__page-btn {
+  border: 1px solid rgba(26, 43, 61, 0.12);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--app-text);
+  font-weight: 700;
+  padding: 0.72rem 1.2rem;
+}
+
+.bodegas-shell__page-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.bodegas-shell__page-indicator {
+  color: var(--app-text-soft);
+  font-weight: 700;
+}
+
+.bodegas-shell__empty {
+  display: grid;
+  justify-items: start;
+  gap: 0.85rem;
+  text-align: left;
+  padding: 1.35rem 1rem;
+}
+
+.bodegas-shell__empty h3,
+.bodegas-shell__empty p {
+  margin: 0;
+}
+
+.bodegas-shell__empty p {
+  color: var(--app-text-muted);
+  max-width: 52ch;
+}
+
+.bodegas-shell__empty-icon {
+  font-size: 2rem;
+  color: var(--app-accent);
+}
+
+@media (min-width: 992px) {
+  .bodegas-shell__header {
+    grid-template-columns: minmax(0, 1.7fr) minmax(360px, 520px);
+  }
+}
+
+@media (max-width: 767px) {
+  .bodegas-shell__container {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+
+  .bodegas-shell__header,
+  .bodegas-shell__table-panel,
+  .bodegas-shell__empty {
+    padding-left: 0.85rem;
+    padding-right: 0.85rem;
+  }
+
+  .bodegas-shell__pagination {
+    justify-content: space-between;
+  }
+}

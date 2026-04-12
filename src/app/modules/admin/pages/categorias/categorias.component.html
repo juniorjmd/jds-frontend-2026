@@ -1,43 +1,45 @@
-<div class="container-fluid contenedor">
-    <div class="row">
-        <div class="col-sm-12">
-            <h2 class="text-center">Categorías de productos</h2>
+<app-inventario-layout>
+    <div class="container-fluid contenedor">
+        <div class="row">
+            <div class="col-sm-12">
+                <h2 class="text-center">Categorías de productos</h2>
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-sm-12">
+                <button type="button" class="btn btn-primary" (click)='crearCategoria()'>Nueva Categoría</button>
+            </div>
+        </div>
+        <hr>
+        <div class="row">
+            <div class="col-sm-1"></div>
+            <div class="col-sm-10">
+                <table class="table table-striped" *ngIf="categorias.length > 0">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Letra</th>
+                            <th>Tipo</th>
+                            <th>cuenta contable</th>
+                            <th>Contador</th>
+                            <th>Opción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let categoria of categorias" title="{{categoria.descripcion}}">
+                            <td>{{categoria.nombre}}</td>
+                            <td>{{categoria.letra}}</td>
+                            <td>{{categoria.tipoDescripcion}}</td>
+                            <td>{{categoria.NombreCuentaContable}}</td>
+                            <td>{{categoria.contador}}</td>
+                            <td>
+                                <i class="bi bi-pencil-fill boton_activo" (click)="setActualizacategoria(categoria)" title="Editar categoría" aria-label="Editar categoría"></i>
+                                <i class="bi bi-card-text boton_activo ms-2" (click)="setAgregarPerfil(categoria)" title="Asignar características de categoría" aria-label="Asignar características de categoría"></i>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
-    <div class="row mb-3">
-        <div class="col-sm-12">
-            <button type="button" class="btn btn-primary" (click)='crearCategoria()'>Nueva Categoría</button>
-        </div>
-    </div>
-    <hr>
-    <div class="row">
-        <div class="col-sm-1"></div>
-        <div class="col-sm-10">
-            <table class="table table-striped" *ngIf="categorias.length > 0">
-                <thead>
-                    <tr>
-                        <th>Nombre</th>
-                        <th>Letra</th>
-                        <th>Tipo</th>
-                        <th>cuenta contable</th>
-                        <th>Contador</th>
-                        <th>Opción</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr *ngFor="let categoria of categorias" title="{{categoria.descripcion}}">
-                        <td>{{categoria.nombre}}</td>
-                        <td>{{categoria.letra}}</td>
-                        <td>{{categoria.tipoDescripcion}}</td>
-                        <td>{{categoria.NombreCuentaContable}}</td>
-                        <td>{{categoria.contador}}</td>
-                        <td>
-                            <i class="bi bi-pencil-fill boton_activo" (click)="setActualizacategoria(categoria)" title="Editar categoría" aria-label="Editar categoría"></i>
-                            <i class="bi bi-card-text boton_activo ms-2" (click)="setAgregarPerfil(categoria)" title="Asignar características de categoría" aria-label="Asignar características de categoría"></i>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
+</app-inventario-layout>

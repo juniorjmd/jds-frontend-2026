@@ -1,8 +1,15 @@
-<div class="container">
-    <h3>Cargue de Inventario por Plantilla</h3>
-    <p>
-      Para realizar el cargue masivo de inventario, siga estos pasos:
-    </p>
+<section class="inventarios-plantilla-page">
+  <header class="inventarios-plantilla-page__header">
+    <div>
+      <span class="app-badge">Inventario</span>
+      <h2>Cargue de inventario por plantilla</h2>
+      <p>Utilice una plantilla para cargar inventario de forma masiva y validar los datos antes de procesarlos.</p>
+    </div>
+  </header>
+
+  <div class="inventarios-plantilla-page__body">
+    <p>Para realizar el cargue masivo de inventario, siga estos pasos:</p>
+
     <ol>
       <li>
         Descargue una de las plantillas disponibles a continuación. Puede elegir entre los formatos Excel y CSV:
@@ -32,59 +39,38 @@
           <li>Guarde el archivo.</li>
         </ol>
       </li>
-      <li>
-        Seleccione el archivo CSV utilizando el botón a continuación.
-      </li>
-      <li>
-        Valide el archivo para asegurarse de que no hay errores en los datos. Si se encuentran errores, corrija el archivo y vuelva a cargarlo.
-      </li>
-      <li>
-        Una vez validado correctamente, podrá procesar el archivo para cargar los datos al sistema.
-      </li>
+      <li>Seleccione el archivo CSV utilizando el botón a continuación.</li>
+      <li>Valide el archivo para asegurarse de que no hay errores en los datos. Si se encuentran errores, corrija el archivo y vuelva a cargarlo.</li>
+      <li>Una vez validado correctamente, podrá procesar el archivo para cargar los datos al sistema.</li>
     </ol>
-  
-    <hr />
-  
-    <label for="fileUpload">Selecciona el archivo CSV:</label>
-    <input
-      type="file"
-      id="fileUpload"
-      (change)="onFileSelected($event)"
-      accept=".csv"
-      class="form-control"
-    />
-    <br />
-  
-    <button
-      class="btn btn-primary"
-      [disabled]="!fileUploaded"
-      (click)="validateFile()"
-    >
-      Validar Archivo
-    </button>
-    <button
-      class="btn btn-success"
-      [disabled]="!validationPassed"
-      (click)="processFile()"
-    >
-      Procesar Archivo
-    </button>
-  
-    <hr />
-  
-    <div *ngIf="validationErrors.length > 0" class="alert alert-danger">
+
+    <div class="inventarios-plantilla-page__uploader">
+      <label for="fileUpload">Selecciona el archivo CSV:</label>
+      <input
+        type="file"
+        id="fileUpload"
+        (change)="onFileSelected($event)"
+        accept=".csv"
+        class="form-control"
+      />
+    </div>
+
+    <div class="inventarios-plantilla-page__actions">
+      <button class="btn btn-primary" [disabled]="!fileUploaded" (click)="validateFile()">Validar archivo</button>
+      <button class="btn btn-success" [disabled]="!validationPassed" (click)="processFile()">Procesar archivo</button>
+    </div>
+
+    <div *ngIf="validationErrors.length > 0" class="alert alert-danger inventarios-plantilla-page__alert">
       <h5>Errores de Validación</h5>
-      <p>
-        Se encontraron los siguientes errores en el archivo. Por favor, corrija los errores y vuelva a cargar el archivo.
-      </p>
+      <p>Se encontraron los siguientes errores en el archivo. Por favor, corrija los errores y vuelva a cargar el archivo.</p>
       <ul>
         <li *ngFor="let error of validationErrors">{{ error }}</li>
       </ul>
     </div>
-  
-    <div *ngIf="validationPassed" class="alert alert-success">
-      <h5>Validación Exitosa</h5>
+
+    <div *ngIf="validationPassed" class="alert alert-success inventarios-plantilla-page__alert">
+      <h5>Validación exitosa</h5>
       <p>El archivo ha sido validado correctamente. Ahora puede procesar los datos.</p>
     </div>
   </div>
-  
+</section>

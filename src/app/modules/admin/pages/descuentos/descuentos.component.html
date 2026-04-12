@@ -1,67 +1,117 @@
-<div class="container-fluid contenedor">
-    <h2>Mantenimientos de Descuentos</h2> 
-        <div class="row">
-            <div class="col-sm-4"> 
-                    <div class="form-group">
-                        <label for="tipo">Tipo</label>
-                        <select class="form-control" id="tipo"  [(ngModel)] = "newDesc.tipo" >
-                            <option value="P">Porcentaje</option>
-                            <option value="C">Cantidad</option>
-                        </select>
-                    </div>
-                  </div> 
-                  <div class="col-sm-4"> 
-                        <div class="form-group">
-                            <label for="cantidad">Cantidad</label>
-                            <input type="number"  [(ngModel)] = "newDesc.cantidad"  class="form-control" id="cantidad" placeholder="Ingrese la cantidad">
-                        </div>
-                      </div> 
-        </div>
-     
-       
+<app-inventario-layout>
+<div class="container">
+    <section class="descuentos-shell app-page">
+        <header class="app-panel descuentos-shell__header">
+            <div class="descuentos-shell__copy">
+                <span class="app-badge">Descuentos</span>
+                <h2 class="app-title descuentos-shell__title">Listado de descuentos</h2>
+                <p class="descuentos-shell__description">
+                    Centraliza la configuracion de descuentos en un listado limpio y usa un unico modal para crear o editar cada regla.
+                </p>
+            </div>
 
-        <div class="row">
-            <div class="col-sm-4"> 
-                     <div class="form-group">
-            <label for="nombre">Nombre</label>
-            <input type="text"  [(ngModel)] = "newDesc.nombre"  class="form-control" id="nombre" placeholder="Ingrese el nombre">
-        </div>
-                  </div> 
-                  <div class="col-sm-4"> 
-                        <div class="form-group">
-            <label for="descripcion">Descripción</label>
-            <textarea class="form-control"  [(ngModel)] = "newDesc.descripcion"  id="descripcion" rows="3" placeholder="Ingrese una descripción"></textarea>
-        </div> 
-                      </div></div> 
-       
-       
-        <button type="submit" (click)="editar()" class="btn btn-primary">Guardar</button> 
-    <hr>
-     
-    <table class="table">
-        <thead class="thead-dark">
-            <tr> 
-                <th scope="col">Nombre</th>
-                <th scope="col">Cantidad</th>
-                <th scope="col">Tipo</th>
-                <th scope="col">Descripción</th>
-                <th scope="col">Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-             <tr *ngFor="let item of descuentos"> 
-                <th scope="col">{{item.nombre}}</th>
-                <th scope="col">{{item.cantidad}}</th>
-                <th scope="col">{{item.NombreTipo}}</th>
-                <th scope="col">{{item.descripcion}}</th>
-                <th scope="col"><div class="btn-group" role="group" aria-label="Basic example">
-                    <button class="btn btn-primary" (click)="setEditar(item)" title="editar"><i class="bi bi-pencil-fill"></i> </button>    
-                    <button type="button" class="btn btn-danger">
-                        <i class="bi bi-trash-fill"></i> 
-                      </button></div>
-                </th>
-            </tr>
-           
-        </tbody>
-    </table>
+            <div class="descuentos-shell__controls">
+                <div class="descuentos-shell__filter">
+                    <label for="filtroDescuentos">Filtrar listado</label>
+                    <input
+                        id="filtroDescuentos"
+                        type="text"
+                        class="form-control app-input"
+                        [(ngModel)]="filtroDescuentos"
+                        (ngModelChange)="actualizarFiltro()"
+                        placeholder="Buscar por nombre, tipo o descripcion">
+                </div>
+
+                <button type="button" class="app-chip-button app-chip-button--primary" (click)="abrirModalDescuento()">
+                    <i class="bi bi-plus-circle"></i>
+                    Crear nuevo
+                </button>
+            </div>
+        </header>
+
+        <section class="app-panel descuentos-shell__table-panel" *ngIf="descuentos.length > 0; else descuentosVacios">
+            <div class="app-toolbar app-toolbar--between descuentos-shell__table-toolbar">
+                <div class="app-toolbar__group">
+                    <span class="app-badge">{{ descuentosFiltrados.length }} registros</span>
+                </div>
+                <div class="app-toolbar__group">
+                    <label class="descuentos-shell__page-size-label" for="tamanoPaginaDescuentos">Mostrar</label>
+                    <select
+                        id="tamanoPaginaDescuentos"
+                        class="form-control app-select descuentos-shell__page-size"
+                        [(ngModel)]="tamanoPagina"
+                        (ngModelChange)="cambiarTamanoPagina()">
+                        <option *ngFor="let size of tamanosPagina" [ngValue]="size">{{ size }}</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="descuentos-shell__table-wrap">
+                <table class="table descuentos-table">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Cantidad</th>
+                            <th>Tipo</th>
+                            <th>Descripcion</th>
+                            <th class="descuentos-table__actions-head">Opciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let item of descuentosPaginados; trackBy: trackByDescuento">
+                            <td>{{ item.nombre }}</td>
+                            <td>{{ item.cantidad }}</td>
+                            <td>
+                                <span class="descuentos-table__type" [class.is-percent]="item.tipo === 'P'" [class.is-fixed]="item.tipo === 'C'">
+                                    {{ item.NombreTipo || (item.tipo === 'P' ? 'PORCENTAJE' : 'CANTIDAD') }}
+                                </span>
+                            </td>
+                            <td>{{ item.descripcion || 'Sin descripcion' }}</td>
+                            <td class="descuentos-table__actions">
+                                <button
+                                    type="button"
+                                    class="descuentos-table__action"
+                                    title="Editar descuento"
+                                    aria-label="Editar descuento"
+                                    (click)="abrirModalDescuento(item)">
+                                    <i class="bi bi-pencil-square"></i>
+                                </button>
+                                <button
+                                    type="button"
+                                    class="descuentos-table__action is-danger"
+                                    title="Eliminar descuento"
+                                    aria-label="Eliminar descuento"
+                                    (click)="eliminar(item)">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="descuentos-shell__pagination" *ngIf="totalPaginas > 1">
+                <button type="button" class="descuentos-shell__page-btn" (click)="irAPagina(paginaActual - 1)" [disabled]="paginaActual === 1">
+                    Anterior
+                </button>
+                <span class="descuentos-shell__page-indicator">Pagina {{ paginaActual }} de {{ totalPaginas }}</span>
+                <button type="button" class="descuentos-shell__page-btn" (click)="irAPagina(paginaActual + 1)" [disabled]="paginaActual === totalPaginas">
+                    Siguiente
+                </button>
+            </div>
+        </section>
+
+        <ng-template #descuentosVacios>
+            <section class="app-panel descuentos-shell__empty">
+                <i class="bi bi-percent descuentos-shell__empty-icon"></i>
+                <h3>No hay descuentos para mostrar</h3>
+                <p>Todavia no existen descuentos registrados o el filtro actual no devolvio coincidencias.</p>
+                <button type="button" class="app-chip-button app-chip-button--primary" (click)="abrirModalDescuento()">
+                    <i class="bi bi-plus-circle"></i>
+                    Crear primer descuento
+                </button>
+            </section>
+        </ng-template>
+    </section>
 </div>
+</app-inventario-layout>

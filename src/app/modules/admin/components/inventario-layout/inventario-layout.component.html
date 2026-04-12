@@ -1,0 +1,16 @@
+<section class="module-shell inventario-layout">
+    <nav class="module-shell__tabs" aria-label="Secciones de inventarios" *ngIf="tabs.length > 0">
+        <a
+            *ngFor="let tab of tabs"
+            [routerLink]="tab.route"
+            routerLinkActive="is-active"
+            class="module-shell__tab"
+            [routerLinkActiveOptions]="{ exact: !!tab.exact }">
+            {{ tab.label }}
+        </a>
+    </nav>
+
+    <div class="module-shell__content inventario-layout__content">
+        <ng-content></ng-content>
+    </div>
+</section>

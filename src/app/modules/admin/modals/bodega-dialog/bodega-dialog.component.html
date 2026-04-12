@@ -1,0 +1,48 @@
+<section class="bodega-dialog">
+    <header class="bodega-dialog__header">
+        <div class="bodega-dialog__copy">
+            <span class="app-badge">Bodegas</span>
+            <h2 class="bodega-dialog__title">{{ titulo }}</h2>
+            <p class="bodega-dialog__subtitle">Centraliza la configuracion de la bodega sin salir del listado principal.</p>
+        </div>
+
+        <button type="button" class="bodega-dialog__close" (click)="cerrar()" aria-label="Cerrar modal">
+            <i class="bi bi-x-lg"></i>
+        </button>
+    </header>
+
+    <div class="row g-3">
+        <div class="col-md-6">
+            <label class="bodega-dialog__label" for="bodegaNombre">Nombre</label>
+            <input id="bodegaNombre" type="text" class="form-control app-input" [(ngModel)]="bodega.nombre" placeholder="Nombre de la bodega">
+        </div>
+
+        <div class="col-md-6">
+            <label class="bodega-dialog__label" for="bodegaTipo">Tipo</label>
+            <select id="bodegaTipo" class="form-control app-select" [(ngModel)]="bodega.tipo">
+                <option *ngFor="let tipo of tipos" [ngValue]="tipo.value">{{ tipo.label }}</option>
+            </select>
+        </div>
+
+        <div class="col-md-6">
+            <label class="bodega-dialog__label" for="bodegaEstado">Estado</label>
+            <select id="bodegaEstado" class="form-control app-select" [(ngModel)]="bodega.estado">
+                <option [ngValue]="1">Activo</option>
+                <option [ngValue]="2">Inactivo</option>
+            </select>
+        </div>
+
+        <div class="col-12">
+            <label class="bodega-dialog__label" for="bodegaDescripcion">Descripcion</label>
+            <textarea id="bodegaDescripcion" rows="4" class="form-control app-input bodega-dialog__textarea" [(ngModel)]="bodega.descripcion" placeholder="Descripcion de la bodega"></textarea>
+        </div>
+    </div>
+
+    <footer class="app-toolbar bodega-dialog__footer">
+        <button type="button" class="app-chip-button" (click)="cerrar()">Cancelar</button>
+        <button type="button" class="app-chip-button app-chip-button--primary" (click)="guardar()">
+            <i class="bi bi-save"></i>
+            {{ esEdicion ? 'Guardar cambios' : 'Guardar bodega' }}
+        </button>
+    </footer>
+</section>

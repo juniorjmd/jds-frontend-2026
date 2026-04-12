@@ -6,7 +6,7 @@ import { CategoriasModel } from 'src/app/models/categorias.model';
 import { MarcasModel } from 'src/app/models/marcas/marcas.module';
 import { PrdPreciosModule } from 'src/app/models/prd-precios/prd-precios.module';
 import { PresentacionPrdModel } from 'src/app/models/presentacionPrdModel';
-import { ProductoModel } from 'src/app/models/producto/producto.module'; 
+import { ProductoModel } from 'src/app/models/producto/producto.module';
 import { ProductoService } from 'src/app/services/producto.service';
 import Swal from 'sweetalert2';
 import { InventarioProductMutationResponse } from 'src/app/interfaces/inventario-response.interface';
@@ -20,20 +20,20 @@ import { GenericMultiRecordsPayload, GenericRecordsPayload } from 'src/app/inter
 })
 export class ModalUpdateProductoComponent {
   ivaIncluido :boolean = true;
-   marcas:MarcasModel[] = []; 
+   marcas:MarcasModel[] = [];
    categorias:CategoriasModel[] = [];
-   
+
    tipProductos:any = [{id:0 , nombre:'Seleccione el tipo de producto'},
     {id:1 , nombre:'prd.fisico '},
-         {id:2 , nombre:'servicios' } 
+         {id:2 , nombre:'servicios' }
        ];
   presentacion:PresentacionPrdModel[] = []
-  private productoService = inject(ProductoService)  
+  private productoService = inject(ProductoService)
 private dialogo= inject(MatDialogRef<ModalUpdateProductoComponent>);
-  constructor( @Inject(MAT_DIALOG_DATA) public   newProducto:ProductoModel , private loading:loading){ 
+  constructor( @Inject(MAT_DIALOG_DATA) public   newProducto:ProductoModel , private loading:loading){
     this.getPresentacion();
-    this.getCategorias_marcas()   
-    //CustomConsole.log('producto injectado' , this.newProducto); 
+    this.getCategorias_marcas()
+    //CustomConsole.log('producto injectado' , this.newProducto);
     let precio:PrdPreciosModule = new PrdPreciosModule();
     precio.id_producto = this.newProducto.id
     precio.precio_con_iva = 0;
@@ -44,17 +44,17 @@ private dialogo= inject(MatDialogRef<ModalUpdateProductoComponent>);
   if(this.newProducto.precios[2] == undefined)this.newProducto.precios[2]= {...precio}  ;
   }
 
- 
-    
+
+
   getPresentacion(){
     this.productoService.getPresentacioProducto().subscribe({next:(value:ApiResponse<GenericRecordsPayload<PresentacionPrdModel>>)=>{
-      this.presentacion = value.data.records;  
+      this.presentacion = value.data.records;
     }});
   }
-  getCategorias_marcas(){ 
+  getCategorias_marcas(){
     this.marcas = [];
     this.categorias = [];
-  
+
       this.loading.show()
       this.productoService.getCategorias_marcas().subscribe({
         next: (datos:ApiResponse<GenericMultiRecordsPayload<any>>)=>{
@@ -68,7 +68,7 @@ private dialogo= inject(MatDialogRef<ModalUpdateProductoComponent>);
           this.loading.hide()
         } ,
         error:(error : any) => {this.loading.hide();
-          Swal.fire('getCategorias_marcas',error) 
+          Swal.fire('getCategorias_marcas',error)
           try {
             Swal.fire( error.error.error, '', 'error');
           } catch (error) {
@@ -76,17 +76,22 @@ private dialogo= inject(MatDialogRef<ModalUpdateProductoComponent>);
           }
         }}
         );
-     
+
       }
-  
+
       limpiarFormulario(){
         this.newProducto  =new ProductoModel( '' , '' ,0 ,0,'','0', 0,0,0,0,0,'','','',0,''  ) ;
-        this.dialogo.close(true); 
-  
+        this.dialogo.close(true);
+
        }
+
+      cerrar(): void {
+        this.dialogo.close(false);
+      }
+
        enviarProducto(){
-       
-        if( this.newProducto.nombre.trim()  === ''){ 
+
+        if( this.newProducto.nombre.trim()  === ''){
           Swal.fire( 'Debe establecer minimo el nombre principal del  producto', '', 'error');
          return ;
          }
@@ -97,19 +102,19 @@ private dialogo= inject(MatDialogRef<ModalUpdateProductoComponent>);
         if(this.newProducto.infoTributaria !== 'GRABADO'){
           this.newProducto.porcent_iva = 0
         }
-         if( this.newProducto.idCategoria!   <= 0){ 
+         if( this.newProducto.idCategoria!   <= 0){
           Swal.fire( 'Debe establecer una categoria', '', 'error');
          return ;
-         } 
-         if( this.newProducto.idMarca!   <= 0){ 
+         }
+         if( this.newProducto.idMarca!   <= 0){
           Swal.fire( 'Debe establecer una marca', '', 'error');
          return ;
-         } 
-         if( this.newProducto.tipo_producto!   <= 0){ 
+         }
+         if( this.newProducto.tipo_producto!   <= 0){
           Swal.fire( 'Debe establecer un tipo de producto', '', 'error');
          return ;
-         } 
-        /* if( this.newProducto.precioVenta   <= 0){ 
+         }
+        /* if( this.newProducto.precioVenta   <= 0){
           Swal.fire( 'Debe establecer el precio de venta', '', 'error');
          return ;
          } */
@@ -131,33 +136,33 @@ private dialogo= inject(MatDialogRef<ModalUpdateProductoComponent>);
              }
           }
         }else{
-          for (let i=0; i<3 ;i++){ 
+          for (let i=0; i<3 ;i++){
             this.newProducto.precios[i].precio_antes_de_iva =   this.newProducto.precios[i].precio_con_iva??0;;
-            this.newProducto.precios[i].valor_iva = 0; 
+            this.newProducto.precios[i].valor_iva = 0;
            }
         }
-        this.loading.show(); 
+        this.loading.show();
         this.productoService.updateProducto(this.newProducto).subscribe(
           {next:
          (respuesta:InventarioProductMutationResponse)=>{//CustomConsole.log(respuesta)
-          
-         if (respuesta.ok){ 
-          Swal.fire('datos ingresados con exito'); 
+
+         if (respuesta.ok){
+          Swal.fire('datos ingresados con exito');
            this.limpiarFormulario();
-        }else{ 
+        }else{
           try {
            Swal.fire(respuesta.error?.message ?? 'error en el servidor', '', 'error');
           } catch (error : any) {
            Swal.fire('error en el servidor', '', 'error');
           }
-        
+
         }
-        
+
          }
          , error: error =>  {Swal.fire(JSON.stringify(error), '', 'error')  ;
           Swal.fire("enviar producto" ,  error)
          }
          , complete: () =>  {this.loading.hide();} }
-        ) 
+        )
        }
  }

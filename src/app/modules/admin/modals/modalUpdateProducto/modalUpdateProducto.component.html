@@ -1,119 +1,127 @@
-<div class="container-fluid modal_container"    >
-    <div class="row m-2 ">
-        <div class="col-sm-12">
-            <h2 class='centrado'>Edicion de productos</h2>
-        </div>
+<section class="producto-dialog">
+  <header class="producto-dialog__header">
+    <div class="producto-dialog__copy">
+      <span class="app-badge">Productos</span>
+      <h2>Edición de producto</h2>
+      <p>Actualiza los datos del producto sin salir del diálogo.</p>
     </div>
-    <div class="row m-2">
-          
-            <div class="col-sm-2">Nombre : </div>
-            <div class="col-sm-10"> <input type="text" [(ngModel)]="newProducto.nombre" class="form-control" placeholder="nombre principal "></div> </div>
-            <div class="row m-2">
-            <div class="col-sm-2">Nombre 2 : </div>
-            <div class="col-sm-10"> <input type="text" [(ngModel)]="newProducto.nombre2" class="form-control" placeholder="nombre secundario "></div> </div>
-            <div class="row m-2">
-            <div class="col-sm-2">Nombre 3 : </div>
-            <div class="col-sm-10"> <input type="text" [(ngModel)]="newProducto.nombre3" class="form-control" placeholder="nombre terciario "></div>
-            <div class="col-sm-2">Ref. proveedor : </div>
-            <div class="col-sm-10"> <input type="text" [(ngModel)]="newProducto.cod_prd_externo" class="form-control" placeholder="Referencia desde el proveedor"></div>
-      </div> 
-        <div class="row m-2"> 
-            <div class="col-sm-2">Categoria : </div>
-            <div class="col-sm-10">  
-                <input type="text" readonly [(ngModel)]="newProducto.categoria!.nombre" class="form-control" placeholder="Categoria">
-            </div> 
+
+    <button type="button" class="producto-dialog__close" (click)="cerrar()" aria-label="Cerrar">
+      <i class="bi bi-x-lg"></i>
+    </button>
+  </header>
+
+  <div class="producto-dialog__body">
+    <div class="row g-3">
+      <div class="col-md-6">
+        <label class="producto-dialog__label">Nombre</label>
+        <input type="text" [(ngModel)]="newProducto.nombre" class="form-control" placeholder="Nombre principal">
+      </div>
+
+      <div class="col-md-6">
+        <label class="producto-dialog__label">Nombre 2</label>
+        <input type="text" [(ngModel)]="newProducto.nombre2" class="form-control" placeholder="Nombre secundario">
+      </div>
+
+      <div class="col-md-6">
+        <label class="producto-dialog__label">Nombre 3</label>
+        <input type="text" [(ngModel)]="newProducto.nombre3" class="form-control" placeholder="Nombre terciario">
+      </div>
+
+      <div class="col-md-6">
+        <label class="producto-dialog__label">Ref. proveedor</label>
+        <input type="text" [(ngModel)]="newProducto.cod_prd_externo" class="form-control" placeholder="Referencia del proveedor">
+      </div>
+
+      <div class="col-12">
+        <label class="producto-dialog__label">Categoría</label>
+        <input type="text" readonly [(ngModel)]="newProducto.categoria!.nombre" class="form-control" placeholder="Categoría">
+      </div>
+
+      <div class="col-md-6">
+        <label class="producto-dialog__label">Marca</label>
+        <select class="form-control" [(ngModel)]="newProducto.idMarca">
+          <option *ngFor="let marca of marcas" [value]="marca.id">{{marca.nombre}}</option>
+        </select>
+      </div>
+
+      <div class="col-md-3">
+        <label class="producto-dialog__label">Tipo de producto</label>
+        <select class="form-control" [(ngModel)]="newProducto.tipo_producto">
+          <option *ngFor="let tipProducto of tipProductos" [value]="tipProducto.id">{{tipProducto.nombre}}</option>
+        </select>
+      </div>
+
+      <div class="col-md-3">
+        <label class="producto-dialog__label">Presentación</label>
+        <select class="form-control" [(ngModel)]="newProducto.presentacion">
+          <option *ngFor="let tipProducto of presentacion" [value]="tipProducto.id">{{tipProducto.nombre}}</option>
+        </select>
+      </div>
+
+      <div class="col-12">
+        <label class="producto-dialog__label">Información tributaria</label>
+        <div class="btn-group btn-group-toggle" data-toggle="buttons">
+          <label class="btn btn-secondary" [class.active]="newProducto.infoTributaria === 'GRABADO'">
+            <input type="radio" name="options" (click)="newProducto.porcent_iva=0" [(ngModel)]="newProducto.infoTributaria" autocomplete="off" value="GRABADO"> Grabado
+          </label>
+          <label class="btn btn-secondary" [class.active]="newProducto.infoTributaria === 'EXENTO'">
+            <input type="radio" name="options" (click)="newProducto.porcent_iva=0" [(ngModel)]="newProducto.infoTributaria" autocomplete="off" value="EXENTO"> Exento
+          </label>
+          <label class="btn btn-secondary" [class.active]="newProducto.infoTributaria === 'EXCLUIDO'">
+            <input type="radio" name="options" (click)="newProducto.porcent_iva=0" [(ngModel)]="newProducto.infoTributaria" autocomplete="off" value="EXCLUIDO"> Excluido
+          </label>
         </div>
-        <div class="row m-2">
-            <div class="col-sm-2">Marca : </div>
-            <div class="col-sm-10">
-                <select class="form-control" [(ngModel)]="newProducto.idMarca">
-                    <option *ngFor="let marca of marcas" value="{{marca.id}}">{{marca.nombre}}</option>
-                </select>
-            </div>
+      </div>
+
+      <div class="col-md-4">
+        <label class="producto-dialog__label">IVA (%)</label>
+        <input type="number" [readOnly]="newProducto.infoTributaria !== 'GRABADO'" [(ngModel)]="newProducto.porcent_iva" class="form-control" placeholder="IVA">
+      </div>
+
+      <div class="col-md-8 producto-dialog__switch-group">
+        <div class="form-check form-switch">
+          <input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault" [(ngModel)]="ivaIncluido">
+          <label class="form-check-label" for="flexSwitchCheckDefault">IVA incluido</label>
         </div>
-        <div class="row m-2"> 
-            <div class="col-sm-2">Tipo de Producto : </div>
-            <div class="col-sm-4">
-                <select class="form-control" [(ngModel)]="newProducto.tipo_producto">
-                    <option *ngFor="let tipProducto of tipProductos" value="{{tipProducto.id}}">{{tipProducto.nombre}}</option>
-                </select>
-            </div>
-            <div class="col-sm-2">presentacion : </div>
-            <div class="col-sm-4">
-                <select class="form-control" [(ngModel)]="newProducto.presentacion">
-                    <option *ngFor="let tipProducto of presentacion" value="{{tipProducto.id}}">{{tipProducto.nombre}}</option>
-                </select>
-            </div>
-        </div>
-        <div class="row m-2"> 
-        <div class="col-sm-2">informacion tributaria : </div>
-        <div class="col-sm-10">
-                <div class="btn-group btn-group-toggle" data-toggle="buttons">
-                    <label class="btn btn-secondary" [class.active]="newProducto.infoTributaria === 'GRABADO'">
-                        <input type="radio" name="options" (click)="newProducto.porcent_iva=0" [(ngModel)]="newProducto.infoTributaria" autocomplete="off" value="GRABADO"> Grabado
-                    </label>
-                    <label class="btn btn-secondary" [class.active]="newProducto.infoTributaria === 'EXENTO'">
-                        <input type="radio" name="options" (click)="newProducto.porcent_iva=0"  [(ngModel)]="newProducto.infoTributaria" autocomplete="off" value="EXENTO"> Exento
-                    </label>
-                    <label class="btn btn-secondary" [class.active]="newProducto.infoTributaria === 'EXCLUIDO'">
-                        <input type="radio" name="options" (click)="newProducto.porcent_iva=0"  [(ngModel)]="newProducto.infoTributaria" autocomplete="off" value="EXCLUIDO"> Excluido
-                    </label>
-                </div>
-            </div> 
-        </div> 
-    <div class="row m-2"> 
-            <div class="col-sm-2">IVA (%) : </div>
-            <div class="col-sm-4"> <input type="number" [readOnly]="newProducto.infoTributaria !== 'GRABADO'" [(ngModel)]="newProducto.porcent_iva" class="form-control" placeholder="nombre principal "></div>
-            <div class="col-sm-6" > 
-                <div class="form-check form-switch">
-                <input   class="form-check-input" 
-                type="checkbox" id="flexSwitchCheckDefault" [(ngModel)]="ivaIncluido">
-                <label class="form-check-label" for="flexSwitchCheckDefault">IVA incluido</label>
-            </div>
-        </div>
-    </div> 
-    <div class="row m-2">
-         
-            <div class="col-sm-2">precio de compra : </div>
-            <div class="col-sm-10">
-                 <input type="number" [(ngModel)]="newProducto.precioCompra" class="form-control" placeholder="nombre principal ">
-                </div>
-        
+      </div>
+
+      <div class="col-12">
+        <label class="producto-dialog__label">Precio de compra</label>
+        <input type="number" [(ngModel)]="newProducto.precioCompra" class="form-control" placeholder="Precio de compra">
+      </div>
+
+      <div class="col-md-4">
+        <label class="producto-dialog__label">Precio 1</label>
+        <input type="number" [(ngModel)]="newProducto.precios[0].precio_con_iva" class="form-control" placeholder="Precio 1">
+      </div>
+      <div class="col-md-4">
+        <label class="producto-dialog__label">Precio 2</label>
+        <input type="number" [(ngModel)]="newProducto.precios[1].precio_con_iva" class="form-control" placeholder="Precio 2">
+      </div>
+      <div class="col-md-4">
+        <label class="producto-dialog__label">Precio 3</label>
+        <input type="number" [(ngModel)]="newProducto.precios[2].precio_con_iva" class="form-control" placeholder="Precio 3">
+      </div>
+
+      <div class="col-12">
+        <hr>
+      </div>
+
+      <div class="col-md-8">
+        <label class="producto-dialog__label">Código de barras</label>
+        <input type="text" [(ngModel)]="newProducto.barcode" class="form-control" placeholder="Código de barras">
+      </div>
+
+      <div class="col-md-4">
+        <label class="producto-dialog__label">Descripción</label>
+        <input type="text" [(ngModel)]="newProducto.descripcion" class="form-control" placeholder="Descripción adicional">
+      </div>
     </div>
-    <div class="row m-2"> 
-        <div class="col-sm-3">
-            <div class="col-sm-10">precio1 : </div>
-            <div class="col-sm-12"> <input type="number" [(ngModel)]="newProducto.precios[0].precio_con_iva" class="form-control" placeholder="nombre principal "></div>
-        </div>
-        <div class="col-sm-3">
-            <div class="col-sm-10">precio2 : </div>
-            <div class="col-sm-12"> <input type="number" [(ngModel)]="newProducto.precios[1].precio_con_iva" class="form-control" placeholder="nombre principal "></div>
-        </div>
-        <div class="col-sm-3">
-            <div class="col-sm-10">precio3 : </div>
-            <div class="col-sm-12"> <input type="number" [(ngModel)]="newProducto.precios[2].precio_con_iva" class="form-control" placeholder="nombre principal "></div>
-        </div>
-    </div>
-    <hr>
-    <div class="row m-2">
-        <div class="col-sm-1"></div>
-        <div class="col-sm-7">
-            <div class="col-sm-6">Codigo de Barras</div>
-            <div class="col-sm-12">
-                <input type="text" [(ngModel)]="newProducto.barcode" class="form-control" placeholder="CODIGO DE BARRAS">
-            </div>
-            <div class="col-sm-6">Descripcion</div>
-            <div class="col-sm-12">
-                <input type="text" [(ngModel)]="newProducto.descripcion" class="form-control" placeholder="Descripcion adicional">
-            </div>
-        </div>
-        <div class="col-sm-3">
-            <div class="col-sm-12  d-grid  ">
-                <input class="btn btn-success " type="button" (click)="enviarProducto()" value="Actualizar Producto">
-            </div>  
-            <div class="col-sm-12  d-grid  ">
-                <button type="button" class="btn btn-danger " (click)="limpiarFormulario()"> Cancelar </button>
-            </div>
-        </div>
-    </div>
-</div>
+  </div>
+
+  <footer class="app-toolbar producto-dialog__footer">
+    <button type="button" class="app-chip-button app-chip-button--secondary" (click)="limpiarFormulario()">Cancelar</button>
+    <button type="button" class="app-chip-button app-chip-button--primary" (click)="enviarProducto()">Actualizar producto</button>
+  </footer>
+</section>

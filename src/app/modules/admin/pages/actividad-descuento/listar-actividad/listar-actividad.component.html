@@ -1,46 +1,135 @@
-<div class="container-fluid">
-    
-    <div class="row" *ngIf="actividades && actividades.length > 0">
-        <div class="col-sm-12">
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th>actividad</th>
-                        <th>tipo</th>
-                        <th>inicia</th>
-                        <th>finaliza</th> 
-                        <th>descuento</th> 
-                        <th>estado</th> 
-                        <th colspan="4">Opciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr *ngFor="let venta of actividades" title="">
-                        <td>{{venta.nombre}}</td>
-                        <td>{{venta.nombreTipo}}</td>
-                        <td>{{venta.fechaInicial}}</td>
-                        <td>{{venta.fechaFinal  }}</td> 
-                        <td>{{venta.nombreDescuento  }}</td> 
-                        <td>{{venta.nombre_estado  }}</td> 
-                        <td><i class="bi bi-list boton_activo" (click)="verDetalle(venta)"></i></td>
-                        <td><i class="bi bi-calendar" (click)="editarFecha(venta)"></i></td>
-                        <td>
-                            
-                            <i *ngIf="venta.estado == 1 " class="bi bi-toggle-on" (click)="activarDesactivarActividad(venta)"></i>
+<div class="container-fluid actividad-shell__container">
+    <section class="actividad-shell app-page">
+        <header class="app-panel actividad-shell__header">
+            <div class="actividad-shell__copy">
+                <span class="app-badge">Act. descuento</span>
+                <h2 class="app-title actividad-shell__title">Listado de actividades de descuento</h2>
+                <p class="actividad-shell__description">
+                    Consulta las actividades registradas, ajusta sus fechas y crea nuevas configuraciones desde un modal sin salir del listado principal.
+                </p>
+            </div>
 
-                            <i *ngIf="venta.estado == 2"  class="bi bi-toggle-off" (click)="activarDesactivarActividad(venta)"></i>
-                        
-                        </td>
-                        <td><i class="bi bi-x-circle" (click)="excluirProductos(venta)"></i></td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-    <div class="row" *ngIf="actividades && actividades.length === 0">
-        <div class="col-sm-12 text-center">
-            <p>No se encontraron actividades.</p>
-        </div>
-    </div>
+            <div class="actividad-shell__controls">
+                <div class="actividad-shell__filter">
+                    <label for="filtroActividades">Filtrar listado</label>
+                    <input
+                        id="filtroActividades"
+                        type="text"
+                        class="form-control app-input"
+                        [(ngModel)]="filtroActividades"
+                        (ngModelChange)="actualizarFiltro()"
+                        placeholder="Buscar por actividad, tipo, descuento o estado">
+                </div>
+
+                <button type="button" class="app-chip-button app-chip-button--primary" (click)="irACrear()">
+                    <i class="bi bi-plus-circle"></i>
+                    Crear nueva
+                </button>
+            </div>
+        </header>
+
+        <section class="app-panel actividad-shell__table-panel" *ngIf="actividades.length > 0; else actividadesVacias">
+            <div class="app-toolbar app-toolbar--between actividad-shell__table-toolbar">
+                <div class="app-toolbar__group">
+                    <span class="app-badge">{{ actividadesFiltradas.length }} registros</span>
+                </div>
+                <div class="app-toolbar__group">
+                    <label class="actividad-shell__page-size-label" for="tamanoPaginaActividad">Mostrar</label>
+                    <select
+                        id="tamanoPaginaActividad"
+                        class="form-control app-select actividad-shell__page-size"
+                        [(ngModel)]="tamanoPagina"
+                        (ngModelChange)="cambiarTamanoPagina()">
+                        <option *ngFor="let size of tamanosPagina" [ngValue]="size">{{ size }}</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="actividad-shell__table-wrap">
+                <table class="table actividad-table">
+                    <thead>
+                        <tr>
+                            <th>Actividad</th>
+                            <th>Tipo</th>
+                            <th>Inicia</th>
+                            <th>Finaliza</th>
+                            <th>Descuento</th>
+                            <th>Estado</th>
+                            <th class="actividad-table__actions-head">Opciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let actividad of actividadesPaginadas; trackBy: trackByActividad">
+                            <td>{{ actividad.nombre }}</td>
+                            <td>{{ actividad.nombreTipo }}</td>
+                            <td>{{ actividad.fechaInicial }}</td>
+                            <td>{{ actividad.fechaFinal }}</td>
+                            <td>{{ actividad.nombreDescuento }}</td>
+                            <td>
+                                <span class="actividad-table__status" [class.is-active]="actividad.estado == 1" [class.is-inactive]="actividad.estado != 1">
+                                    {{ actividad.nombre_estado }}
+                                </span>
+                            </td>
+                            <td class="actividad-table__actions">
+                                <button
+                                    type="button"
+                                    class="actividad-table__action"
+                                    title="Ver detalle"
+                                    aria-label="Ver detalle"
+                                    (click)="verDetalle(actividad)">
+                                    <i class="bi bi-list"></i>
+                                </button>
+                                <button
+                                    type="button"
+                                    class="actividad-table__action"
+                                    title="Editar fechas"
+                                    aria-label="Editar fechas"
+                                    (click)="editarFecha(actividad)">
+                                    <i class="bi bi-calendar"></i>
+                                </button>
+                                <button
+                                    type="button"
+                                    class="actividad-table__action"
+                                    [title]="actividad.estado == 1 ? 'Desactivar actividad' : 'Activar actividad'"
+                                    [attr.aria-label]="actividad.estado == 1 ? 'Desactivar actividad' : 'Activar actividad'"
+                                    (click)="activarDesactivarActividad(actividad)">
+                                    <i class="bi" [class.bi-toggle-on]="actividad.estado == 1" [class.bi-toggle-off]="actividad.estado != 1"></i>
+                                </button>
+                                <button
+                                    type="button"
+                                    class="actividad-table__action is-danger"
+                                    title="Excluir productos"
+                                    aria-label="Excluir productos"
+                                    (click)="excluirProductos(actividad)">
+                                    <i class="bi bi-x-circle"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="actividad-shell__pagination" *ngIf="totalPaginas > 1">
+                <button type="button" class="actividad-shell__page-btn" (click)="irAPagina(paginaActual - 1)" [disabled]="paginaActual === 1">
+                    Anterior
+                </button>
+                <span class="actividad-shell__page-indicator">Pagina {{ paginaActual }} de {{ totalPaginas }}</span>
+                <button type="button" class="actividad-shell__page-btn" (click)="irAPagina(paginaActual + 1)" [disabled]="paginaActual === totalPaginas">
+                    Siguiente
+                </button>
+            </div>
+        </section>
+
+        <ng-template #actividadesVacias>
+            <section class="app-panel actividad-shell__empty">
+                <i class="bi bi-tags actividad-shell__empty-icon"></i>
+                <h3>No hay actividades para mostrar</h3>
+                <p>Todavia no existen actividades registradas o el filtro actual no encontro coincidencias.</p>
+                <button type="button" class="app-chip-button app-chip-button--primary" (click)="irACrear()">
+                    <i class="bi bi-plus-circle"></i>
+                    Crear primera actividad
+                </button>
+            </section>
+        </ng-template>
+    </section>
 </div>
-

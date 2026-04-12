@@ -1,6 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import { caja } from 'src/app/interfaces/caja.interface';
-import { select } from 'src/app/interfaces/generales.interface';
 import { cajaModel } from 'src/app/models/ventas/cajas.model';
 import { loading } from 'src/app/models/app.loading';
 import { cajasServices } from 'src/app/services/Cajas.services'; 
@@ -10,12 +8,10 @@ import { ParametrosService } from 'src/app/services/parametros.service';
 import { ParametrosModel } from 'src/app/models/parametros/parametros.model';
 import Swal from 'sweetalert2';
 import { MatDialog } from '@angular/material/dialog';
-import { ModalCntSubCuentasComponent } from '../../modals/cuentasContables/cnt-sub-cuentas.component';
-import { tap } from 'rxjs';
-import { responseSubC } from 'src/app/interfaces/odoo-prd';
 import { CustomConsole } from 'src/app/models/CustomConsole';
 import { ApiResponse } from 'src/app/interfaces/api-response.interface';
-import { GenericMutationPayload, GenericRecordsPayload } from 'src/app/interfaces/generic-response.interface';
+import { GenericRecordsPayload } from 'src/app/interfaces/generic-response.interface';
+import { CajaDialogComponent, CajaDialogResult } from '../../modals/caja-dialog/caja-dialog.component';
 
 @Component({
   selector: 'app-cajas-nueva',
@@ -25,9 +21,12 @@ import { GenericMutationPayload, GenericRecordsPayload } from 'src/app/interface
 export class CajasNuevaComponent implements OnInit {
   cajas :cajaModel[]  = []; 
   parametros:ParametrosModel[] = [];
-  newCaja : cajaModel = new cajaModel(undefined);
   esta : establecimientoModel[] = [];
   guardarBtn = false;
+  filtroCajas = '';
+  paginaActual = 1;
+  tamanoPagina = 10;
+  readonly tamanosPagina = [5, 10, 20, 50];
   constructor( private serviceCaja : cajasServices ,  
      private parServices:ParametrosService , 
      private newAbrirDialog: MatDialog,
@@ -37,46 +36,65 @@ export class CajasNuevaComponent implements OnInit {
      this.getCajas();
     
   }
-  Cancelar(){
-    this.newCaja =  new cajaModel(undefined);
-     
+
+  get cajasFiltradas(): cajaModel[] {
+    const term = this.filtroCajas.trim().toLowerCase();
+    if (term === '') {
+      return this.cajas;
+    }
+
+    return this.cajas.filter((caja) =>
+      [
+        caja.nombre,
+        caja.nombreEstadoGeneral,
+        caja.nombre_scuenta_gastos,
+        caja.nombre_scuenta_venta,
+        caja.nombreEstado,
+        caja.nombreEstablecimiento,
+        caja.descripcion
+      ]
+        .filter(Boolean)
+        .some((value) => String(value).toLowerCase().includes(term))
+    );
   }
 
-  buscarCuentasContablesGastos(){
-    this.newAbrirDialog.open(ModalCntSubCuentasComponent, { data:  null })
-    .afterClosed() 
-    .pipe(
-      tap((response: responseSubC) => {
-        CustomConsole.log('buscarCuentasContablesGastos',response);
-        if (response.confirmado && response.datoDevolucion !== undefined ) {  
-          this.newCaja.nombre_scuenta_gastos = response.datoDevolucion.nombre_scuenta;
-          this.newCaja.cod_cuenta_gastos = response.datoDevolucion.id_scuenta;
-          this.newCaja.cuentaContableGastos = response.datoDevolucion.id_scuenta;  
-        }  
-      })
-    ).subscribe({
-      next: () => {},
-      error: (error) => Swal.fire('Error:', error),
-      complete: () => CustomConsole.log('buscarCuentasContables completo')
-    }); 
+  get totalPaginas(): number {
+    return Math.max(1, Math.ceil(this.cajasFiltradas.length / this.tamanoPagina));
   }
 
-  buscarCuentasContablesEfectivo(){
-    this.newAbrirDialog.open(ModalCntSubCuentasComponent, { data:  null })
-    .afterClosed() 
-    .pipe(
-      tap((response: responseSubC) => {
-        if (response.confirmado && response.datoDevolucion !== undefined ) {  
-          this.newCaja.nombre_scuenta_venta = response.datoDevolucion.nombre_scuenta
-          this.newCaja.cod_cuenta_venta = response.datoDevolucion.id_scuenta;
-          this.newCaja.cuentaContableEfectivo = response.datoDevolucion.id_scuenta;  
-        }  
+  get cajasPaginadas(): cajaModel[] {
+    const start = (this.paginaActual - 1) * this.tamanoPagina;
+    return this.cajasFiltradas.slice(start, start + this.tamanoPagina);
+  }
+
+  actualizarFiltro(): void {
+    this.paginaActual = 1;
+  }
+
+  cambiarTamanoPagina(): void {
+    this.paginaActual = 1;
+  }
+
+  irAPagina(page: number): void {
+    this.paginaActual = Math.min(Math.max(page, 1), this.totalPaginas);
+  }
+
+  abrirModalCaja(caja?: cajaModel): void {
+    this.newAbrirDialog
+      .open(CajaDialogComponent, {
+        width: 'min(860px, 95vw)',
+        autoFocus: false,
+        data: {
+          caja,
+          establecimientos: this.esta
+        }
       })
-    ).subscribe({
-      next: () => {},
-      error: (error) => Swal.fire('Error:', error),
-      complete: () => CustomConsole.log('buscarCuentasContables completo')
-    }); 
+      .afterClosed()
+      .subscribe((resultado?: CajaDialogResult) => {
+        if (resultado?.saved) {
+          this.getCajas();
+        }
+      });
   }
   getParametros(){ 
     this.parametros = []; 
@@ -107,7 +125,6 @@ export class CajasNuevaComponent implements OnInit {
        );
    }  
   getEstablecimiento(){
-    this.newCaja.establecimiento = 0;
     this.serviceCaja.getEstablecimientos()
      .subscribe(
       (datos: ApiResponse<GenericRecordsPayload<establecimientoModel>>)=>{
@@ -126,17 +143,11 @@ export class CajasNuevaComponent implements OnInit {
       error => {this.loading.hide();
         
     this.esta = [];
-        alert(this.serviceCaja.getErrorMessage(error));
+        window.alert(this.serviceCaja.getErrorMessage(error));
       }
       );
   }
-  setActualizaCaja(cajaActualizar : cajaModel){
-    this.newCaja = {...cajaActualizar} ; 
-    CustomConsole.log('setActualizaCaja',this.newCaja)
-  }
 getCajas(){
-  this.cajas[0] = this.newCaja ;
-  
   this.loading.show()
   this.serviceCaja.getCajas()
      .subscribe({next:  (datos:ApiResponse<GenericRecordsPayload<cajaModel>>)=>{
@@ -150,8 +161,9 @@ getCajas(){
     }
 
         this.loading.hide()
+        this.paginaActual = 1;
       } ,error:error => {this.loading.hide();
-        alert(this.serviceCaja.getErrorMessage(error));
+        window.alert(this.serviceCaja.getErrorMessage(error));
       }}
       );
 }
@@ -159,57 +171,7 @@ getCajas(){
 
   ngOnInit(): void {
   }
-  guardarCaja(){
-   CustomConsole.log('nueva caja',this.newCaja.nombre)
-   if (typeof(this.newCaja.nombre) === 'undefined'){
-    this.loading.hide();
-    alert('Debe ingresar el Nombre de la caja');
-    return;
-   }
-   if (typeof(this.newCaja.descripcion) === 'undefined'){
-    this.newCaja.descripcion = this.newCaja.nombre ;
-   }else{
-    if ( this.newCaja.descripcion.trim() === ''){
-      this.newCaja.descripcion = this.newCaja.nombre ;
-     }
-   }
-   if (this.newCaja.estadoGeneral === 0){
-    this.newCaja.estadoGeneral = 2 ;
-   }
-   if (this.newCaja.establecimiento === 0){
-    this.newCaja.establecimiento = 1 ;
-   }
-   /* 
- cuentaContableGastos?:number;
- cuentaContableEfectivo?:number; */
-   if (this.newCaja.cuentaContableGastos == undefined || this.newCaja.cuentaContableGastos  < 1){ 
-        
-    this.loading.hide();
-    alert('Debe ingresar la cuenta de gastos de la caja');
-    return;
-   }
-   if (this.newCaja.cuentaContableEfectivo == undefined || this.newCaja.cuentaContableEfectivo  < 1){
-    this.loading.hide();
-    alert('Debe ingresar la cuenta de efectivo de la caja');
-    return;
-   }
 
-   this.loading.show(); 
-   this.serviceCaja.setCaja(this.newCaja).subscribe(
-    (respuesta:ApiResponse<GenericMutationPayload>)=>{CustomConsole.log(respuesta)
-     
-    if (respuesta.ok){
-      alert('datos ingresados con exito');  
-      this.newCaja =  new cajaModel(undefined);
-      this.getCajas();
-    }else{
-      alert(respuesta.error?.message || 'No fue posible guardar la caja');
-      this.loading.hide();
-    }
-    }
-
-   )
-  }
-
-
+  trackByCaja = (index: number, caja: cajaModel): number | string =>
+    caja.id ?? `${caja.nombre}-${index}`;
 }

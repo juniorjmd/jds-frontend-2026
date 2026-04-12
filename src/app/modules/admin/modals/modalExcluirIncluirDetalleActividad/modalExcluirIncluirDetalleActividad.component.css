@@ -1,3 +1,84 @@
-:host {
-  display: block;
+.actividad-productos-dialog {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.25rem;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(247, 244, 240, 0.95));
+  color: var(--app-text);
+}
+
+.actividad-productos-dialog__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.actividad-productos-dialog__copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.actividad-productos-dialog__header h2 {
+  margin: 0;
+  font-size: 1.65rem;
+  font-weight: 800;
+}
+
+.actividad-productos-dialog__copy p {
+  margin: 0;
+  color: var(--app-text-soft);
+}
+
+.actividad-productos-dialog__close {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 999px;
+  border: 1px solid var(--app-border);
+  background: rgba(255, 255, 255, 0.82);
+  color: var(--app-text-soft);
+}
+
+.actividad-productos-dialog__body {
+  display: grid;
+  gap: 1rem;
+}
+
+.actividad-productos-dialog__filter {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.actividad-productos-dialog__table-wrapper {
+  max-height: 420px;
+  overflow: auto;
+  border: 1px solid rgba(26, 43, 61, 0.12);
+  border-radius: 0.75rem;
+  background: #fff;
+}
+
+.actividad-productos-dialog__table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.actividad-productos-dialog__table th,
+.actividad-productos-dialog__table td {
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid rgba(26, 43, 61, 0.08);
+}
+
+.actividad-productos-dialog__table tr:hover {
+  background: rgba(26, 43, 61, 0.04);
+}
+
+.actividad-productos-dialog__table tr.ModalItemSelected {
+  background: rgba(26, 43, 61, 0.05);
+}
+
+@media (max-width: 767px) {
+  .actividad-productos-dialog {
+    padding: 1rem;
+  }
 }

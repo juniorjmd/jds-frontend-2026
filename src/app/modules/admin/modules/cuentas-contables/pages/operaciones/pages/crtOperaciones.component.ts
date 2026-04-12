@@ -266,22 +266,41 @@ export class CrearOperacionesComponent implements OnInit {
     }, error:error=>Swal.fire(this.cntService.getErrorMessage(error)),  complete: () =>  this.load.hide()})
   }
   onSubmit() {
-    // Aquí puedes manejar la lógica de envío del formulario
+    const cuentaSeleccionada = this.cuentas.find(
+      (x) => x.id_scuenta == this.newCntTransacciones.id_cuenta
+    );
+
+    if (!this.newCntTransacciones.id_cuenta || !cuentaSeleccionada) {
+      Swal.fire('Cuenta requerida', 'Selecciona una cuenta valida antes de agregar el movimiento.', 'warning');
+      return;
+    }
+
+    if (!this.newCntTransacciones.fecha_transaccion) {
+      Swal.fire('Fecha requerida', 'Debes indicar la fecha de la transaccion.', 'warning');
+      return;
+    }
+
     this.load.show();
-    this.slcuentas= this.cuentas.filter(x=>x.id_scuenta == this.newCntTransacciones.id_cuenta)[0];
-    this.newCntTransacciones.nro_subcuenta =  this.slcuentas.nro_scuenta;
-    this.newCntTransacciones.nombre_subcuenta = this.slcuentas.nombre_scuenta ; 
-    this.newCntTransacciones.nombre_cuenta = this.slcuentas.nombre_cuenta ; 
-    this.newCntTransacciones.nombre_grupo = this.slcuentas.nombre_grupo ; 
-    this.newCntTransacciones.nombre_clase = this.slcuentas.nombre_clase ;  
-    //CustomConsole.log(this.newCntTransacciones);
-    this.cntService.setCntTransaccionesTmp(this.newCntTransacciones).subscribe({next:(value:ApiResponse<GenericMutationPayload>)=>{ 
-      if (!value.ok) {
-        return;
-      }
-      this.getTransaccionesTemporales();
-      this.limpiarMovimiento();
-      this.operacion = new CntOperacionesModel();    }, error:error=>Swal.fire(this.cntService.getErrorMessage(error)),  complete: () =>  this.load.hide()})
+    this.slcuentas = cuentaSeleccionada;
+    this.newCntTransacciones.nro_subcuenta = cuentaSeleccionada.nro_scuenta;
+    this.newCntTransacciones.nombre_subcuenta = cuentaSeleccionada.nombre_scuenta;
+    this.newCntTransacciones.nombre_cuenta = cuentaSeleccionada.nombre_cuenta;
+    this.newCntTransacciones.nombre_grupo = cuentaSeleccionada.nombre_grupo;
+    this.newCntTransacciones.nombre_clase = cuentaSeleccionada.nombre_clase;
+
+    this.cntService.setCntTransaccionesTmp(this.newCntTransacciones).subscribe({
+      next: (value: ApiResponse<GenericMutationPayload>) => {
+        if (!value.ok) {
+          Swal.fire('Error', value.error?.message ?? 'No fue posible guardar el movimiento temporal.', 'error');
+          return;
+        }
+
+        this.getTransaccionesTemporales();
+        this.limpiarMovimiento();
+      },
+      error: (error) => Swal.fire(this.cntService.getErrorMessage(error)),
+      complete: () => this.load.hide()
+    });
    
 
   }

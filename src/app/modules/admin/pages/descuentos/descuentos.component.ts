@@ -1,11 +1,14 @@
 import { Component, inject } from '@angular/core';
-import { error } from 'jquery';
-import { CustomConsole } from 'src/app/models/CustomConsole';
+import { MatDialog } from '@angular/material/dialog';
 import { DescuentoModule } from 'src/app/models/descuento/descuento.model';
 import { ProductoService } from 'src/app/services/producto.service';
 import Swal from 'sweetalert2';
 import { ApiResponse } from 'src/app/interfaces/api-response.interface';
-import { GenericMutationPayload, GenericRecordsPayload } from 'src/app/interfaces/generic-response.interface';
+import { GenericRecordsPayload } from 'src/app/interfaces/generic-response.interface';
+import {
+  DescuentoDialogComponent,
+  DescuentoDialogResult
+} from '../../modals/descuento-dialog/descuento-dialog.component';
 
 @Component({
   selector: 'app-descuentos',
@@ -13,39 +16,118 @@ import { GenericMutationPayload, GenericRecordsPayload } from 'src/app/interface
   styleUrls: ['./descuentos.component.css']
 })
 export class DescuentosComponent {
-   descuentos:DescuentoModule[]=[];
-   private productoService= inject(ProductoService);
-   public newDesc:DescuentoModule =  new DescuentoModule();
-  constructor(){
-    this.getDescuentos()
+  descuentos: DescuentoModule[] = [];
+  filtroDescuentos = '';
+  paginaActual = 1;
+  tamanoPagina = 10;
+  readonly tamanosPagina = [5, 10, 20, 50];
+
+  private productoService = inject(ProductoService);
+  private dialog = inject(MatDialog);
+
+  constructor() {
+    this.getDescuentos();
   }
 
-  eliminar(){
-    
+  get descuentosFiltrados(): DescuentoModule[] {
+    const term = this.filtroDescuentos.trim().toLowerCase();
+    if (term === '') {
+      return this.descuentos;
+    }
+
+    return this.descuentos.filter((item) =>
+      [
+        item.nombre,
+        item.descripcion,
+        item.NombreTipo,
+        item.cantidad
+      ]
+        .filter((value) => value !== undefined && value !== null)
+        .some((value) => String(value).toLowerCase().includes(term))
+    );
   }
-   editar( ){  
-        this.productoService.setDescuento(this.newDesc).subscribe({next:(value:any)=>{
-          CustomConsole.log(value);
-          if (value.ok){ 
-            this.newDesc =  new DescuentoModule();
-            this.getDescuentos();
-          } else{
-            Swal.fire('error','error en la generacion del descuento','error')
-          }
-        },error:error=>Swal.fire(this.productoService.getErrorMessage(error))
-        })
 
-   }
-   setEditar(item:DescuentoModule ){
-   this.newDesc  = {...item} 
+  get totalPaginas(): number {
+    return Math.max(1, Math.ceil(this.descuentosFiltrados.length / this.tamanoPagina));
+  }
 
-   }
+  get descuentosPaginados(): DescuentoModule[] {
+    const start = (this.paginaActual - 1) * this.tamanoPagina;
+    return this.descuentosFiltrados.slice(start, start + this.tamanoPagina);
+  }
 
-   getDescuentos(){
-    this.productoService.getDescuentos().subscribe({next:(value:ApiResponse<GenericRecordsPayload<DescuentoModule>>)=>{
-      if(value.ok && value.data.count > 0){
-        this.descuentos =  value.data.records;
+  actualizarFiltro(): void {
+    this.paginaActual = 1;
+  }
+
+  cambiarTamanoPagina(): void {
+    this.paginaActual = 1;
+  }
+
+  irAPagina(page: number): void {
+    this.paginaActual = Math.min(Math.max(page, 1), this.totalPaginas);
+  }
+
+  abrirModalDescuento(descuento?: DescuentoModule): void {
+    this.dialog
+      .open(DescuentoDialogComponent, {
+        width: 'min(720px, 95vw)',
+        autoFocus: false,
+        data: {
+          descuento
+        }
+      })
+      .afterClosed()
+      .subscribe((resultado?: DescuentoDialogResult) => {
+        if (resultado?.saved) {
+          this.getDescuentos();
+        }
+      });
+  }
+
+  eliminar(descuento: DescuentoModule): void {
+    Swal.fire({
+      title: 'Eliminar descuento',
+      text: `Se eliminara el descuento "${descuento.nombre}".`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Eliminar',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (!result.isConfirmed) {
+        return;
       }
-    }})
-   }
+
+      this.productoService.deleteDescuento(descuento).subscribe({
+        next: (value) => {
+          if (value.ok) {
+            Swal.fire('Descuento eliminado con exito', '', 'success');
+            this.getDescuentos();
+            return;
+          }
+
+          Swal.fire('Error', value.error?.message ?? 'No fue posible eliminar el descuento', 'error');
+        },
+        error: (error) => Swal.fire(this.productoService.getErrorMessage(error), '', 'error')
+      });
+    });
+  }
+
+  getDescuentos(): void {
+    this.productoService.getDescuentos().subscribe({
+      next: (value: ApiResponse<GenericRecordsPayload<DescuentoModule>>) => {
+        if (value.ok && value.data.count > 0) {
+          this.descuentos = value.data.records;
+        } else {
+          this.descuentos = [];
+        }
+
+        this.paginaActual = 1;
+      },
+      error: (error) => Swal.fire(this.productoService.getErrorMessage(error), '', 'error')
+    });
+  }
+
+  trackByDescuento = (index: number, descuento: DescuentoModule): number | string =>
+    descuento.id ?? `${descuento.nombre}-${index}`;
 }

@@ -1,0 +1,79 @@
+<div class="medio-dialog">
+    <div class="medio-dialog__header">
+        <div class="medio-dialog__copy">
+            <span class="app-badge">Admin</span>
+            <h2 class="medio-dialog__title">{{ titulo }}</h2>
+            <p class="medio-dialog__subtitle">{{ subtitulo }}</p>
+        </div>
+
+        <button type="button" class="medio-dialog__close" (click)="cerrar()" aria-label="Cerrar formulario">
+            <i class="bi bi-x-lg"></i>
+        </button>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-md-6">
+            <label class="medio-dialog__label" for="medioNombre">Nombre</label>
+            <input
+                id="medioNombre"
+                type="text"
+                [(ngModel)]="medio.nombre"
+                class="form-control app-input"
+                placeholder="Nombre del medio">
+        </div>
+
+        <div class="col-md-6">
+            <label class="medio-dialog__label" for="medioEstado">Estado</label>
+            <select
+                id="medioEstado"
+                [(ngModel)]="medio.estado"
+                class="form-control app-select">
+                <option [ngValue]="0">Escoger estado</option>
+                <option *ngFor="let estado of estados" [ngValue]="estado.value">{{ estado.label }}</option>
+            </select>
+        </div>
+
+        <div class="col-md-7">
+            <label class="medio-dialog__label" for="medioCuenta">Cuenta contable</label>
+            <div class="medio-dialog__account-picker">
+                <input
+                    id="medioCuenta"
+                    type="text"
+                    [(ngModel)]="medio.nombreCuentaContable"
+                    class="form-control app-input"
+                    readonly
+                    placeholder="Cuenta medio de pago">
+                <button type="button" class="medio-dialog__account-action" (click)="buscarCuentasContables()">
+                    <i class="bi bi-search"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="col-md-5">
+            <label class="medio-dialog__label" for="medioEstablecimiento">Establecimiento</label>
+            <select
+                id="medioEstablecimiento"
+                [(ngModel)]="medio.establecimiento"
+                class="form-control app-select">
+                <option [ngValue]="0">Escoger establecimiento</option>
+                <option *ngFor="let item of data.establecimientos" [ngValue]="item.id">{{ item.nombre }}</option>
+            </select>
+        </div>
+
+        <div class="col-12">
+            <label class="medio-dialog__label" for="medioDescripcion">Descripcion</label>
+            <textarea
+                id="medioDescripcion"
+                [(ngModel)]="medio.descripcion"
+                class="form-control app-input medio-dialog__textarea"
+                placeholder="Descripcion breve del medio de pago"></textarea>
+        </div>
+    </div>
+
+    <div class="app-toolbar medio-dialog__actions">
+        <button type="button" class="app-chip-button" (click)="cerrar()">Cancelar</button>
+        <button type="button" class="app-chip-button app-chip-button--primary" (click)="guardar()">
+            {{ esEdicion ? 'Guardar cambios' : 'Crear medio' }}
+        </button>
+    </div>
+</div>

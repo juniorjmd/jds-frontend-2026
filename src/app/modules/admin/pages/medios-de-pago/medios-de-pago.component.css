@@ -1,0 +1,216 @@
+.medios-shell {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding-bottom: 1rem;
+}
+
+.medios-shell__header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1.1rem 1.2rem;
+}
+
+.medios-shell__copy {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+}
+
+.medios-shell__title {
+    margin: 0;
+    font-size: 2rem;
+}
+
+.medios-shell__description {
+    margin: 0;
+    color: var(--app-text-soft);
+    max-width: 62ch;
+}
+
+.medios-shell__controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.85rem;
+    align-items: flex-end;
+    justify-content: flex-end;
+}
+
+.medios-shell__filter {
+    min-width: 280px;
+}
+
+.medios-shell__filter label,
+.medios-shell__page-size-label {
+    display: block;
+    margin-bottom: 0.45rem;
+    color: var(--app-text-soft);
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.medios-shell__table-panel {
+    padding: 1rem 1.15rem;
+}
+
+.medios-shell__table-toolbar {
+    margin-bottom: 0.9rem;
+}
+
+.medios-shell__table-wrap {
+    overflow-x: auto;
+}
+
+.medios-shell__page-size {
+    width: 86px;
+    min-width: 86px;
+}
+
+.medios-table {
+    margin-bottom: 0;
+    vertical-align: middle;
+}
+
+.medios-table thead th {
+    border-top: 0;
+    border-bottom: 1px solid rgba(54, 44, 38, 0.1);
+    color: var(--app-text-soft);
+    font-size: 0.8rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.medios-table tbody td {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    border-color: rgba(54, 44, 38, 0.08);
+    color: var(--app-text);
+}
+
+.medios-table__state {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.35rem 0.75rem;
+    border-radius: 999px;
+    background: rgba(107, 114, 128, 0.12);
+    color: var(--app-text-soft);
+    font-size: 0.82rem;
+    font-weight: 700;
+}
+
+.medios-table__state.is-active {
+    background: rgba(31, 108, 99, 0.12);
+    color: var(--app-accent);
+}
+
+.medios-table__state.is-inactive {
+    background: rgba(181, 70, 70, 0.12);
+    color: var(--app-danger);
+}
+
+.medios-table__actions-head,
+.medios-table__actions {
+    text-align: right;
+}
+
+.medios-table__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.45rem;
+}
+
+.medios-table__action {
+    width: 2.4rem;
+    height: 2.4rem;
+    border: 1px solid rgba(54, 44, 38, 0.12);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.88);
+    color: var(--app-text);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.medios-table__action.is-disabled {
+    color: var(--app-text-soft);
+    cursor: default;
+}
+
+.medios-shell__empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0.65rem;
+    padding: 2rem 1.2rem;
+}
+
+.medios-shell__empty h3 {
+    margin: 0;
+}
+
+.medios-shell__empty p {
+    max-width: 44ch;
+    margin: 0 0 0.4rem;
+    color: var(--app-text-soft);
+}
+
+.medios-shell__empty-icon {
+    font-size: 2rem;
+    color: var(--app-primary);
+}
+
+.medios-shell__pagination {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+.medios-shell__page-btn {
+    min-height: 38px;
+    padding: 0.45rem 0.9rem;
+    border-radius: 999px;
+    border: 1px solid rgba(54, 44, 38, 0.12);
+    background: rgba(255, 255, 255, 0.92);
+    color: var(--app-text);
+    font-weight: 700;
+}
+
+.medios-shell__page-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.medios-shell__page-indicator {
+    color: var(--app-text-soft);
+    font-size: 0.88rem;
+    font-weight: 700;
+}
+
+@media (max-width: 767px) {
+    .medios-shell__title {
+        font-size: 1.65rem;
+    }
+
+    .medios-shell__controls,
+    .medios-shell__filter {
+        width: 100%;
+    }
+
+    .medios-shell__controls .app-chip-button {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .medios-shell__pagination {
+        justify-content: space-between;
+    }
+}

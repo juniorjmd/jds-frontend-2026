@@ -47,9 +47,60 @@ export class MenuItemLiComponent {
     return value.startsWith('/') ? value : `/${value}`;
   }
 
+  private splitRouteSegments(route: string[]): { segments: string[]; absolute: boolean } {
+    const absolute = route[0]?.startsWith('/') ?? false;
+    const segments = route.flatMap((part) => part.split('/').filter(Boolean));
+    return { segments, absolute };
+  }
+
+  private normalizeInventoryRoute(route: string[]): string[] {
+    const { segments, absolute } = this.splitRouteSegments(route);
+    let normalized = [...segments];
+    let isAbsolute = absolute || normalized[0] === 'home';
+
+    if (normalized[0] === 'admin') {
+      normalized = ['home', ...normalized];
+      isAbsolute = true;
+    }
+
+    if (normalized[0] === 'inventarios') {
+      normalized = ['home', 'admin', ...normalized];
+      isAbsolute = true;
+    }
+
+    if (normalized[0] === 'inventario') {
+      normalized = ['home', 'admin', 'inventarios', ...normalized];
+      isAbsolute = true;
+    }
+
+    if (normalized[0] === 'home' && normalized[1] === 'admin') {
+      if (normalized[2] === 'inventario') {
+        normalized[2] = 'inventarios';
+      }
+
+      if (normalized[2] === 'inventarios' && normalized.length === 3) {
+        normalized.push('inicio');
+      }
+    }
+
+    if (normalized.length === 0) {
+      return [];
+    }
+
+    return isAbsolute ? [`/${normalized[0]}`, ...normalized.slice(1)] : normalized;
+  }
+
+  getRouterLink(recurso: RecursoDetalle): string[] {
+    if (!this.hasNavigableRoute(recurso)) {
+      return [];
+    }
+
+    return this.normalizeInventoryRoute(recurso.direccion!);
+  }
+
   private recursoIsActive(recurso: RecursoDetalle): boolean {
-    if (recurso.direccion && recurso.direccion.length > 0 && recurso.direccion[0] !== '') {
-      return this.router.isActive(this.normalizeRoute(recurso.direccion.join('/')), false);
+    if (this.hasNavigableRoute(recurso)) {
+      return this.router.isActive(this.normalizeRoute(this.getRouterLink(recurso).join('/')), false);
     }
 
     return (recurso.recursosHijos ?? []).some((child) => this.recursoIsActive(child));
@@ -65,7 +116,7 @@ export class MenuItemLiComponent {
 
   getFallbackRoute(recurso: RecursoDetalle): string[] {
     if (this.hasNavigableRoute(recurso)) {
-      return recurso.direccion!;
+      return this.getRouterLink(recurso);
     }
 
     for (const child of recurso.recursosHijos ?? []) {

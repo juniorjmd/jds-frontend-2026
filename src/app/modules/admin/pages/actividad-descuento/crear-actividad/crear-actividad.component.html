@@ -1,117 +1,231 @@
-<div class="container-fluit"> <h2>Crear Descuento Actividad</h2>
-    <form [formGroup]="actividadForm" (ngSubmit)="onSubmitActividad()">
-     <div class="row"> <div class="col">
-        <label for="nombre" class="form-label">Nombre</label>
-        <input id="nombre" class="form-control" formControlName="nombre">
-      </div>
-    
-      <div class="col">
-        <label for="fechaInicial" class="form-label">Fecha Inicial</label>
-        <input id="fechaInicial" type="date" class="form-control" formControlName="fechaInicial"> 
+<div class="container-fluid actividad-create__container">
+    <section class="actividad-create app-page">
+        <header class="app-panel actividad-create__hero">
+            <div class="actividad-create__hero-copy">
+                <span class="app-badge">Act. descuento</span>
+                <h2 class="app-title actividad-create__title">Crear actividad de descuento</h2>
+                <p class="actividad-create__description">
+                    Configura la actividad, define su vigencia y agrega los items relacionados antes de guardarla.
+                </p>
+            </div>
 
-      </div>
-      <div class="col">
-        <label for="fechaFinal" class="form-label">Fecha Final</label>
-        <input id="fechaFinal" type="date" class="form-control" [min]="actividadForm.get('fechaInicial')?.value" formControlName="fechaFinal">
-        <div *ngIf="actividadForm.get('fechaFinal')?.hasError('minDate') && actividadForm.get('fechaFinal')?.touched" class="text-danger">
-        La fecha final debe ser igual o posterior a la fecha inicial.
-        </div>
-      </div>
-      <div class="col">
-        <label for="tipo" class="form-label">Tipo</label>
-        <select id="tipo" (change)="cambiarListado()" class="form-select" formControlName="tipo">
-          <option value="">seleccione un tipo de actividad</option>
-          <option value="PRD">Descuento por Productos</option>
-          <option value="CAT">Descuento por Categorías</option>
-          <option value="CLI">Descuento por Clientes</option>
-          <option value="BRD">Descuento por Marcas</option>
-        </select>
-      </div>
-      <div class="col">
-        <label for="estado" class="form-label">Estado</label>
-        <select id="estado" class="form-select" formControlName="estado">
-          <option value=1>Activo</option>
-          <option value=0>Inactivo</option>
-        </select>
-      </div>
-      <div class="col">
-        <label for="idDescuento" class="form-label">ID Descuento</label> 
-        <select id="idDescuento" class="form-select" formControlName="idDescuento">
-            <option value="">seleccione descuento</option>
-            <option *ngFor="let item of descuentos" [value]="item.id">{{item.nombre}}</option> 
-        </select>
-    </div>
-</div>
-<div class="row">
-    <div class="col-sm-4">
-        <label for="descripcion" class="form-label">Descripción</label>
-        <textarea id="descripcion" class="form-control" formControlName="descripcion"></textarea>
-      </div> 
+            <div class="actividad-create__hero-actions">
+                <button type="button" class="app-chip-button" (click)="cerrar()">
+                    <i class="bi bi-arrow-left"></i>
+                    Volver al listado
+                </button>
+            </div>
+        </header>
 
-      <div class="col-sm-2">  
-        <br>
-      <button type="submit" class="btn btn-primary">Guardar Actividad</button></div>
-    
-      <div class="col-sm-2">  
-        <br>
-      <button type="button" (click)="abrirBusqueda()" class="btn btn-primary">Ingresar item</button></div>
-    </div>
-    </form> 
-<hr>
-<div style="height: 400px; overflow-y: auto; overflow-x: hidden;">
-    <div class="row" *ngIf="showprd" >
-        <div class="col-sm-12">
-            <table class="table">
-                <tr>
-                    <th colspan="4">Productos Seleccionados<th>
-                </tr>
-                <tr  *ngFor="let item of productos" >
-                    <td>{{item.nombre}}</td><td>{{item.nombre2}}</td><td>{{item.nombre3}}</td><td>
-                        <button class="btn btn-danger" (click)="eliminarPrdTemp(item.id)"><i class="bi bi-trash"></i></button>
-                    </td>
-                </tr>
-            </table>
-        </div>
-    </div> 
-    <div class="row" *ngIf="showcat" >
-        <div class="col-sm-8">
-            <table class="table">
-                <tr>
-                    <th colspan="3">Categorias Seleccionadas<th>
-                </tr>
-                <tr  *ngFor="let item of categorias">
-                    <td>{{item.nombre}}</td> <td> 
-                     <button class="btn btn-danger" (click)="eliminarPrdTemp(item.id)"><i class="bi bi-trash"></i></button>  </td>
-                </tr>
-            </table>
-        </div>
-    </div> 
-    
-    <div class="row" *ngIf="showmar" >
-        <div class="col-sm-8">
-            <table class="table">
-                <tr>
-                    <th colspan="3">Marcas Seleccionadas<th>
-                </tr>
-                <tr  *ngFor="let item of marcas">
-                    <td>{{item.nombre}}</td> <td>  <button class="btn btn-danger" (click)="eliminarPrdTemp(item.id)"><i class="bi bi-trash"></i></button>  </td>
-                </tr>
-            </table>
-        </div>
-    </div> 
-  
-    <div class="row" *ngIf="showcli" >
-        <div class="col-sm-12">
-            <table class="table">
-                <tr>
-                    <th colspan="3">Clientes Seleccionados<th>
-                </tr>
-                <tr  *ngFor="let item of clientes">
-                    <td>{{item.nombreCompleto}}</td><td>{{item.numIdentificacion}}</td><td>{{item.email}}</td>
-                    <td> <button class="btn btn-danger" (click)="eliminarPrdTemp(item.id)"><i class="bi bi-trash"></i></button> </td>
-                </tr>
-            </table>
-        </div>
-    </div> 
-</div>
+        <form class="actividad-create__layout" [formGroup]="actividadForm" (ngSubmit)="onSubmitActividad()">
+            <section class="app-panel actividad-create__panel">
+                <div class="actividad-create__panel-header">
+                    <div>
+                        <span class="app-badge">Datos generales</span>
+                        <h3>Informacion base</h3>
+                    </div>
+
+                    <div class="actividad-create__panel-actions">
+                        <button type="button" class="app-chip-button" (click)="abrirBusqueda()">
+                            <i class="bi bi-search"></i>
+                            Ingresar item
+                        </button>
+                        <button type="submit" class="app-chip-button app-chip-button--primary">
+                            <i class="bi bi-save"></i>
+                            Guardar actividad
+                        </button>
+                    </div>
+                </div>
+
+                <div class="actividad-create__grid">
+                    <label class="actividad-create__field">
+                        <span>Nombre</span>
+                        <input id="nombre" class="form-control app-input" formControlName="nombre" placeholder="Nombre de la actividad">
+                    </label>
+
+                    <label class="actividad-create__field">
+                        <span>Fecha inicial</span>
+                        <input id="fechaInicial" type="date" class="form-control app-input" formControlName="fechaInicial">
+                    </label>
+
+                    <label class="actividad-create__field">
+                        <span>Fecha final</span>
+                        <input id="fechaFinal" type="date" class="form-control app-input" [min]="actividadForm.get('fechaInicial')?.value" formControlName="fechaFinal">
+                        <small *ngIf="actividadForm.get('fechaFinal')?.hasError('minDate') && actividadForm.get('fechaFinal')?.touched" class="actividad-create__hint is-error">
+                            La fecha final debe ser igual o posterior a la fecha inicial.
+                        </small>
+                    </label>
+
+                    <label class="actividad-create__field">
+                        <span>Tipo</span>
+                        <select id="tipo" (change)="cambiarListado()" class="form-control app-select" formControlName="tipo">
+                            <option value="">Seleccione un tipo de actividad</option>
+                            <option value="PRD">Descuento por productos</option>
+                            <option value="CAT">Descuento por categorias</option>
+                            <option value="CLI">Descuento por clientes</option>
+                            <option value="BRD">Descuento por marcas</option>
+                        </select>
+                    </label>
+
+                    <label class="actividad-create__field">
+                        <span>Estado</span>
+                        <select id="estado" class="form-control app-select" formControlName="estado">
+                            <option [ngValue]="1">Activo</option>
+                            <option [ngValue]="0">Inactivo</option>
+                        </select>
+                    </label>
+
+                    <label class="actividad-create__field">
+                        <span>Descuento</span>
+                        <select id="idDescuento" class="form-control app-select" formControlName="idDescuento">
+                            <option value="">Seleccione descuento</option>
+                            <option *ngFor="let item of descuentos" [ngValue]="item.id">{{ item.nombre }}</option>
+                        </select>
+                    </label>
+
+                    <label class="actividad-create__field actividad-create__field--full">
+                        <span>Descripcion</span>
+                        <textarea
+                            id="descripcion"
+                            rows="4"
+                            class="form-control app-input"
+                            formControlName="descripcion"
+                            placeholder="Describe el alcance o la intencion comercial de esta actividad"></textarea>
+                    </label>
+                </div>
+            </section>
+
+            <section class="app-panel actividad-create__selection-panel" *ngIf="showprd">
+                <div class="actividad-create__selection-header">
+                    <div>
+                        <span class="app-badge">Detalle</span>
+                        <h3>Productos seleccionados</h3>
+                    </div>
+                    <span class="app-badge">{{ productos.length }}</span>
+                </div>
+
+                <div class="actividad-create__table-wrap">
+                    <table class="table actividad-create__table">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Referencia 2</th>
+                                <th>Referencia 3</th>
+                                <th class="actividad-create__actions-head">Quitar</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let item of productos">
+                                <td>{{ item.nombre }}</td>
+                                <td>{{ item.nombre2 }}</td>
+                                <td>{{ item.nombre3 }}</td>
+                                <td class="actividad-create__actions-cell">
+                                    <button type="button" class="actividad-create__icon-button is-danger" (click)="eliminarPrdTemp(item.id)">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="app-panel actividad-create__selection-panel" *ngIf="showcat">
+                <div class="actividad-create__selection-header">
+                    <div>
+                        <span class="app-badge">Detalle</span>
+                        <h3>Categorias seleccionadas</h3>
+                    </div>
+                    <span class="app-badge">{{ categorias.length }}</span>
+                </div>
+
+                <div class="actividad-create__table-wrap">
+                    <table class="table actividad-create__table">
+                        <thead>
+                            <tr>
+                                <th>Categoria</th>
+                                <th class="actividad-create__actions-head">Quitar</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let item of categorias">
+                                <td>{{ item.nombre }}</td>
+                                <td class="actividad-create__actions-cell">
+                                    <button type="button" class="actividad-create__icon-button is-danger" (click)="eliminarPrdTemp(item.id)">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="app-panel actividad-create__selection-panel" *ngIf="showmar">
+                <div class="actividad-create__selection-header">
+                    <div>
+                        <span class="app-badge">Detalle</span>
+                        <h3>Marcas seleccionadas</h3>
+                    </div>
+                    <span class="app-badge">{{ marcas.length }}</span>
+                </div>
+
+                <div class="actividad-create__table-wrap">
+                    <table class="table actividad-create__table">
+                        <thead>
+                            <tr>
+                                <th>Marca</th>
+                                <th class="actividad-create__actions-head">Quitar</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let item of marcas">
+                                <td>{{ item.nombre }}</td>
+                                <td class="actividad-create__actions-cell">
+                                    <button type="button" class="actividad-create__icon-button is-danger" (click)="eliminarPrdTemp(item.id)">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="app-panel actividad-create__selection-panel" *ngIf="showcli">
+                <div class="actividad-create__selection-header">
+                    <div>
+                        <span class="app-badge">Detalle</span>
+                        <h3>Clientes seleccionados</h3>
+                    </div>
+                    <span class="app-badge">{{ clientes.length }}</span>
+                </div>
+
+                <div class="actividad-create__table-wrap">
+                    <table class="table actividad-create__table">
+                        <thead>
+                            <tr>
+                                <th>Cliente</th>
+                                <th>Identificacion</th>
+                                <th>Correo</th>
+                                <th class="actividad-create__actions-head">Quitar</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let item of clientes">
+                                <td>{{ item.nombreCompleto }}</td>
+                                <td>{{ item.numIdentificacion }}</td>
+                                <td>{{ item.email }}</td>
+                                <td class="actividad-create__actions-cell">
+                                    <button type="button" class="actividad-create__icon-button is-danger" (click)="eliminarPrdTemp(item.id)">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </form>
+    </section>
 </div>

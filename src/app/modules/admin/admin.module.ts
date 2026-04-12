@@ -30,6 +30,12 @@ import { ModalUpdateProductoComponent } from './modals/modalUpdateProducto/modal
 import { ModalInOutDetalleActividad } from './modals/modalExcluirIncluirDetalleActividad/modalExcluirIncluirDetalleActividad.component';
 import { ModalChangeFechaActividadComponent } from './modals/modalChangeFechaActividad/modalChangeFechaActividad.component';
 import { IndexComponent } from './index/index.component';
+import { MedioPagoDialogComponent } from './modals/medio-pago-dialog/medio-pago-dialog.component';
+import { CajaDialogComponent } from './modals/caja-dialog/caja-dialog.component';
+import { ContadorDialogComponent } from './modals/contador-dialog/contador-dialog.component';
+import { DescuentoDialogComponent } from './modals/descuento-dialog/descuento-dialog.component';
+import { BodegaDialogComponent } from './modals/bodega-dialog/bodega-dialog.component';
+import { InventarioLayoutComponent } from './components/inventario-layout/inventario-layout.component';
 
  
 @NgModule({
@@ -47,6 +53,12 @@ import { IndexComponent } from './index/index.component';
     ImpuestosComponent,
     CajasNuevaComponent,
     CajasDetalleComponent,
+    MedioPagoDialogComponent,
+    CajaDialogComponent,
+    ContadorDialogComponent,
+    DescuentoDialogComponent,
+    BodegaDialogComponent,
+    InventarioLayoutComponent,
     AdminCategoriasComponent,
     DescuentosComponent,
     ActividadDescuentoComponent,ModalInOutDetalleActividad,ModalChangeFechaActividadComponent,

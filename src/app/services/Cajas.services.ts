@@ -20,6 +20,7 @@ import { DocumentoCierreRequest } from '../interfaces/producto-request';
 import { DocumentosModel } from '../models/ventas/documento.model';
 import { ConfigService } from './config.service';
 import { ApiResponse } from '../interfaces/api-response.interface';
+import { TipoDocumento } from '../interfaces/tipo-documento';
 import {
     CarwashBoxSummaryData,
     CarwashCloseBoxData,
@@ -103,12 +104,12 @@ return this.http
         return apiMessage || fallbackMessage || textMessage || 'Error inesperado';
     }
     
-    getTiposDocumentosConContadores(){
+    getTiposDocumentosConContadores():Observable<ApiResponse<GenericRecordsPayload<TipoDocumento>>>{
         let datos = {"action": actions.actionSelect ,
                      "_tabla" : vistas.tipos_documentos_con_cont,
                      "_where" : [{columna : 'estado' , tipocomp : '=' , dato : 1}]
                     };
-        return this.http.post<ApiResponse<GenericRecordsPayload<unknown>>>(this.configService.url.action , datos, httpOptions()) ;
+        return this.http.post<ApiResponse<GenericRecordsPayload<TipoDocumento>>>(this.configService.url.action , datos, httpOptions()) ;
     }
 
     getEstablecimientos():Observable<ApiResponse<GenericRecordsPayload<establecimientoModel>>>{
@@ -411,30 +412,51 @@ return this.http
         
     }
     setConsecutivo(contador:Contador){
-        let datos ;
-        let reso = (contador.resolucion != undefined)? contador.resolucion: '';
-        let fecha1  = new Date();
-        let fecha2  = new Date()
-        if (reso != ''){
-              fecha1 = contador.fechaInicioResolucion!;
-              fecha2 = contador.fechaFinResolucion!;
+        const reso = contador.resolucion != undefined ? contador.resolucion : '';
+        const fechaInicio = reso !== '' ? contador.fechaInicioResolucion ?? null : null;
+        const fechaFin = reso !== '' ? contador.fechaFinResolucion ?? null : null;
+
+        let datos;
+
+        if ((contador.id ?? 0) > 0) {
+            const where = [{ "columna": "id", "tipocomp": "=", "dato": contador.id }];
+            const arraydatos = {
+                "codContador": contador.codContador,
+                "establecimiento": contador.establecimiento,
+                "tipoContador": contador.tipoContador,
+                "desde": contador.desde,
+                "hasta": contador.hasta,
+                "resolucion": reso,
+                "fechaInicioResolucion": fechaInicio,
+                "fechaFinResolucion": fechaFin,
+            };
+
+            datos = {
+                "action": actions.actionUpdate,
+                "_tabla": TABLA.contador,
+                "_where": where,
+                "_arraydatos": arraydatos
+            };
+        } else {
+            const arraydatos = {
+                "codContador": contador.codContador,
+                "establecimiento": contador.establecimiento,
+                "tipoContador": contador.tipoContador,
+                "desde": contador.desde,
+                "hasta": contador.hasta,
+                "resolucion": reso,
+                "fechaInicio": fechaInicio ?? new Date(),
+                "fechaFin": fechaFin ?? new Date(),
+                "USUARIO_LOGUEADO": '0',
+            };
+
+            datos = {
+                "action": actions.actionProcedure,
+                "_procedure": PROCEDURE.insertaContador,
+                "_arraydatos": arraydatos
+            };
         }
-        let  arraydatos ;  
-            arraydatos =  {  
-            "codContador" : contador.codContador  ,
-            "establecimiento" : contador.establecimiento,
-            "tipoContador" : contador.tipoContador ,
-            "desde" : contador.desde ,
-            "hasta" : contador.hasta ,
-            "resolucion":reso,
-            "fechaInicio":fecha1,
-            "fechaFin":fecha2,
-            "USUARIO_LOGUEADO" : '0',
-        }
-            datos = {"action": actions.actionProcedure ,
-            "_procedure" : PROCEDURE.insertaContador,
-            "_arraydatos" : arraydatos
-           }; 
+
         return this.http.post<ApiResponse<GenericMutationPayload>>(this.configService.url.action , datos, httpOptions()) ;
         
 

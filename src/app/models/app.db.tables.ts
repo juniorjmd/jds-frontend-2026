@@ -28,6 +28,7 @@
     tipoEstablecimiento:"tipo_establecimiento",
     contador:"contadores" , 
     tiposVehiculos:"inv_mst_tipos_vehiculos",
+    inv_bodegas:"inv_bodegas",
     inv_descuentos:"inv_descuentos",
     inventario:"inv_inventario",
     inv_inventario_ingreso_aplicado : 'inv_inventario_ingreso_aplicado' ,

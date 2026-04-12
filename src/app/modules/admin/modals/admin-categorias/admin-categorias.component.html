@@ -1,43 +1,69 @@
-<div class="container mt-5">
-    <h2>Crear Categoría</h2>
-    <form [formGroup]="categoriaForm!" (ngSubmit)="onSubmit()">
-        <div class="form-group">
-          <label for="categoriaPadre1">Categoría Padre 1</label>
-          <select id="categoriaPadre1" (change)="filtrarPadre2()" class="form-control" formControlName="categoriaPadre1">
-            <option *ngFor="let cat of categoriasPadre1" [value]="cat.id">{{ cat.nombre }}</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label for="categoriaPadre2">Categoría Padre 2</label>
-          <select id="categoriaPadre2"  (change)="filtrarPadre3()" class="form-control" formControlName="categoriaPadre2">
-            <option *ngFor="let cat of categoriasPadre2" [value]="cat.id">{{ cat.nombre }}</option>
-          </select>
-        </div>  
-        
-        <div class="form-group"> 
-          <label for="cuentaContable">Cuenta contable</label> 
-          <div class="input-group mb-3">
-            <input type="text" class="form-control" readonly placeholder="cuenta contable"  formControlName="cuentaContable" 
-            id="cuentaContable"  aria-label="cuentaContable"  aria-describedby="basic-addon1">  
-              <button type="button"class="btn btn-outline-primary" (click)='buscarCuentasContables()'>
-                  <i class="bi bi-search"></i>  
-              </button>
-          </div>
+<section class="admin-categorias-dialog">
+  <header class="admin-categorias-dialog__header">
+    <div class="admin-categorias-dialog__copy">
+      <span class="app-badge">Categorías</span>
+      <h2>Nueva categoría</h2>
+      <p>Agrega una categoría y asigna la cuenta contable correspondiente.</p>
+    </div>
 
+    <button type="button" class="admin-categorias-dialog__close" (click)="cerrar()" aria-label="Cerrar">
+      <i class="bi bi-x-lg"></i>
+    </button>
+  </header>
+
+  <form [formGroup]="categoriaForm!" (ngSubmit)="onSubmit()" class="admin-categorias-dialog__body">
+    <div class="admin-categorias-dialog__grid">
+      <div class="admin-categorias-dialog__field">
+        <label for="categoriaPadre1">Categoría Padre 1</label>
+        <select id="categoriaPadre1" (change)="filtrarPadre2()" class="form-control" formControlName="categoriaPadre1">
+          <option *ngFor="let cat of categoriasPadre1" [value]="cat.id">{{ cat.nombre }}</option>
+        </select>
+      </div>
+
+      <div class="admin-categorias-dialog__field">
+        <label for="categoriaPadre2">Categoría Padre 2</label>
+        <select id="categoriaPadre2" (change)="filtrarPadre3()" class="form-control" formControlName="categoriaPadre2">
+          <option *ngFor="let cat of categoriasPadre2" [value]="cat.id">{{ cat.nombre }}</option>
+        </select>
+      </div>
+
+      <div class="admin-categorias-dialog__field admin-categorias-dialog__field--full">
+        <label for="cuentaContable">Cuenta contable</label>
+        <div class="input-group">
+          <input
+            type="text"
+            class="form-control"
+            readonly
+            placeholder="Cuenta contable"
+            formControlName="cuentaContable"
+            id="cuentaContable"
+            aria-label="cuentaContable"
+            aria-describedby="basic-addon1">
+          <button type="button" class="btn btn-outline-primary" (click)="buscarCuentasContables()">
+            <i class="bi bi-search"></i>
+          </button>
         </div>
-      <div class="form-group">
+      </div>
+
+      <div class="admin-categorias-dialog__field">
         <label for="letra">Letra</label>
         <input type="text" id="letra" class="form-control" formControlName="letra">
       </div>
-      <div class="form-group">
+
+      <div class="admin-categorias-dialog__field">
         <label for="nombre">Nombre</label>
         <input type="text" id="nombre" class="form-control" formControlName="nombre">
       </div>
-      <div class="form-group">
+
+      <div class="admin-categorias-dialog__field admin-categorias-dialog__field--full">
         <label for="descripcion">Descripción</label>
         <textarea id="descripcion" class="form-control" formControlName="descripcion"></textarea>
-      </div>   
-      <button type="submit" class="btn btn-primary" [disabled]="categoriaForm?.invalid">Crear</button>
-    </form>
-  </div>
-  
+      </div>
+    </div>
+
+    <footer class="app-toolbar admin-categorias-dialog__footer">
+      <button type="button" class="app-chip-button" (click)="cerrar()">Cancelar</button>
+      <button type="submit" class="app-chip-button app-chip-button--primary" [disabled]="categoriaForm?.invalid">Crear</button>
+    </footer>
+  </form>
+</section>

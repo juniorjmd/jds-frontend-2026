@@ -1,9 +1,9 @@
-import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { loading } from 'src/app/models/app.loading'; 
+import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
+import { loading } from 'src/app/models/app.loading';
 import { DocumentosModel } from 'src/app/models/ventas/documento.model';
 import { DocumentoService } from 'src/app/services/documento.service';
-import { MatDialog } from '@angular/material/dialog'; 
-import { MoverDocumentosComponent } from '../../modals/mover-documentos/mover-documentos.component'; 
+import { MatDialog } from '@angular/material/dialog';
+import { MoverDocumentosComponent } from '../../modals/mover-documentos/mover-documentos.component';
 import { DocumentoListado } from 'src/app/interfaces/documento.interface';
 import { ProductoService } from 'src/app/services/producto.service';
 import { errorOdoo, responsePrd } from 'src/app/interfaces/odoo-prd';
@@ -11,22 +11,21 @@ import { MediosDePago } from 'src/app/interfaces/medios-de-pago.interface';
 import { cajasServices } from 'src/app/services/Cajas.services';
 import { DocpagosModel, pagosModel } from 'src/app/models/ventas/pagos.model';
 import { cajaModel } from 'src/app/models/ventas/cajas.model';
-import { PagosVentaComponent } from '../../modals/pagos-venta/pagos-venta.component'; 
-import { BuscarProdDirectoComponent } from '../../modals/buscar-prod-directo/buscar-prod-directo.component'; 
+import { PagosVentaComponent } from '../../modals/pagos-venta/pagos-venta.component';
+import { BuscarProdDirectoComponent } from '../../modals/buscar-prod-directo/buscar-prod-directo.component';
 import { productoDocumento } from 'src/app/interfaces/clientes-odoo';
 import { RecursoDetalle, Usuario } from 'src/app/interfaces/usuario.interface';
 import { LoginService } from 'src/app/services/login.services';
 import { Router } from '@angular/router';
 import { catchError, tap } from 'rxjs/operators';
-import { of } from 'rxjs'; 
+import { of } from 'rxjs';
 import Swal from 'sweetalert2';
 import { IngresarProductoVentaComponent } from '../../modals/ingresar-producto-venta/ingresar-producto-venta.component';
 import { DtoDocumentoProducto } from 'src/app/interfaces/dto-documento-producto';
-import { cajaRequest } from 'src/app/interfaces/producto-request';
 import { DatosInicialesService } from 'src/app/services/DatosIniciales.services';
 import { vwsucursal } from 'src/app/models/app.db.interfaces';
 import { NewGastoComponent } from '../../modals/new-gasto/new-gasto.component';
-import { PrinterManager } from 'src/app/models/printerManager';  
+import { PrinterManager } from 'src/app/models/printerManager';
 import { BusquedaPersona } from 'src/app/interfaces/busqueda-persona';
 import { FndClienteComponent } from 'src/app/modules/shared/modals/fnd-cliente/fnd-cliente.component';
 import { AbonosCuentasXCobrarComponent } from '../../modals/abonos-cuentas-xcobrar/abonos-cuentas-xcobrar.component';
@@ -37,26 +36,27 @@ import { IngresoServicioVehiculoComponent } from '../../modals/ingreso_servicio_
 import { CustomConsole } from 'src/app/models/CustomConsole';
 import { ApiResponse } from 'src/app/interfaces/api-response.interface';
 import { DocumentoActionPayload, DocumentoMutationPayload, DocumentoRecordsPayload } from 'src/app/services/documento.service';
-import { InventarioProductResponse, InventarioReturnResponse } from 'src/app/interfaces/inventario-response.interface';
+import {   InventarioReturnResponse } from 'src/app/interfaces/inventario-response.interface';
 import { GenericRecordsPayload } from 'src/app/interfaces/generic-response.interface';
 import { ModuleBannerService } from 'src/app/services/module-banner.service';
 
 @Component({
   selector: 'app-ventas',
   templateUrl: './ventas.component.html',
-  styleUrls: ['./ventas.component.css']
+  styleUrls: ['./ventas.component.css'],
+  encapsulation: ViewEncapsulation.None
 })
 export class VentasComponent implements AfterViewInit, OnInit, OnDestroy {
 
-  cotiza = false; 
-  libranza = false; 
+  cotiza = false;
+  libranza = false;
   pasaAotraCaja = false;
   planSepare = false;
   CrtGasto = false;
   domicilio = false;
   ingresoServicio = false;
   showQuickActions = false;
-  pagos: pagosModel[] = []; 
+  pagos: pagosModel[] = [];
   indexEfectivo!: number;
   focus!: boolean;
   MedioP: MediosDePago[] = [];
@@ -70,42 +70,42 @@ export class VentasComponent implements AfterViewInit, OnInit, OnDestroy {
   documentoActivo:DocumentosModel | null = null;
   empleadoActivo:EmpleadoModel  = new EmpleadoModel();
   documentoRetorno: DocumentosModel = new DocumentosModel();
-  documentoSeleccionadoActivo: DocumentosModel = new DocumentosModel(); 
+  documentoSeleccionadoActivo: DocumentosModel = new DocumentosModel();
   sucursal?:vwsucursal;
   @ViewChild('codProd') codProdlement!: ElementRef;
   continuar:boolean;
 
   constructor(
-    public loading: loading, 
+    public loading: loading,
     private serviceCaja: cajasServices,
     private newAbrirDialog: MatDialog,
     private documentoService: DocumentoService,
     private productoService: ProductoService,
-    private _ServLogin: LoginService, 
+    private _ServLogin: LoginService,
     private _Router : Router,
     private dInicialServ: DatosInicialesService,
     private moduleBannerService: ModuleBannerService
-  ) {    
+  ) {
           this.getUsuarioLogueado();
           this.continuar =  true;
 
-      
+
   }
 
-  ngOnInit(): void {   
+  ngOnInit(): void {
     this.dInicialServ.getParametroValidarExistencia().subscribe({next:value=>{
-      CustomConsole.log('validar existencia en venta', value ); 
+      CustomConsole.log('validar existencia en venta', value );
       this.dInicialServ.setParametroExistencia(value.data.records[0]);
     }});
     this.dInicialServ.currentVendedores.subscribe({next:value=>{
       this.empleados = value??[];
-    }}); 
+    }});
     this.dInicialServ.continueVenta.subscribe({next:(value)=>{
       this.continuar = value;
       CustomConsole.log('continuar => continueVenta',this.continuar);
 
       if ( this.continuar ){
-        
+
         this.serviceCaja.getCajasActivasUsuarioActivo().subscribe({next:(value: ApiResponse<{ records: cajaModel[]; count: number }>)=>{
           CustomConsole.log('CAJA USUARIO LOGUEADO',JSON.stringify(value))
           if(value.data.count > 0 ){
@@ -116,25 +116,25 @@ export class VentasComponent implements AfterViewInit, OnInit, OnDestroy {
             this._Router.navigate(['home','pos','abrir']);
           }
         },error:e=>Swal.fire(JSON.stringify(e))})
-      
+
       }
       else{
-        
+
         this.serviceCaja.getCajasActivasUsuarioActivo().subscribe({next:(value: ApiResponse<{ records: cajaModel[]; count: number }>)=>{
           CustomConsole.log('CAJA USUARIO LOGUEADO',JSON.stringify(value))
-          if(value.data.count <= 0 ){  
+          if(value.data.count <= 0 ){
             this._Router.navigate(['home','pos','abrir']);
           }
         },error:e=>Swal.fire(JSON.stringify(e))})
       }
-      
+
     }})
-    this.dInicialServ.currentSucursal.subscribe({next:(suc)=>{ 
+    this.dInicialServ.currentSucursal.subscribe({next:(suc)=>{
        this.sucursal =  suc;
        PrinterManager.setSucursal(this.sucursal!);
 
     }})
-  
+
   }
 
   ngOnDestroy(): void {
@@ -162,7 +162,7 @@ export class VentasComponent implements AfterViewInit, OnInit, OnDestroy {
   getDatosContables(){
     this.serviceCaja.getCuentasContablesEstablecimientoUsuario().subscribe({next:(value:ApiResponse<{ records: cajaModel[]; count: number }>)=>{
       CustomConsole.log('getCuentasContablesEstablecimientoUsuario' , value)
-      this.dInicialServ.validarCuentasContablesEstablecimiento(value.data.records[0] ) 
+      this.dInicialServ.validarCuentasContablesEstablecimiento(value.data.records[0] )
     }})
   }
 
@@ -180,26 +180,26 @@ export class VentasComponent implements AfterViewInit, OnInit, OnDestroy {
         next:(request) => {
           this.getMenuImage(request.usuario)
         } ,
-        error: error=>{Swal.fire('Error getUsuarioLogeado', this._ServLogin.getErrorMessage(error) ) ;} 
+        error: error=>{Swal.fire('Error getUsuarioLogeado', this._ServLogin.getErrorMessage(error) ) ;}
       }
     )
   }
 
   getMenuImage(usuario: Usuario) {
     let menuCard: RecursoDetalle[] = [];
-    let menu = usuario.permisos; 
+    let menu = usuario.permisos;
     CustomConsole.log( 'permisos usuario' , usuario, menu);
 
     let menuDetalleBtn =  usuario.permisos.filter(x=> x.nombre_recurso === "Punto de Venta" )
     CustomConsole.log( 'permisos usuario',  menuDetalleBtn[0].recursosHijos);
-    menuDetalleBtn[0].recursosHijos!.forEach((recurso ) => { 
+    menuDetalleBtn[0].recursosHijos!.forEach((recurso ) => {
 
         switch (recurso.nombre_recurso.trim()) {
           case 'crear cotizacion':
-            this.cotiza = true; 
+            this.cotiza = true;
             break;
           case 'crear libranza':
-            this.libranza = true; 
+            this.libranza = true;
             break;
           case 'pasar a otra caja':
             this.pasaAotraCaja = true;
@@ -209,44 +209,44 @@ export class VentasComponent implements AfterViewInit, OnInit, OnDestroy {
             break;
           case 'domicilio':
             this.domicilio = true;
-            break; 
+            break;
          case 'ingresoServicio':
             this.ingresoServicio = true;
-            break; 
+            break;
           case 'crearGastoPV':
             this.CrtGasto = true;
             break;
         }
-       
+
     });
 
     return menuCard;
   }
 
-  async getAsyncDocumentos() { 
+  async getAsyncDocumentos() {
     this.loading.show();
     await this.documentoService.getDocumentosCaja().subscribe({
       next:(response: ApiResponse<DocumentoRecordsPayload>) => {
         this.documentos = [];
         let documentoSeleccionado: DocumentosModel[] ;
-        CustomConsole.log('getDocumentos', response.data.count); 
+        CustomConsole.log('getDocumentos', response.data.count);
         if (response.data.count > 0) {
-          this.documentos = response.data.records ; 
+          this.documentos = response.data.records ;
           CustomConsole.log('getDocumentos_recuest', this.documentos);
           if (response.data.count === 1) {
             this.documentoActivo = response.data.records[0];
           } else {
-            documentoSeleccionado = this.documentos.filter((x: DocumentosModel) => x.estado == 1) ; 
+            documentoSeleccionado = this.documentos.filter((x: DocumentosModel) => x.estado == 1) ;
           CustomConsole.log('documentoSeleccionado' , documentoSeleccionado);
-            this.documentoActivo = (documentoSeleccionado.length > 0) ?  documentoSeleccionado[0] :  this.documentos[0]; 
+            this.documentoActivo = (documentoSeleccionado.length > 0) ?  documentoSeleccionado[0] :  this.documentos[0];
           }
-          this.empleadoActivo = (this.empleados.filter(x=> x.id == this.documentoActivo?.cod_vendedor )[0])??[] 
+          this.empleadoActivo = (this.empleados.filter(x=> x.id == this.documentoActivo?.cod_vendedor )[0])??[]
 
           if(this.empleadoActivo.id == undefined){
             this.empleadoActivo.nombreCompleto =  this.documentoActivo?.vendedorNombre!;
             this.empleadoActivo.idPersona = this.documentoActivo?.cod_vendedor!;
         }
-          this.asignarMediosDePagoValoresIniciales();  
+          this.asignarMediosDePagoValoresIniciales();
           this.syncModuleBanner();
         } else {
           this.crearDocumento();
@@ -258,11 +258,11 @@ export class VentasComponent implements AfterViewInit, OnInit, OnDestroy {
     });
   }
 
-  
-   getDocumentos() {  
+
+   getDocumentos() {
     this.loading.show();
      this.documentoService.getDocumentosCaja().subscribe({
-      next: (response: ApiResponse<DocumentoRecordsPayload>) => 
+      next: (response: ApiResponse<DocumentoRecordsPayload>) =>
         {
         this.documentos = [];
         let documentoSeleccionado: DocumentosModel[] ;
@@ -270,40 +270,40 @@ export class VentasComponent implements AfterViewInit, OnInit, OnDestroy {
         CustomConsole.log('getDocumentos_recuest', response);
 
         if (response.data.count > 0) {
-          this.documentos = response.data.records ; 
+          this.documentos = response.data.records ;
           CustomConsole.log('getDocumentos_recuest', this.documentos);
           if (response.data.count === 1) {
             this.documentoActivo = response.data.records[0];
           } else {
-            documentoSeleccionado = this.documentos.filter((x: DocumentosModel) => x.estado == 1) ; 
+            documentoSeleccionado = this.documentos.filter((x: DocumentosModel) => x.estado == 1) ;
           CustomConsole.log('documentoSeleccionado' , documentoSeleccionado);
-            this.documentoActivo = (documentoSeleccionado.length > 0) ?  documentoSeleccionado[0] :  this.documentos[0]; 
+            this.documentoActivo = (documentoSeleccionado.length > 0) ?  documentoSeleccionado[0] :  this.documentos[0];
           }
           this.empleadoActivo = (this.empleados.filter(x=> x.id == this.documentoActivo?.cod_vendedor )[0] )??[]
           if(this.empleadoActivo.id == undefined){
             this.empleadoActivo.nombreCompleto =  this.documentoActivo?.vendedorNombre!;
             this.empleadoActivo.idPersona = this.documentoActivo?.cod_vendedor!;
         }
-          this.asignarMediosDePagoValoresIniciales(); 
+          this.asignarMediosDePagoValoresIniciales();
           this.syncModuleBanner();
-          
+
           this.irbuscarProducto();
         } else {
           this.crearDocumento();
         }
-        
+
       },
       error: (error) => {Swal.fire('getDocumentos - Error:', this.documentoService.getErrorMessage(error) ) ;
         this.loading.hide();},
       complete: () =>
-        this.loading.hide() 
+        this.loading.hide()
     });
   }
 
   asignarMediosDePagoValoresIniciales(){
 
     this.MedioP = this.MedioPInicial.map(x=>x);
-    CustomConsole.log('documentoActivo' , this.documentoActivo); 
+    CustomConsole.log('documentoActivo' , this.documentoActivo);
           if (this.documentoActivo!.pagos === undefined ){
             this.documentoActivo!.pagos = this.MedioP.map((value: any , index) => {
               let valorPago = 0;
@@ -319,21 +319,21 @@ export class VentasComponent implements AfterViewInit, OnInit, OnDestroy {
                   vueltos: 0,
                   referencia: '' , refDoc : '',
                   soloLectura : false,
-                } ; 
+                } ;
               return auxpago;
             })
-          } 
-           let docPagos:DocpagosModel[]  = (this.documentoActivo!.pagos !== undefined )?[...this.documentoActivo!.pagos] : [] ; 
+          }
+           let docPagos:DocpagosModel[]  = (this.documentoActivo!.pagos !== undefined )?[...this.documentoActivo!.pagos] : [] ;
                       CustomConsole.log("asignar pagos" , docPagos)
            this.MedioP.forEach(medio => {
            CustomConsole.log(medio.id);
             const pago:DocpagosModel[] = docPagos.filter((p: DocpagosModel) => p.idMedioDePago == medio.id)!;
             let sum = pago ? pago.reduce((total, p) => total + p.valorPagado, 0) : 0;
             CustomConsole.log('get pagos iteracion ' , pago )
-           
+
               medio.valor_aux = sum ;
-            
-          }); 
+
+          });
 
             this.pagos = this.documentoActivo!.pagos!;
             CustomConsole.log('pagos factura', this.pagos,'medios de pagos ', this.MedioP);
@@ -348,7 +348,7 @@ export class VentasComponent implements AfterViewInit, OnInit, OnDestroy {
     this.documentoService.crearDocumento().pipe(
       tap((response: ApiResponse<DocumentoMutationPayload>) => {
         const respuesta = response.data;
-        CustomConsole.log('crearDocumento', respuesta); 
+        CustomConsole.log('crearDocumento', respuesta);
         if (response.ok) {
           this.getDocumentos();
         } else {
@@ -358,7 +358,7 @@ export class VentasComponent implements AfterViewInit, OnInit, OnDestroy {
         this.irbuscarProducto();
       }),
       catchError((error: any) => {
-        this.loading.hide(); 
+        this.loading.hide();
         Swal.fire(this.documentoService.getErrorMessage(error), '', 'error');
         return of(null);
       })
@@ -369,14 +369,14 @@ export class VentasComponent implements AfterViewInit, OnInit, OnDestroy {
     });
   }
 
-  buscarProducto() { 
+  buscarProducto() {
     CustomConsole.log('buscarProducto', this.codigoProducto);
     let dataAuxEnvio: productoDocumento = {
       'idproducto': this.codigoProducto,
       'documento': this.documentoActivo!
-    }; 
+    };
     if (this.codigoProducto.trim() !== '' ) {
-      
+
       this.loading.show();
       this.productoService.getProductoByIdOrCodBarra(this.codigoProducto).subscribe({
         next:(value)=>{CustomConsole.log(value)
@@ -387,18 +387,18 @@ export class VentasComponent implements AfterViewInit, OnInit, OnDestroy {
             .afterClosed()
                   .pipe(
                     tap((response: responsePrd) => {
-                      if ((response.confirmado||false) && response.datoDevolucion !== undefined ) {  
+                      if ((response.confirmado||false) && response.datoDevolucion !== undefined ) {
 
                         let datoAsignacion:DtoDocumentoProducto = {
                           'producto': response.datoDevolucion   ,
                            'documento':this.documentoActivo!
-                         } 
+                         }
 
                          this.newAbrirDialog.open(IngresarProductoVentaComponent, { data:  datoAsignacion })
                          .afterClosed()
                          .pipe(
                            tap((confirmado: Boolean) => {
-                             if (confirmado) { 
+                             if (confirmado) {
                                this.getDocumentos();
                              }
                            })
@@ -406,12 +406,12 @@ export class VentasComponent implements AfterViewInit, OnInit, OnDestroy {
                            next: () => {},
                            error: (error) => Swal.fire( JSON.stringify(error) ) ,
                            complete: () => CustomConsole.log('moverDocumentoCaja completo')
-                         }); 
+                         });
 
-            
-                      } else { 
+
+                      } else {
                         this.codigoProducto = '';
-                        
+
                       }
                     })
                   ).subscribe({
@@ -419,7 +419,7 @@ export class VentasComponent implements AfterViewInit, OnInit, OnDestroy {
                     error: (error) => Swal.fire( JSON.stringify(error) ) ,
                     complete: () => CustomConsole.log('busquedaAuxiliarProducto completo')
                   });
-     
+
             }else{
           let datoAsignacion:DtoDocumentoProducto = {
             'producto': value.data.products[0]    ,
@@ -429,7 +429,7 @@ export class VentasComponent implements AfterViewInit, OnInit, OnDestroy {
            .afterClosed()
            .pipe(
              tap((confirmado: Boolean) => {
-               if (confirmado) { 
+               if (confirmado) {
                  this.getDocumentos();
                }
              })
@@ -437,16 +437,16 @@ export class VentasComponent implements AfterViewInit, OnInit, OnDestroy {
              next: () => {},
              error: (error) => Swal.fire( JSON.stringify(error) ) ,
              complete: () => CustomConsole.log('moverDocumentoCaja completo')
-           }); 
-          } 
+           });
+          }
         }else{
           Swal.fire('No existen datos con el codigo ' + this.codigoProducto )
         }
       },
       error:error=>Swal.fire(error),complete:()=>
-        this.loading.hide() 
+        this.loading.hide()
       })
-     
+
     }
   }
 
@@ -455,7 +455,7 @@ export class VentasComponent implements AfterViewInit, OnInit, OnDestroy {
       .afterClosed()
       .pipe(
         tap((confirmado: Boolean) => {
-          if (confirmado) { 
+          if (confirmado) {
             this.getDocumentos();
           }
         })
@@ -466,12 +466,12 @@ export class VentasComponent implements AfterViewInit, OnInit, OnDestroy {
       });
   }
   editar(linea: DocumentoListado){
-    
+
     this.newAbrirDialog.open(ModalUpdateProductoVentaComponent, { data: {...linea} })
       .afterClosed()
       .pipe(
         tap((confirmado: Boolean) => {
-          if (confirmado) { 
+          if (confirmado) {
             this.getDocumentos();
           }
         })
@@ -487,7 +487,7 @@ export class VentasComponent implements AfterViewInit, OnInit, OnDestroy {
     this.productoService.devolverPrdCompra(linea).pipe(
       tap((respuesta: InventarioReturnResponse) => {
         CustomConsole.log(JSON.stringify(respuesta));
-        if (!respuesta.ok) { 
+        if (!respuesta.ok) {
           try {
             Swal.fire(respuesta.error?.message ?? 'error en el servidor', '', 'error');
            } catch (error : any) {
@@ -499,7 +499,7 @@ export class VentasComponent implements AfterViewInit, OnInit, OnDestroy {
         this.loading.hide();
       }),
       catchError((error: errorOdoo) => {
-        CustomConsole.log(JSON.stringify(error)); 
+        CustomConsole.log(JSON.stringify(error));
         try {
           Swal.fire(error.error.error, '', 'error');
          } catch (error : any) {
@@ -516,32 +516,32 @@ export class VentasComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   irbuscarProducto() {
-    let activeTextarea = document.activeElement!.tagName; 
+    let activeTextarea = document.activeElement!.tagName;
     CustomConsole.log('elemento==>',activeTextarea);
     if (activeTextarea.toUpperCase().indexOf('SELECT') < 0) {
        this.codProdlement.nativeElement.focus();
-       
+
     }
   }
 
-  irbuscarProductoObl() { 
-    this.codProdlement.nativeElement.focus(); 
+  irbuscarProductoObl() {
+    this.codProdlement.nativeElement.focus();
   }
 
   asignarPagosAVenta() {
-    if (typeof(this.documentoActivo!.listado) === 'undefined' || this.documentoActivo!.listado.length === 0) { 
+    if (typeof(this.documentoActivo!.listado) === 'undefined' || this.documentoActivo!.listado.length === 0) {
       Swal.fire('No posee elementos a facturar', 'Debe incluir minimo un producto o servicio en la factura', 'error');
       return;
-    } 
+    }
     this.newAbrirDialog.open(PagosVentaComponent, { data: this.documentoActivo })
       .afterClosed()
       .pipe(
         tap((confirmado: {rep:boolean,credito:boolean}) => {
-          if (confirmado.rep  ) { 
-            if ( !confirmado.credito) { 
+          if (confirmado.rep  ) {
+            if ( !confirmado.credito) {
               this.facturarDocumento();
             }else{
-             // this.documentoActivo 
+             // this.documentoActivo
 
              this.documentoService.getDocumentoActivo().subscribe({next:(value:ApiResponse<GenericRecordsPayload<DocumentosModel>>)=>{
               if (!value.ok || value.data.count === 0) { return; }
@@ -571,19 +571,19 @@ export class VentasComponent implements AfterViewInit, OnInit, OnDestroy {
     if (this.documentoActivo?.campo_info_5 != undefined && this.documentoActivo?.campo_info_5 == 'NO_FACTURABLE'){
       return;
     }
-    if (typeof(this.documentoActivo!.listado) === 'undefined' || this.documentoActivo!.listado.length === 0) { 
+    if (typeof(this.documentoActivo!.listado) === 'undefined' || this.documentoActivo!.listado.length === 0) {
       Swal.fire('No posee elementos a facturar', 'Debe incluir minimo un producto o servicio en la factura', 'error');
       return;
-    } 
+    }
     this.newAbrirDialog.open(PagosVentaComponent, { data: this.documentoActivo })
       .afterClosed()
       .pipe(
         tap((confirmado: {rep:boolean,credito:boolean}) => {
-          if (confirmado.rep  ) { 
-            if ( !confirmado.credito) { 
+          if (confirmado.rep  ) {
+            if ( !confirmado.credito) {
               this.facturarDocumentoRemision();
             }else{
-             // this.documentoActivo 
+             // this.documentoActivo
 
              this.documentoService.getDocumentoActivo().subscribe({next:(value:ApiResponse<GenericRecordsPayload<DocumentosModel>>)=>{
               if (!value.ok || value.data.count === 0) { return; }
@@ -609,10 +609,10 @@ export class VentasComponent implements AfterViewInit, OnInit, OnDestroy {
       });
   }
 
-  generarAbonosCuentasXcobrar() { 
+  generarAbonosCuentasXcobrar() {
     if (this.documentoActivo?.campo_info_5 != undefined && this.documentoActivo?.campo_info_5 == 'NO_FACTURABLE'){
       return;
-    } 
+    }
       if (this.documentoActivo?.campo_info_5 != undefined && this.documentoActivo?.campo_info_5 == 'NO_FACTURABLE'){
         return;
       }
@@ -620,7 +620,7 @@ export class VentasComponent implements AfterViewInit, OnInit, OnDestroy {
       .afterClosed()
       .pipe(
         tap((respuesta: BusquedaPersona)=>{
-          if (respuesta.response) {  
+          if (respuesta.response) {
             this.newAbrirDialog.open(AbonosCuentasXCobrarComponent, { data:respuesta.persona })
             .afterClosed()
             .pipe(
@@ -637,11 +637,11 @@ export class VentasComponent implements AfterViewInit, OnInit, OnDestroy {
         next: () => {},
         error: (error) => Swal.fire( JSON.stringify(error) ) ,
         complete: () => CustomConsole.log('buscarCliente completo')
-      });   
-     
-  
+      });
 
-  
+
+
+
   }
   asignarPagosACuentaPorCobrar() {
     if (this.documentoActivo?.campo_info_5 != undefined && this.documentoActivo?.campo_info_5 == 'NO_FACTURABLE'){
@@ -649,20 +649,20 @@ export class VentasComponent implements AfterViewInit, OnInit, OnDestroy {
     }
     if (typeof(this.documentoActivo!.listado) === 'undefined' || (
        this.documentoActivo!.listado !== undefined &&
-      this.documentoActivo!.listado.length === 0) ){ 
+      this.documentoActivo!.listado.length === 0) ){
       Swal.fire('No posee elementos a facturar', 'Debe incluir minimo un producto o servicio en la factura', 'error');
       return;
-    } 
-    if (typeof(this.documentoActivo!.cliente) === 'undefined' || this.documentoActivo!.clienteNombre == "CLIENTE GENERICO") { 
+    }
+    if (typeof(this.documentoActivo!.cliente) === 'undefined' || this.documentoActivo!.clienteNombre == "CLIENTE GENERICO") {
       Swal.fire('error en cliente', 'Debe incluir incluir al cliente', 'error');
       return;
-    } 
+    }
     this.newAbrirDialog.open(GenerarCntPorCobrarComponent, {   data:{ Documento:this.documentoActivo , origen:'venta'} })
       .afterClosed()
       .pipe(
         tap((confirmado:  {result : boolean , documento :  DocumentosModel }) => {
-          if (confirmado.result) { 
-          this.documentoRetorno = Object.assign(new DocumentosModel(), confirmado.documento); 
+          if (confirmado.result) {
+          this.documentoRetorno = Object.assign(new DocumentosModel(), confirmado.documento);
           CustomConsole.log('facturarDocumento =>>>>>', this.documentoRetorno);
           this.printer_factura_final();
           this.crearDocumento();
@@ -680,22 +680,22 @@ export class VentasComponent implements AfterViewInit, OnInit, OnDestroy {
     }
     if (typeof(this.documentoActivo!.listado) === 'undefined' || (
        this.documentoActivo!.listado !== undefined &&
-      this.documentoActivo!.listado.length === 0) ){ 
+      this.documentoActivo!.listado.length === 0) ){
       Swal.fire('No posee elementos a facturar', 'Debe incluir minimo un producto o servicio en la factura', 'error');
       return;
-    } 
-    if (typeof(this.documentoActivo!.cliente) === 'undefined' || this.documentoActivo!.clienteNombre == "CLIENTE GENERICO") { 
+    }
+    if (typeof(this.documentoActivo!.cliente) === 'undefined' || this.documentoActivo!.clienteNombre == "CLIENTE GENERICO") {
       Swal.fire('error en cliente', 'Debe incluir incluir al cliente', 'error');
       return;
-    } 
+    }
     this.newAbrirDialog.open(GenerarCntPorCobrarComponent, { data:{ Documento:this.documentoActivo , origen:'remision'}
-      
+
        })
       .afterClosed()
       .pipe(
         tap((confirmado:  {result : boolean , documento :  DocumentosModel }) => {
-          if (confirmado.result) { 
-          this.documentoRetorno = Object.assign(new DocumentosModel(), confirmado.documento); 
+          if (confirmado.result) {
+          this.documentoRetorno = Object.assign(new DocumentosModel(), confirmado.documento);
           CustomConsole.log('facturarDocumento =>>>>>', this.documentoRetorno);
           this.printer_factura_final();
           this.crearDocumento();
@@ -727,7 +727,7 @@ export class VentasComponent implements AfterViewInit, OnInit, OnDestroy {
       CustomConsole.log(this.documentoActivo!.pagos);
     }
     if (this.documentoActivo!.listado!.length === 0) {
-      let error = 'Debe ingresar los productos a facturar' ; 
+      let error = 'Debe ingresar los productos a facturar' ;
       try {
         Swal.fire(error, '', 'error');
        } catch (error : any) {
@@ -735,7 +735,7 @@ export class VentasComponent implements AfterViewInit, OnInit, OnDestroy {
        }
       return;
     }
-    if (parseInt(this.documentoActivo!.totalFactura.toString()) === 0) { 
+    if (parseInt(this.documentoActivo!.totalFactura.toString()) === 0) {
       try {
         Swal.fire('el total de la factura debe ser mayor a cero', '', 'error');
        } catch (error : any) {
@@ -748,8 +748,8 @@ export class VentasComponent implements AfterViewInit, OnInit, OnDestroy {
     this.documentoService.cerrarDocumento(this.documentoActivo!.orden).subscribe({next:(respuesta: ApiResponse<DocumentoActionPayload>) => {
       console.clear();
       CustomConsole.log("respuesta cierre documento =>" , respuesta)
-      if (respuesta.ok && respuesta.data.documentoFinal) {  
-        this.documentoRetorno = Object.assign(new DocumentosModel(), respuesta.data.documentoFinal); 
+      if (respuesta.ok && respuesta.data.documentoFinal) {
+        this.documentoRetorno = Object.assign(new DocumentosModel(), respuesta.data.documentoFinal);
         CustomConsole.log('facturarDocumento =>>>>>', this.documentoRetorno);
         this.printer_factura_final();
         this.crearDocumento();
@@ -764,7 +764,7 @@ export class VentasComponent implements AfterViewInit, OnInit, OnDestroy {
       this.irbuscarProducto();
     }
       ,error: (error: any) => {
-         
+
         try {
           Swal.fire(error.error.error, '', 'error');
          } catch (error : any) {
@@ -793,7 +793,7 @@ export class VentasComponent implements AfterViewInit, OnInit, OnDestroy {
       CustomConsole.log(this.documentoActivo!.pagos);
     }
     if (this.documentoActivo!.listado!.length === 0) {
-      let error = 'Debe ingresar los productos a facturar' ; 
+      let error = 'Debe ingresar los productos a facturar' ;
       try {
         Swal.fire(error, '', 'error');
        } catch (error : any) {
@@ -801,7 +801,7 @@ export class VentasComponent implements AfterViewInit, OnInit, OnDestroy {
        }
       return;
     }
-    if (parseInt(this.documentoActivo!.totalFactura.toString()) === 0) { 
+    if (parseInt(this.documentoActivo!.totalFactura.toString()) === 0) {
       try {
         Swal.fire('el total de la factura debe ser mayor a cero', '', 'error');
        } catch (error : any) {
@@ -814,8 +814,8 @@ export class VentasComponent implements AfterViewInit, OnInit, OnDestroy {
     this.documentoService.cerrarDocumentoRemision(this.documentoActivo!.orden).subscribe({next:(respuesta: ApiResponse<DocumentoActionPayload>) => {
       //console.clear();
       CustomConsole.log("respuesta cierre documento =>" , respuesta)
-      if (respuesta.ok && respuesta.data.documentoFinal) {  
-        this.documentoRetorno = Object.assign(new DocumentosModel(), respuesta.data.documentoFinal); 
+      if (respuesta.ok && respuesta.data.documentoFinal) {
+        this.documentoRetorno = Object.assign(new DocumentosModel(), respuesta.data.documentoFinal);
         CustomConsole.log('facturarDocumento =>>>>>', this.documentoRetorno);
         this.printer_factura_final();
         this.crearDocumento();
@@ -830,7 +830,7 @@ export class VentasComponent implements AfterViewInit, OnInit, OnDestroy {
       this.irbuscarProducto();
     }
       ,error: (error: any) => {
-         
+
         try {
           Swal.fire(error.error.error, '', 'error');
          } catch (error : any) {
@@ -854,10 +854,10 @@ export class VentasComponent implements AfterViewInit, OnInit, OnDestroy {
     this.loading.show();
     this.documentoService.cambiarDocumento(this.documentoActivo!.orden).pipe(
       tap((response: ApiResponse<{ message: string; documentId: number }>) => {
-        if (!response.ok) {  
+        if (!response.ok) {
           Swal.fire('error en el servidor', '', 'error');
-        } else {  
-          this.empleadoActivo = (this.empleados.filter(x=> x.id == this.documentoActivo?.cod_vendedor )[0])??[] 
+        } else {
+          this.empleadoActivo = (this.empleados.filter(x=> x.id == this.documentoActivo?.cod_vendedor )[0])??[]
 
           if(this.empleadoActivo.id == undefined){
             this.empleadoActivo.nombreCompleto =  this.documentoActivo?.vendedorNombre!;
@@ -893,7 +893,7 @@ export class VentasComponent implements AfterViewInit, OnInit, OnDestroy {
     this.documentoService.cancelarDocumento(this.documentoActivo!.orden).pipe(
       tap((respuesta: ApiResponse<DocumentoActionPayload>) => {
         if (respuesta.ok) {
-          this.getDocumentos(); 
+          this.getDocumentos();
         } else {
           this.getDocumentos();
           try {
@@ -928,7 +928,7 @@ export class VentasComponent implements AfterViewInit, OnInit, OnDestroy {
     this.documentoService.convertirDocumentoEnCotizacion(this.documentoActivo!.orden).pipe(
       tap((respuesta: ApiResponse<DocumentoActionPayload>) => {
         if (respuesta.ok && respuesta.data.documentoFinal) {
-          this.documentoRetorno = Object.assign(new DocumentosModel(), respuesta.data.documentoFinal); 
+          this.documentoRetorno = Object.assign(new DocumentosModel(), respuesta.data.documentoFinal);
           CustomConsole.log('facturarCotizacion =>>>>>', this.documentoRetorno);
           this.printer_factura_final();
           this.crearDocumento();
@@ -959,14 +959,14 @@ export class VentasComponent implements AfterViewInit, OnInit, OnDestroy {
     });
   }
 //generar factura domicilio
-  generarEnvio() { 
+  generarEnvio() {
     if (this.documentoActivo?.campo_info_5 != undefined && this.documentoActivo?.campo_info_5 == 'NO_FACTURABLE'){
       return;
     }
-    if (this.documentoActivo!.totalFactura <= 0) { 
-      
+    if (this.documentoActivo!.totalFactura <= 0) {
+
       Swal.fire('El valor en la factura debe ser mayor a cero', '', 'error');
-      
+
       return;
     }
     if (typeof(this.documentoActivo!.cliente) === 'undefined' || this.documentoActivo!.clienteNombre == "CLIENTE GENERICO") {
@@ -981,7 +981,7 @@ export class VentasComponent implements AfterViewInit, OnInit, OnDestroy {
           next: () => {},
           error: (error) => Swal.fire( JSON.stringify(error) ) ,
           complete: () => CustomConsole.log('generarEnvio completo')
-        });   
+        });
     } else {
       this.generarDomicilio();
     }
@@ -990,13 +990,13 @@ export class VentasComponent implements AfterViewInit, OnInit, OnDestroy {
   if (this.documentoActivo?.campo_info_5 != undefined && this.documentoActivo?.campo_info_5 == 'NO_FACTURABLE'){
     return;
   }
- } 
+ }
   generarDomicilio() {
     this.loading.show();
     this.documentoService.generarDomicilioDocumento(this.documentoActivo!.orden).pipe(
       tap((respuesta: ApiResponse<DocumentoActionPayload>) => {
         if (respuesta.ok) {
-          this.getDocumentos(); 
+          this.getDocumentos();
         } else {
           this.getDocumentos();
           try {
@@ -1024,22 +1024,22 @@ export class VentasComponent implements AfterViewInit, OnInit, OnDestroy {
     });
   }
 
-  getMediosP() { 
+  getMediosP() {
     this.loading.show();
     this.serviceCaja.getMediosCajaActiva().pipe(
       tap((datos: any) => {
-        if (datos.ok && datos.data.count > 0) { 
+        if (datos.ok && datos.data.count > 0) {
           this.MedioP = datos.data.records ;
           this.MedioPInicial = datos.data.records ;
           this.getDocumentos();
         } else {
           this.MedioP = [];
-          Swal.fire('error en el servidor', 'No hay medios de pago disponible', 'error');    
-        }  
+          Swal.fire('error en el servidor', 'No hay medios de pago disponible', 'error');
+        }
         this.loading.hide();
       }),
       catchError((error: any) => {
-        this.loading.hide(); 
+        this.loading.hide();
         try {
           Swal.fire(error.error.error, '', 'error');
          } catch (error : any) {
@@ -1061,7 +1061,7 @@ export class VentasComponent implements AfterViewInit, OnInit, OnDestroy {
     .afterClosed()
     .pipe(
       tap((response: {result : boolean , documento :  DocumentosModel } ) => {
-        if (response.result) { 
+        if (response.result) {
              Swal.fire("ok" , "gasto generado con exito" , 'info')
              this.documentoRetorno = response.documento;
              this.printer_factura_final()  ;
@@ -1072,7 +1072,7 @@ export class VentasComponent implements AfterViewInit, OnInit, OnDestroy {
       complete: () => CustomConsole.log('busquedaAuxiliarProducto completo')
     });
   }
-  busquedaAuxiliarProducto() { 
+  busquedaAuxiliarProducto() {
     if (this.documentoActivo?.campo_info_5 != undefined && this.documentoActivo?.campo_info_5 == 'NO_FACTURABLE'){
       return;
     }
@@ -1081,7 +1081,7 @@ export class VentasComponent implements AfterViewInit, OnInit, OnDestroy {
       .afterClosed()
       .pipe(
         tap((response: responsePrd) => {
-          if (response.confirmado && response.datoDevolucion !== undefined ) { 
+          if (response.confirmado && response.datoDevolucion !== undefined ) {
 
             let datoAsignacion:DtoDocumentoProducto = {
              'producto': response.datoDevolucion    ,
@@ -1091,7 +1091,7 @@ export class VentasComponent implements AfterViewInit, OnInit, OnDestroy {
             .afterClosed()
             .pipe(
               tap((confirmado: Boolean) => {
-                if (confirmado) { 
+                if (confirmado) {
                   this.getDocumentos();
                 }
               })
@@ -1099,8 +1099,8 @@ export class VentasComponent implements AfterViewInit, OnInit, OnDestroy {
               next: () => {},
               error: (error) => Swal.fire( JSON.stringify(error) ) ,
               complete: () => CustomConsole.log('moverDocumentoCaja completo')
-            });  
-          } else { 
+            });
+          } else {
             this.codigoProducto = '';
             this.irbuscarProducto();
           }
@@ -1120,8 +1120,8 @@ export class VentasComponent implements AfterViewInit, OnInit, OnDestroy {
     .afterClosed()
     .pipe(
       tap((confirmado: Boolean)=>{
-        if (confirmado) { 
-          this.getDocumentos();  
+        if (confirmado) {
+          this.getDocumentos();
           this.codigoProducto = '';
           this.irbuscarProducto();
           this.buscarClose = true;}
@@ -1130,18 +1130,18 @@ export class VentasComponent implements AfterViewInit, OnInit, OnDestroy {
       next: () => {},
       error: (error) => Swal.fire( JSON.stringify(error) ) ,
       complete: () => CustomConsole.log('buscarCliente completo')
-    });   
+    });
   }
 
-  ingresarServicio(){ 
+  ingresarServicio(){
     CustomConsole.log('documentoActivo- ingresarServicio' ,  this.documentoActivo);
-    
+
     this.newAbrirDialog.open(IngresoServicioVehiculoComponent,{ data: this.documentoActivo?.caja})
     .afterClosed()
     .pipe(
       tap((confirmado: Boolean)=>{
-        if (confirmado) { 
-          this.getDocumentos();  
+        if (confirmado) {
+          this.getDocumentos();
           this.codigoProducto = '';
           this.irbuscarProducto();
           this.buscarClose = true;}
@@ -1150,7 +1150,7 @@ export class VentasComponent implements AfterViewInit, OnInit, OnDestroy {
       next: () => {},
       error: (error) => Swal.fire( JSON.stringify(error) ) ,
       complete: () => CustomConsole.log('buscarCliente completo')
-    });   
+    });
   }
 
 
@@ -1158,7 +1158,7 @@ export class VentasComponent implements AfterViewInit, OnInit, OnDestroy {
     let doc = new DocumentosModel();
     doc = this.documentoRetorno;
 
-    CustomConsole.log('documento retorno',doc,'sucursal ', this.sucursal); 
+    CustomConsole.log('documento retorno',doc,'sucursal ', this.sucursal);
     let printM =  new PrinterManager(this.serviceCaja);;;
     printM.setDocumento(this.documentoRetorno);
     printM.printReceipt();

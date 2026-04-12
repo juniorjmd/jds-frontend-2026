@@ -1,0 +1,16 @@
+<div class="app-panel ventas-card">
+  <div class="ventas-card__head">
+    <div>
+      <h2 class="ventas-card__title">Medios de pago</h2>
+    </div>
+  </div>
+  <div class="ventas-payment-list">
+    <div class="ventas-payment-item" *ngFor="let medio of MedioP; let i = index">
+      <div class="ventas-payment-item__label">
+        <strong>{{ medio.nombre }}</strong>
+      </div>
+      <input class="form-control app-input ventas-payment-item__input" readonly type="number"
+        [(ngModel)]="MedioP[i].valor_aux">
+    </div>
+  </div>
+</div>

@@ -1,0 +1,84 @@
+.admin-categorias-dialog {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: 1.5rem;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(247, 244, 240, 0.95));
+  color: var(--app-text);
+}
+
+.admin-categorias-dialog__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.admin-categorias-dialog__copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.admin-categorias-dialog__header h2 {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 800;
+}
+
+.admin-categorias-dialog__header p {
+  margin: 0;
+  color: var(--app-text-soft);
+  max-width: 52ch;
+}
+
+.admin-categorias-dialog__close {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 999px;
+  border: 1px solid var(--app-border);
+  background: rgba(255, 255, 255, 0.82);
+  color: var(--app-text-soft);
+}
+
+.admin-categorias-dialog__grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.admin-categorias-dialog__field {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.admin-categorias-dialog__field--full {
+  grid-column: 1 / -1;
+}
+
+.admin-categorias-dialog__field label {
+  color: var(--app-text-soft);
+  text-transform: uppercase;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.admin-categorias-dialog__footer {
+  justify-content: flex-end;
+}
+
+@media (min-width: 768px) {
+  .admin-categorias-dialog__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 767px) {
+  .admin-categorias-dialog__footer {
+    justify-content: stretch;
+  }
+
+  .admin-categorias-dialog__footer .app-chip-button {
+    width: 100%;
+  }
+}

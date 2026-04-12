@@ -1,0 +1,15 @@
+:host {
+  display: block;
+  min-width: 0;
+  min-height: 0;
+}
+
+.ventas-card__copy {
+  display: grid;
+  gap: 0.18rem;
+  align-content: start;
+}
+
+.ventas-card__copy .ventas-card__subtitle {
+  margin-top: 0;
+}

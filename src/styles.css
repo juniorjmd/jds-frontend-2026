@@ -266,6 +266,18 @@ margin-right: auto;
     display: grid;
     gap: 1rem;
     width: 100%;
+    align-content: start;
+    align-items: start;
+    justify-items: stretch;
+    grid-auto-rows: max-content;
+    margin: 0;
+    padding: 0;
+    min-height: calc(100vh - 150px);
+}
+
+.module-shell > * {
+    width: 100%;
+    margin-top: 0;
 }
 
 .app-page-header {
@@ -482,6 +494,9 @@ margin-right: auto;
     display: flex;
     flex-wrap: wrap;
     gap: 0.6rem;
+    width: 100%;
+    justify-content: flex-start;
+    align-items: center;
     padding: 0.35rem;
     border: 1px solid rgba(54, 44, 38, 0.12);
     border-radius: 14px;
@@ -517,6 +532,8 @@ margin-right: auto;
 
 .module-shell__content {
     min-width: 0;
+    width: 100%;
+    align-self: start;
 }
 
 .icono_aplicacion:hover {

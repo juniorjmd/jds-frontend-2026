@@ -1,0 +1,82 @@
+<section class="contador-dialog">
+    <header class="contador-dialog__header">
+        <div>
+            <span class="app-badge">Contadores</span>
+            <h2>{{ titulo }}</h2>
+            <p>{{ subtitulo }}</p>
+        </div>
+
+        <button type="button" class="contador-dialog__close" (click)="cerrar()" aria-label="Cerrar modal">
+            <i class="bi bi-x-lg"></i>
+        </button>
+    </header>
+
+    <div class="contador-dialog__body">
+        <div class="contador-dialog__grid">
+            <label class="contador-dialog__field">
+                <span>Codigo</span>
+                <input
+                    type="text"
+                    maxlength="8"
+                    class="form-control app-input"
+                    [(ngModel)]="contador.codContador"
+                    placeholder="Prefijo del contador">
+            </label>
+
+            <label class="contador-dialog__field">
+                <span>Tipo de contador</span>
+                <select class="form-control app-select" [(ngModel)]="contador.tipoContador">
+                    <option [ngValue]="0">Selecciona un tipo</option>
+                    <option *ngFor="let item of data.tiposContador" [ngValue]="item.id">{{ item.nombre }}</option>
+                </select>
+            </label>
+
+            <label class="contador-dialog__field">
+                <span>Establecimiento</span>
+                <select class="form-control app-select" [(ngModel)]="contador.establecimiento">
+                    <option [ngValue]="0">Selecciona un establecimiento</option>
+                    <option *ngFor="let item of data.establecimientos" [ngValue]="item.id">{{ item.nombre }}</option>
+                </select>
+            </label>
+
+            <label class="contador-dialog__field">
+                <span>Resolucion</span>
+                <input
+                    type="text"
+                    class="form-control app-input"
+                    [(ngModel)]="contador.resolucion"
+                    placeholder="Opcional">
+            </label>
+        </div>
+
+        <div class="contador-dialog__grid contador-dialog__grid--compact">
+            <label class="contador-dialog__field">
+                <span>Desde</span>
+                <input type="number" class="form-control app-input" [(ngModel)]="contador.desde" min="0">
+            </label>
+
+            <label class="contador-dialog__field">
+                <span>Hasta</span>
+                <input type="number" class="form-control app-input" [(ngModel)]="contador.hasta" min="0">
+            </label>
+
+            <label class="contador-dialog__field">
+                <span>Fecha inicial</span>
+                <input type="date" class="form-control app-input" [(ngModel)]="contador.fechaInicioResolucion">
+            </label>
+
+            <label class="contador-dialog__field">
+                <span>Fecha final</span>
+                <input type="date" class="form-control app-input" [(ngModel)]="contador.fechaFinResolucion">
+            </label>
+        </div>
+    </div>
+
+    <footer class="contador-dialog__footer">
+        <button type="button" class="app-chip-button" (click)="cerrar()">Cancelar</button>
+        <button type="button" class="app-chip-button app-chip-button--primary" (click)="guardar()">
+            <i class="bi bi-save"></i>
+            {{ esEdicion ? 'Guardar cambios' : 'Guardar contador' }}
+        </button>
+    </footer>
+</section>

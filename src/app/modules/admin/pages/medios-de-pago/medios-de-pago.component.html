@@ -1,99 +1,116 @@
-<div class="container-fluid contenedor" style="width: 100%; height: 90%;">
-    <div class="row">
-        <div class="col-sm-12">
-            <h2 class="centrado">Creación de Medios De Pago</h2>
-        </div>
-    </div>
-    
-    <div class="row"> 
-        <div class="col-sm-3"></div>
-        <div class="col-sm-6">
-    <div class="row"> 
-        <div class="col-sm-6">
-            <label for="establecimientoCaja">Nombre</label> 
-            <input type="text" class="o_input form-control" [(ngModel)]="newMedioP.nombre" placeholder="Nombre del medio...">
-        </div> 
-        <div class="col-sm-6"><label for="establecimientoCaja">Estado</label> 
-            <select class=" o_input form-control" [(ngModel)]="newMedioP.estado">
-                <option value=0>Estado</option>
-                <option value=1>Activo</option>
-                <option value=2>Inactivo</option>
-            </select>
-        </div>
-    </div>
-    <div class="row pt-4"> 
-        
-        <div class="col-sm-6"  >
-            <label for="establecimientoCaja">Cuenta contable</label> 
-            <div class="input-group mb-3">
-               
-                <input type="text" class="form-control" readonly placeholder="Cuenta medio de pago" [(ngModel)]="newMedioP.nombreCuentaContable" name="nombreCCnttIvaVenta"  aria-label="Username"  aria-describedby="basic-addon1">  
-                <button type="button"class="btn btn-outline-primary" (click)='buscarCuentasContables()'>
-                    <i class="bi bi-search"></i>  
+<div class="container">
+    <section class="medios-shell app-page">
+        <header class="app-panel medios-shell__header">
+            <div class="medios-shell__copy">
+                <span class="app-badge">Medios de pago</span>
+                <h2 class="app-title medios-shell__title">Configuración de medios de pago</h2>
+                <p class="medios-shell__description">
+                    Administra el catálogo de recaudos, asigna su cuenta contable y define el establecimiento donde aplica.
+                </p>
+            </div>
+
+            <div class="medios-shell__controls">
+                <div class="medios-shell__filter">
+                    <label for="filtroMediosPago">Filtrar listado</label>
+                    <input
+                        id="filtroMediosPago"
+                        type="text"
+                        class="form-control app-input"
+                        [(ngModel)]="filtroMedios"
+                        (ngModelChange)="actualizarFiltro()"
+                        placeholder="Buscar por nombre, cuenta o establecimiento">
+                </div>
+
+                <button type="button" class="app-chip-button app-chip-button--primary" (click)="abrirModalMedio()">
+                    <i class="bi bi-plus-circle"></i>
+                    Crear nuevo
                 </button>
             </div>
-        </div> 
-        <div class="col-sm-6"> 
-            <label for="Establecimiento">Establecimiento</label> 
-            <select class="o_input form-control" [(ngModel)]="newMedioP.establecimiento">
-                <option value=0>Establecimiento</option>
-                <option *ngFor="let item of esta" [ngValue]="item.id">{{item.nombre}}</option>
-            </select>
-        </div>
-    </div>
-    <div class="row"> 
-        <div class="col-sm-12">
-            <label for="establecimientoCaja">Descripción</label> 
-            <textarea [(ngModel)]="newMedioP.descripcion" class="o_input form-control" placeholder="Descripcion..."></textarea>
-        </div>
-    </div>
-    <br>
-    <div class="row">
-        <div class="col-sm-12 justify-content-center">
-            <button class="btn btn-outline-primary" role="button" (click)='guardarMedio()'>
-                <i class="bi bi-save"></i> Guardar
-            </button>
-            <button class="btn btn-outline-danger" role="button" (click)='Cancelar()'>
-                <i class="bi bi-trash"></i> Cancelar
-            </button>
-        </div>
-    </div>
-</div>
-</div>
+        </header>
 
+        <section class="app-panel medios-shell__table-panel" *ngIf="MedioP.length > 0; else mediosVacios">
+            <div class="app-toolbar app-toolbar--between medios-shell__table-toolbar">
+                <div class="app-toolbar__group">
+                    <span class="app-badge">{{ mediosFiltrados.length }} registros</span>
+                </div>
+                <div class="app-toolbar__group">
+                    <label class="medios-shell__page-size-label" for="tamanoPaginaMedios">Mostrar</label>
+                    <select
+                        id="tamanoPaginaMedios"
+                        class="form-control app-select medios-shell__page-size"
+                        [(ngModel)]="tamanoPagina"
+                        (ngModelChange)="cambiarTamanoPagina()">
+                        <option *ngFor="let size of tamanosPagina" [ngValue]="size">{{ size }}</option>
+                    </select>
+                </div>
+            </div>
 
+            <div class="medios-shell__table-wrap">
+                <table class="table medios-table">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Descripcion</th>
+                            <th>Cuenta</th>
+                            <th>Estado</th>
+                            <th>Establecimiento</th>
+                            <th class="medios-table__actions-head">Opciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let caja of mediosPaginados; trackBy: trackByMedio">
+                            <td>{{ caja.nombre }}</td>
+                            <td>{{ caja.descripcion || 'Sin descripcion' }}</td>
+                            <td>{{ caja.nombreCuentaContable || 'Sin cuenta' }}</td>
+                            <td>
+                                <span class="medios-table__state" [class.is-active]="caja.nombreEstado === 'Activo'" [class.is-inactive]="caja.nombreEstado !== 'Activo'">
+                                    {{ caja.nombreEstado || 'Sin estado' }}
+                                </span>
+                            </td>
+                            <td>{{ caja.nombreEsta || 'Sin establecimiento' }}</td>
+                            <td class="medios-table__actions">
+                                <button
+                                    *ngIf="caja.nombre !== 'Efectivo'; else medioBloqueado"
+                                    type="button"
+                                    class="medios-table__action"
+                                    title="Editar medio"
+                                    aria-label="Editar medio"
+                                    (click)="abrirModalMedio(caja)"
+                                >
+                                    <i class="bi bi-pencil-square"></i>
+                                </button>
+                                <ng-template #medioBloqueado>
+                                    <span class="medios-table__action is-disabled" title="Este medio esta protegido">
+                                        <i class="bi bi-lock-fill"></i>
+                                    </span>
+                                </ng-template>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
 
+            <div class="medios-shell__pagination" *ngIf="totalPaginas > 1">
+                <button type="button" class="medios-shell__page-btn" (click)="irAPagina(paginaActual - 1)" [disabled]="paginaActual === 1">
+                    Anterior
+                </button>
+                <span class="medios-shell__page-indicator">Pagina {{ paginaActual }} de {{ totalPaginas }}</span>
+                <button type="button" class="medios-shell__page-btn" (click)="irAPagina(paginaActual + 1)" [disabled]="paginaActual === totalPaginas">
+                    Siguiente
+                </button>
+            </div>
+        </section>
 
-
-    <hr>
-    <br>
-    <div class="row">
-        <div class="col-sm-12">
-            <table class="table" *ngIf="MedioP.length > 0">
-                <tr>
-                    <th>nombre</th>
-                    <th>descripcion</th>
-                    <th>Cuenta</th>
-                    <th>estado</th>
-                    <th>Establecimiento</th>
-                    <th>opcion</th>
-                </tr>
-                <tr *ngFor="let caja of MedioP">
-                    <td>{{caja.nombre}}</td>
-                    <td>{{caja.descripcion}}</td>
-                    <td>{{caja.nombreCuentaContable}}</td>
-                    <td>{{caja.nombreEstado}}</td>
-                    <td>{{caja.nombreEsta}}</td>
-                    <td *ngIf="caja.nombre !== 'Efectivo'">
-                        <i class="bi bi-pencil-fill boton_activo" (click)="setActualizaCaja(caja)"></i>
-                    </td>
-                    <td *ngIf="caja.nombre === 'Efectivo'">
-                        <span class="bi bi-pencil-fill bi-stack-1x" style="position: relative;">
-                            <i class="bi bi-x-circle-fill" style="position: absolute; top: -5px; right: -10px; color: Tomato;"></i>
-                        </span>
-                    </td>
-                </tr>
-            </table>
-        </div>
-    </div>
+        <ng-template #mediosVacios>
+            <section class="app-panel medios-shell__empty">
+                <i class="bi bi-credit-card-2-front medios-shell__empty-icon"></i>
+                <h3>No hay medios de pago para mostrar</h3>
+                <p>Todavía no has creado registros para este catálogo o la lista actual está vacía.</p>
+                <button type="button" class="app-chip-button app-chip-button--primary" (click)="abrirModalMedio()">
+                    <i class="bi bi-plus-circle"></i>
+                    Crear primer medio
+                </button>
+            </section>
+        </ng-template>
+    </section>
 </div>

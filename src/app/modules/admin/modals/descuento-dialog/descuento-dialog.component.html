@@ -1,0 +1,61 @@
+<section class="descuento-dialog">
+    <header class="descuento-dialog__header">
+        <div>
+            <span class="app-badge">Descuentos</span>
+            <h2>{{ titulo }}</h2>
+            <p>{{ subtitulo }}</p>
+        </div>
+
+        <button type="button" class="descuento-dialog__close" (click)="cerrar()" aria-label="Cerrar modal">
+            <i class="bi bi-x-lg"></i>
+        </button>
+    </header>
+
+    <div class="descuento-dialog__body">
+        <div class="descuento-dialog__grid">
+            <label class="descuento-dialog__field">
+                <span>Nombre</span>
+                <input
+                    type="text"
+                    class="form-control app-input"
+                    [(ngModel)]="descuento.nombre"
+                    placeholder="Nombre del descuento">
+            </label>
+
+            <label class="descuento-dialog__field">
+                <span>Tipo</span>
+                <select class="form-control app-select" [(ngModel)]="descuento.tipo">
+                    <option *ngFor="let tipo of tipos" [ngValue]="tipo.value">{{ tipo.label }}</option>
+                </select>
+            </label>
+
+            <label class="descuento-dialog__field">
+                <span>Cantidad</span>
+                <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    class="form-control app-input"
+                    [(ngModel)]="descuento.cantidad"
+                    placeholder="Valor del descuento">
+            </label>
+
+            <label class="descuento-dialog__field descuento-dialog__field--full">
+                <span>Descripcion</span>
+                <textarea
+                    rows="4"
+                    class="form-control app-input"
+                    [(ngModel)]="descuento.descripcion"
+                    placeholder="Descripcion del descuento"></textarea>
+            </label>
+        </div>
+    </div>
+
+    <footer class="descuento-dialog__footer">
+        <button type="button" class="app-chip-button" (click)="cerrar()">Cancelar</button>
+        <button type="button" class="app-chip-button app-chip-button--primary" (click)="guardar()">
+            <i class="bi bi-save"></i>
+            {{ esEdicion ? 'Guardar cambios' : 'Guardar descuento' }}
+        </button>
+    </footer>
+</section>

@@ -17,7 +17,8 @@
                 </div>
 
                 <ng-template #ItemTemplate>
-                    <span *ngIf="!showEditCol[indexDT][i].showEdit; else editarItemTemplate">{{ dato[item.name] }}</span>
+                    <span *ngIf="!showEditCol?.[indexDT]?.[i]?.showEdit; else
+                        editarItemTemplate"> {{ dato?.[item.name] }} </span>
 
                     <ng-template #editarItemTemplate>
                         <input class="form-control" type="text" [(ngModel)]="datoNuevo" [disabled]="showEditCol[indexDT][i].readOnly" (keyup.enter)="enviarDatoNuevo(indexDT , i, origen)" />
